@@ -98,6 +98,13 @@ samples gradually increases. Most of the tracking-by-detection
 algorithms focus on efficient incremental update of a classifier
 together with more useful background sampling.
 
+The workflow of our MKCF based long-term target following method can be visualized in fig.~\ref{Workflow_figure}. Summarize what we discuss in the next sections.
+\begin{figure*}[!t]
+\includegraphics[width=\textwidth]{figures/Workflow_MKCF+PF.pdf}
+\caption{The workflow of our Multiple KCF and Particle Filter based tracking method without the track re-detection module.}
+\label{Workflow_figure}
+\end{figure*}
+
 Frequency domain correlation filter based trackers in the
 tracking-by-detection paradigm has recently seen growing popularity
 due to its superior computation and robustness to geometric and
@@ -143,13 +150,15 @@ track reinilization module is triggered when the target is lost
 
 The contributions of this study are as follows.
 \begin{itemize}
-\item We build a highly efficient (300 fps) scale adaptive multiple kernelized correlation filter based tracker that outperforms the original KCF implementation with fixed scale framework both in terms of accuracy and performance. The studies following the KCF improved the fixed scale framework by running detection on a number of candidate ROIs to figure out the new scale of the object after estimating the translation of the object. This approach adds additional complexity to the original KCF implementation and drags down the run-time performance from $300$ fps to less than $100$ fps.
+\item We build a highly efficient ($\geq300$ fps) scale adaptive multiple kernelized correlation filter based tracker that outperforms the original KCF implementation with fixed scale framework both in terms of accuracy and performance. The studies following the KCF improved the fixed scale framework by running detection on a number of candidate ROIs to figure out the new scale of the object after estimating the translation of the object. This approach adds additional complexity to the original KCF implementation and drags down the run-time performance from $300$ fps to less than $100$ fps.
 \item We integrate the Particle Filter into the Multiple KCFs tracking as an additional filter that can avoid the drift due to one of the correlation filters we employ in our framework.
 \item We propose a target re-detection module that can minimize the target loss due to the scale filter that learns the object model using only-object area. Also, the target re-detection step is required to handle severe occlusions, pose variations, illumination changes and fast motion.
 \item Since our visual tracker mostly focuses on tracking objects from aerial moving platforms, we design a new robust target-to-camera distance estimation method. This way, a safe distance between the target and the camera-platform can be preserved.
 \end{itemize}
 
-The workflow of our MKCF based long-term target following method can be visualized in fig.???. Summarize what we discuss in the next sections.
+\section{Kernelized Correlation Filter Tracker}
+\label{KCF}
+
 %--------------
 %\section*{Acknowledgements}
 %put stuff here for the accepted , but not the ICCV version

@@ -3,6 +3,8 @@
 !*.tex
 !*.sty
 !*.bib
-!fig
-!fig/*
+!figures
+!figures/*
 !*.bst
+
+*.DS_Store
