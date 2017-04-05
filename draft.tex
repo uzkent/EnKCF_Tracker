@@ -156,9 +156,106 @@ The contributions of this study are as follows.
 \item Since our visual tracker mostly focuses on tracking objects from aerial moving platforms, we design a new robust target-to-camera distance estimation method. This way, a safe distance between the target and the camera-platform can be preserved.
 \end{itemize}
 
+% ---------------------------------------------------------
 \section{Kernelized Correlation Filter Tracker}
 \label{KCF}
+% ---------------------------------------------------------
+The Kernelized Correlation Filter tracker has recently been increasingly popular due to its operation at hundreds of frames per second with state-of-the-art tracking capabilities in
+challenging cases. Its computational efficiency arises from its use of the discrete fourier transform of the circulant matrix and frequency domain element-wise operations knows hadamard product and division. The first example of frequency domain trackers is the Linear Correlation Filter tracker known as MOSSE tracker. It minimizes the ridge regression function
+in the frequency domain using a single template with continous desired gaussian response. The KCF tracker, on the other hand, minimizes the regularized ridge regression function shown below. 
+\begin{equation}
+E(h) = \frac{1}{2}||y-\sum_{c=1}^{C}g*x_{c}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||h_{c}||^{2}
+\label{eq:Closedform_RidgeReg}
+\end{equation}
+where $y$ represents the desired continous response whereas $h$ and $x_{c}$ represents the learned correlation filter and training template for the given channel. The $c$ parameter included in \cite{henriques2015high,galoogahi2013multi} makes it possible to integrate multi-channel features such as HoG and colour into the ridge regression function. The closed-form solution for the eq.~\ref{eq:Closedform_RidgeReg} can be obtained by setting the derivative of $E$ w.r.t $w$ to $0$. The solution in the primal domain can be formulated as
+\begin{equation}
+w = (X^{T}X+\lambda)^{-1}y
+\label{eq:SpatialSolution}
+\end{equation}
+where $X$ and $\lambda$ represent the training samples and regularization term. The same cost function in the Fourier domain can be represented as
+\begin{equation}
+w = (X^{H}X+\lambda I)^{-1}X^{T}y
+\label{eq:FourierSolution}
+\end{equation}
+More information on the spatial and fourier domain solutions can be found in \cite{henriques2015high}. The MOSSE tracker does not make use of $\lambda$ and only one training sample with desired response is used to update $w$. This framework does not include enough background information into the training framework with a single template. The application of the circulant matrix theorem into the eq.~\ref{eq:Closedform_RidgeReg} makes it possible to include many background patches at a similar computational complexity. A circulant matrix $C$ includes the circularly shifted patches of the positive training sample $x$ by the cylic shift operator $P$. By applying shifting operation to the base sample, we can generate the circulant matrix as
+\begin{equation}
+C = Px.
+\label{eq:CirculantMatrixGeneration}
+\end{equation}
+The circulant matrix of a base sample $x$ can be interpreted as the rows of a training matrix $X$ where each row represents features of a training sample. Mathematically, this can be written as
+\begin{equation}
+X = C(x)
+\label{eq:CIrculantMatrixTrainingData}
+\end{equation}
+In this form, eq.~\ref{eq:SpatialSolution} and~\ref{eq:FourierSolution} could prohibit us from implementing a high speed object tracking as we need to perform large number of element-wise division and multiplication operations. However, we know from \cite{gray2006toeplitz} that all circulant matrices are represented diagonally by the Fourier Transform regardless of the base sample $x$ as shown below.
+\begin{equation}
+X = Fdiag(\hat{x})F^{H}.
+\label{eq:CirculantMatrixDFT}
+\end{equation}
+where $F$ denotes a constant Fourier Transform matrix and $x$ is the Discrete Fourier Transform of the base sample $x$. To simplify the cost function formulation in eq.~\ref{eq:FourierSolution} we multiply $X$ in eq.~\ref{eq:CirculantMatrixDFT} with $X^{H}$ yielding 
+\begin{equation}
+X^{H}X = Fdiag(\hat{x}^{*}\odot \hat{x})F^{H}.
+\label{eq:SimplificationX} 
+\end{equation}
+Finally, the eq.~\ref{eq:SimplificationX} can used to formulate the solution vector in Fourier domain $\hat{w}$ as
+\begin{equation}
+\hat{w} = \dfrac{\hat{x}^{*}*\hat{y}}{\hat{x}^{*}*\hat{x}+\lambda}.
+\label{eq:DiagonalizedPrimalSolution}
+\end{equation}
+For detailed documentation of the circulant matrix theorem based frequency domain solution can be found in \cite{henriques2012exploiting,henriques2015high}.
 
+The above primal frequency domain solution can be called as Linear Correlation Filter which improves the MOSSE tracker by incorporating cyclic shifts and regularizer. To further improve the robustness to geometric and photographic variations, one can exploit non-linear regression function in the Correlation Filter framework \cite{henriques2015high}. The solution to the kernelized ridge regression function is shown below.
+\begin{equation}
+\alpha = y(K+\lambda I)^{-1}
+\end{equation}
+wjere $K$ and $\alpha$ represent the kernel matrix and corresponding dual space solution. \cite{henriques2015high} states that kernel matrices is circulant for datasets of circular cylic satisfying the following theorem. 
+\begin{equation}
+k(x,x^{'}) = k(Mx,Mx^{'})
+\label{eq:KernelCirculantTheorem}
+\end{equation}
+where $M$ represents the permutation matrix. Some kernels satisfying the eq.~\ref{eq:KernelCirculantTheorem} are \textit{Gaussian}, \textit{Polynomial}, \textit{Intersection} and \textit{Hellinger} kernels. Similar to the diagonalization in the linear ridge regression solution in eq.~\ref{eq:DiagonalizedPrimalSolution}, the kernelized ridge regression can be made diagonal using the same circulant matrix theorem.  The diagonalized Fourier domain dual form solution can be expressed as
+\begin{equation}
+\hat{\alpha} = \hat{y}(\hat{k}^{xx}+\lambda)^{-1}
+\label{eq:FourierDualDomainSolution}.
+\end{equation}
+where $\hat{k}^{xx}$ represents the first row of the Kernel matrix $K$ known as \textit{gram matrix}. In this study, we will only focus on application of the Gaussian Kernel to the Correlation Filters. We refer the readers to \cite{henriques2015high} for the detailed documentation of the application of other kernels to the Correlation Filters. For single channel features, the Gaussian kernelization is expressed as
+\begin{equation}
+k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\hat{x}^{*}\odot \hat{x}^{'})))
+\label{eq:GaussianCorrelationSingleChannel}
+\end{equation}
+The first correlation filter based trackers used grayscale feature to learn the solution vector $w$, however, the multi-channel features such as HoG and Color were later exploited to improve tracking accuracy \cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. The multi-channel feature integration into the Gaussian Kernelization function in eq.~\ref{eq:GaussianCorrelationSingleChannel} is achieved in a very straight-forward way by summing the correlation result in all the channels as
+\begin{equation}
+k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\hat{x}_{c}^{*}\odot \hat{x}_{c}^{'}))).
+\label{eq:GaussianCorrelationSingleChannel}
+\end{equation}
+Such non-linearization process does not increase the computational complexity of the linear multi-channel correlation filter dramatically as we only need to sum over the $n$ dimensional feature channels. Training shown in eq:~\ref{eq:FourierDualDomainSolution} gives us $\hat{a}$ learned in time step $t$. We can accumulate $\hat{a}$ over time to integrate more temporal information. This can be expressed as
+\begin{equation}
+\hat{a}_{t} = (1-\beta)\hat{a}_{t-1} + \beta\hat{a}_{t}. 
+\end{equation}
+
+Finally, detection step in multi-channel KCF framework is performed as
+\begin{equation}
+r(z) = F^{-1}(\hat{k}^{xz} \odot \hat{\alpha})
+\end{equation}
+where $r$ denotes the correlation response at all cylic shifts of the first row of the kernel matrix $K$. The peak point of the response function gives us the estimated translation of the object from time step $t$-$1$ to $t$.
+
+\section{Multiple Kernelized Correlation Filter Based Tracking}
+\label{sc:MKCF}
+
+\section{Particle Filter}
+\label{sc:PF}
+
+\section{Track Re-initilization via Re-detection}
+\label{sc:Re-initialization}
+
+\section{Geometry Estimation between Target and Drone}
+\label{sc:Geometry}
+
+\section{Experiments}
+\label{sc:Experiments}
+
+\section{Conclusion}
+\label{sc:Conclusion}
 %--------------
 %\section*{Acknowledgements}
 %put stuff here for the accepted , but not the ICCV version
