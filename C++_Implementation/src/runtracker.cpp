@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <sstream>
+#include <iomanip>
 #include <algorithm>
 #include "kcftracker.hpp"
 #include "Filter_Definition.h"
@@ -65,23 +66,22 @@ int var1=1;
 void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
 /* Need to be able to control both up and down event for the ROI */
-    cout << "In CallBack Function" << endl;
     switch( event )
     {
     case EVENT_MOUSEMOVE:
-	cout << "MOUSEMOVE" << endl;
+	// cout << "MOUSEMOVE" << endl;
         break;
     case EVENT_LBUTTONDOWN:
         xMin = x;
         yMin = y;
-	cout << "BOTTOM DOWN" << endl;
+	// cout << "BOTTOM DOWN" << endl;
         break;
     case EVENT_LBUTTONUP:
         pos.x = x;
         pos.y = y;
         width = x - xMin;
         height =  y - yMin;
-	cout << "BOTTOM UP" << endl;
+	// cout << "BOTTOM UP" << endl;
         cout << "xMin = " << xMin << " yMin = " << yMin << "  width = " << width << "  height = " << height << endl;
 //        var1=0;
         break;
@@ -195,7 +195,7 @@ int main(int argc, char* argv[])
    while (1) // Read the Next Frame
    {
      std::stringstream ss;
-     ss << std::setfill('0') << std::setw(8) << nFrames+1;
+     ss << std::setfill('0') << std::setw(5) << nFrames+1;
      string frame_id = to_string(nFrames); 
      if (strncmp(argv[2],"video",5) == 0){
         cout << "Image Read" << endl;
@@ -218,16 +218,13 @@ int main(int argc, char* argv[])
          cout << "\nPlease Select ROI: \n";
 	 while(var1==1)
          {
-    	    cout << "Before Callback" << endl;
-	    // namedWindow("Name");
+    	    // namedWindow("Name");
             setMouseCallback("Name", CallBackFunc, NULL);
-      	    cout << "After CallBack" << endl;
             imshow("Name", frame);
             // Wait until user press some key
-            rectangle( frame, Point( xMin, yMin ), Point( xMin+width, yMin+height), Scalar( 255, 0, 0 ), 4, 8 );
+            // rectangle( frame, Point( xMin, yMin ), Point( xMin+width, yMin+height), Scalar( 255, 0, 0 ), 4, 8 );
             char c = (char)waitKey(10);
-	    cout << c << endl;
-            if( c == 'c' || c == 'C' ) {
+	    if( c == 'c' || c == 'C' ) {
                var1=0;
                break;
             }

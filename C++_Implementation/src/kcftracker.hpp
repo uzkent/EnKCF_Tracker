@@ -87,6 +87,9 @@ protected:
     // Initialize Hanning window. Function called only in the first frame.
     void createHanningMats();
 
+    // Initialize Hanning window. Function called only in the first frame.
+    void createHanningMatsWROI();
+
     // Calculate sub-pixel peak for one dimension
     float subPixelPeak(float left, float center, float right);
 
@@ -99,7 +102,7 @@ protected:
 
 private:
     int size_patch[3], size_patch_scale[3], size_patch_w_roi[3];
-    cv::Mat hann;
+    cv::Mat hann, hann_wroi;
     cv::Size _tmpl_sz, _tmpl_sz_scale, _tmpl_sz_w_roi;
     float _scale,_scale2,_scale_w_roi;
     int _gaussian_size;

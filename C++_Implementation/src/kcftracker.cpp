@@ -90,7 +90,7 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
 
     if (multiscale) { // Multiscale KCF Implementation
         template_size = 64;     // Template Size for the Translation Filter
-        template_size_w_roi = 64; // Template Size for the Wide ROI Translation Filter
+        template_size_w_roi = 96; // Template Size for the Wide ROI Translation Filter
         template_size_scale = 48;   // Template Size for the Scale Filter
         scale_step = 1.06;      // Scale Factor for the Multiscale Search
         scale_weight = 0.95;    // Priority is given to the Same Scale with Previous Frame Scale
@@ -171,7 +171,7 @@ cv::Rect KCFTracker::update(cv::Mat image)
 
     // Train the Translation Filter Model
     cv::Mat x = getFeatures(image, 0);
-	train(x, interp_factor);
+    train(x, interp_factor);
 
     return _roi;
 }
@@ -203,7 +203,7 @@ cv::Rect KCFTracker::updateWROI(cv::Mat image)
     _roi.x = _roi_w.x;
     _roi.y = _roi_w.y;
 
-    if (_roi_w.x + _roi_w.width <= 0) _roi_w.x = -_roi_w.width + 1;
+    if (_roi_w.x + _roi_w.width <= 0)  _roi_w.x = -_roi_w.width + 1;
     if (_roi_w.y + _roi_w.height <= 0) _roi_w.y = -_roi_w.height + 1;
     if (_roi_w.x >= image.cols - 1) _roi_w.x = image.cols - 2;
     if (_roi_w.y >= image.rows - 1) _roi_w.y = image.rows - 2;
@@ -212,7 +212,7 @@ cv::Rect KCFTracker::updateWROI(cv::Mat image)
 
     // Train the Translation Filter Model
     cv::Mat x = getFeaturesWROI(image, 0);
-	trainWROI(x, interp_factor);
+    trainWROI(x, interp_factor);
 
     return _roi_w;
 }
@@ -924,6 +924,7 @@ cv::Mat KCFTracker::getFeaturesWROI(const cv::Mat & image, bool inithann, float 
     // Crop the ROI Area
     cv::Mat FeaturesMap;  
     cv::Mat z = RectTools::subwindow(image, extracted_w_roi, cv::BORDER_REPLICATE);
+
     // Resize the ROI to the Template
     if (z.cols != _tmpl_sz_w_roi.width || z.rows != _tmpl_sz_w_roi.height) {
         cv::resize(z, z, _tmpl_sz_w_roi);
@@ -1000,10 +1001,10 @@ cv::Mat KCFTracker::getFeaturesWROI(const cv::Mat & image, bool inithann, float 
     }
     
     if (inithann) {
-        createHanningMats();
+        createHanningMatsWROI();
     }
 
-    FeaturesMap = hann.mul(FeaturesMap);
+    FeaturesMap = hann_wroi.mul(FeaturesMap);
 
     return FeaturesMap;
 }
@@ -1140,9 +1141,9 @@ cv::Mat KCFTracker::getFeaturesScale(const cv::Mat & image, bool inithann, float
         size_patch_scale[2] = 1;  
     }
     
-    if (inithann) {
+    /* if (inithann) {
         createHanningMats();
-    }
+    }*/
 
     // FeaturesMap = hann.mul(FeaturesMap);
     return FeaturesMap;
@@ -1177,6 +1178,36 @@ void KCFTracker::createHanningMats()
         hann = hann2d;
     }
 }
+
+// Initialize Hanning window. Function called only in the first frame.
+void KCFTracker::createHanningMatsWROI()
+{
+    cv::Mat hann1t = cv::Mat(cv::Size(size_patch_w_roi[1],1), CV_32F, cv::Scalar(0));
+    cv::Mat hann2t = cv::Mat(cv::Size(1,size_patch_w_roi[0]), CV_32F, cv::Scalar(0));
+
+    for (int i = 0; i < hann1t.cols; i++)
+        hann1t.at<float > (0, i) = 0.5 * (1 - std::cos(2 * 3.14159265358979323846 * i / (hann1t.cols - 1)));
+    for (int i = 0; i < hann2t.rows; i++)
+        hann2t.at<float > (i, 0) = 0.5 * (1 - std::cos(2 * 3.14159265358979323846 * i / (hann2t.rows - 1)));
+
+    cv::Mat hann2d = hann2t * hann1t;
+    // HOG features
+    if (_hogfeatures) {
+        cv::Mat hann1d = hann2d.reshape(1,1); // Procedure do deal with cv::Mat multichannel bug
+
+        hann_wroi = cv::Mat(cv::Size(size_patch_w_roi[0]*size_patch_w_roi[1], size_patch_w_roi[2]), CV_32F, cv::Scalar(0));
+        for (int i = 0; i < size_patch_w_roi[2]; i++) {
+            for (int j = 0; j<size_patch_w_roi[0]*size_patch_w_roi[1]; j++) {
+                hann_wroi.at<float>(i,j) = hann1d.at<float>(0,j);
+            }
+        }
+    }
+    // Gray features
+    else {
+        hann_wroi = hann2d;
+    }
+}
+
 
   
 float KCFTracker::subPixelPeak(float left, float center, float right)
