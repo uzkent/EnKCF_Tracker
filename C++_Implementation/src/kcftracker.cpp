@@ -92,8 +92,8 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
         template_size = 64;     // Template Size for the Translation Filter
         template_size_w_roi = 96; // Template Size for the Wide ROI Translation Filter
         template_size_scale = 48;   // Template Size for the Scale Filter
-        scale_step = 1.06;      // Scale Factor for the Multiscale Search
-        scale_weight = 0.95;    // Priority is given to the Same Scale with Previous Frame Scale
+        scale_step = 1.05;      // Scale Factor for the Multiscale Search
+        scale_weight = 2.0 - scale_step;    // Priority is given to the Same Scale with Previous Frame Scale
         if (!fixed_window) {    // Fixed Window KCF Implementation during Tracking
             //printf("Multiscale does not support non-fixed window.\n");
             fixed_window = true;
@@ -149,6 +149,48 @@ cv::Rect KCFTracker::update(cv::Mat image)
     // Detect the Target Translation
     float peak_value;
     cv::Point2f res = detect(_tmpl, getFeatures(image, 0, 1.0f), peak_value);
+
+    // Search Different Scales
+    scale_step = 1.02;
+    if (scale_step != 1) {
+
+        // Test at a smaller _scale
+        float new_peak_value;
+        cv::Point2f new_res = detect(_tmpl, getFeatures(image, 0, 1.0f / scale_step), new_peak_value);
+
+        // Update the Scale if the Confidence is Larger than the Maximum
+        if (scale_weight * new_peak_value > peak_value) {
+            res = new_res;
+            peak_value = new_peak_value;
+            _scale /= scale_step;
+            _scale_w_roi /= scale_step;
+            _scale2 /= scale_step;
+            _roi.width /= scale_step;
+            _roi.height /= scale_step;
+            _roi_w.width /= scale_step;
+            _roi_w.height /= scale_step;
+            _roi_scale.width /= scale_step;
+            _roi_scale.height /= scale_step;
+        }
+
+        // Test at a bigger _scale
+        new_res = detect(_tmpl, getFeatures(image, 0, scale_step), new_peak_value);
+
+        // Update the Scale if the Confidence is Larger than the Maximum
+        if (scale_weight * new_peak_value > peak_value) {
+            res = new_res;
+            peak_value = new_peak_value;
+            _scale *= 1.02;
+            _scale_w_roi *= scale_step;
+            _scale2 *= scale_step;
+            _roi.width *= scale_step;
+            _roi.height *= scale_step;
+            _roi_w.width *= scale_step;
+            _roi_w.height *= scale_step;
+            _roi_scale.width *= scale_step;
+            _roi_scale.height *= scale_step;
+        }
+    }
 
     // Adjust by cell size and _scale
     _roi.x = cx - _roi.width / 2.0f + ((float) res.x * cell_size * _scale);
@@ -229,6 +271,7 @@ cv::Rect KCFTracker::updateScale(cv::Mat image)
     float new_peak_value;
 
     // Search Different Scales
+    scale_step = 1.05;
     if (scale_step != 1) {
 
         // Test at a smaller _scale
