@@ -5,6 +5,7 @@
 !*.bib
 !figures
 !figures/*
+!MKCF_C++
 !*.bst
 
 *.DS_Store
