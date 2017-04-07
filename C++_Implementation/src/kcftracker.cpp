@@ -90,10 +90,10 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
 
     if (multiscale) { // Multiscale KCF Implementation
         template_size = 64;     // Template Size for the Translation Filter
-        template_size_w_roi = 64; // Template Size for the Wide ROI Translation Filter
+        template_size_w_roi = 96; // Template Size for the Wide ROI Translation Filter
         template_size_scale = 48;   // Template Size for the Scale Filter
-        scale_step = 1.06;      // Scale Factor for the Multiscale Search
-        scale_weight = 0.95;    // Priority is given to the Same Scale with Previous Frame Scale
+        scale_step = 1.05;      // Scale Factor for the Multiscale Search
+        scale_weight = 2.0 - scale_step;    // Priority is given to the Same Scale with Previous Frame Scale
         if (!fixed_window) {    // Fixed Window KCF Implementation during Tracking
             //printf("Multiscale does not support non-fixed window.\n");
             fixed_window = true;
@@ -150,6 +150,48 @@ cv::Rect KCFTracker::update(cv::Mat image)
     float peak_value;
     cv::Point2f res = detect(_tmpl, getFeatures(image, 0, 1.0f), peak_value);
 
+    // Search Different Scales
+    scale_step = 1.02;
+    if (scale_step != 1) {
+
+        // Test at a smaller _scale
+        float new_peak_value;
+        cv::Point2f new_res = detect(_tmpl, getFeatures(image, 0, 1.0f / scale_step), new_peak_value);
+
+        // Update the Scale if the Confidence is Larger than the Maximum
+        if (scale_weight * new_peak_value > peak_value) {
+            res = new_res;
+            peak_value = new_peak_value;
+            _scale /= scale_step;
+            _scale_w_roi /= scale_step;
+            _scale2 /= scale_step;
+            _roi.width /= scale_step;
+            _roi.height /= scale_step;
+            _roi_w.width /= scale_step;
+            _roi_w.height /= scale_step;
+            _roi_scale.width /= scale_step;
+            _roi_scale.height /= scale_step;
+        }
+
+        // Test at a bigger _scale
+        new_res = detect(_tmpl, getFeatures(image, 0, scale_step), new_peak_value);
+
+        // Update the Scale if the Confidence is Larger than the Maximum
+        if (scale_weight * new_peak_value > peak_value) {
+            res = new_res;
+            peak_value = new_peak_value;
+            _scale *= 1.02;
+            _scale_w_roi *= scale_step;
+            _scale2 *= scale_step;
+            _roi.width *= scale_step;
+            _roi.height *= scale_step;
+            _roi_w.width *= scale_step;
+            _roi_w.height *= scale_step;
+            _roi_scale.width *= scale_step;
+            _roi_scale.height *= scale_step;
+        }
+    }
+
     // Adjust by cell size and _scale
     _roi.x = cx - _roi.width / 2.0f + ((float) res.x * cell_size * _scale);
     _roi.y = cy - _roi.height / 2.0f + ((float) res.y * cell_size * _scale);
@@ -171,7 +213,7 @@ cv::Rect KCFTracker::update(cv::Mat image)
 
     // Train the Translation Filter Model
     cv::Mat x = getFeatures(image, 0);
-	train(x, interp_factor);
+    train(x, interp_factor);
 
     return _roi;
 }
@@ -203,7 +245,7 @@ cv::Rect KCFTracker::updateWROI(cv::Mat image)
     _roi.x = _roi_w.x;
     _roi.y = _roi_w.y;
 
-    if (_roi_w.x + _roi_w.width <= 0) _roi_w.x = -_roi_w.width + 1;
+    if (_roi_w.x + _roi_w.width <= 0)  _roi_w.x = -_roi_w.width + 1;
     if (_roi_w.y + _roi_w.height <= 0) _roi_w.y = -_roi_w.height + 1;
     if (_roi_w.x >= image.cols - 1) _roi_w.x = image.cols - 2;
     if (_roi_w.y >= image.rows - 1) _roi_w.y = image.rows - 2;
@@ -212,7 +254,7 @@ cv::Rect KCFTracker::updateWROI(cv::Mat image)
 
     // Train the Translation Filter Model
     cv::Mat x = getFeaturesWROI(image, 0);
-	trainWROI(x, interp_factor);
+    trainWROI(x, interp_factor);
 
     return _roi_w;
 }
@@ -229,6 +271,7 @@ cv::Rect KCFTracker::updateScale(cv::Mat image)
     float new_peak_value;
 
     // Search Different Scales
+    scale_step = 1.05;
     if (scale_step != 1) {
 
         // Test at a smaller _scale
@@ -924,6 +967,7 @@ cv::Mat KCFTracker::getFeaturesWROI(const cv::Mat & image, bool inithann, float 
     // Crop the ROI Area
     cv::Mat FeaturesMap;  
     cv::Mat z = RectTools::subwindow(image, extracted_w_roi, cv::BORDER_REPLICATE);
+
     // Resize the ROI to the Template
     if (z.cols != _tmpl_sz_w_roi.width || z.rows != _tmpl_sz_w_roi.height) {
         cv::resize(z, z, _tmpl_sz_w_roi);
@@ -1000,10 +1044,10 @@ cv::Mat KCFTracker::getFeaturesWROI(const cv::Mat & image, bool inithann, float 
     }
     
     if (inithann) {
-        createHanningMats();
+        createHanningMatsWROI();
     }
 
-    FeaturesMap = hann.mul(FeaturesMap);
+    FeaturesMap = hann_wroi.mul(FeaturesMap);
 
     return FeaturesMap;
 }
@@ -1140,9 +1184,9 @@ cv::Mat KCFTracker::getFeaturesScale(const cv::Mat & image, bool inithann, float
         size_patch_scale[2] = 1;  
     }
     
-    if (inithann) {
+    /* if (inithann) {
         createHanningMats();
-    }
+    }*/
 
     // FeaturesMap = hann.mul(FeaturesMap);
     return FeaturesMap;
@@ -1177,6 +1221,36 @@ void KCFTracker::createHanningMats()
         hann = hann2d;
     }
 }
+
+// Initialize Hanning window. Function called only in the first frame.
+void KCFTracker::createHanningMatsWROI()
+{
+    cv::Mat hann1t = cv::Mat(cv::Size(size_patch_w_roi[1],1), CV_32F, cv::Scalar(0));
+    cv::Mat hann2t = cv::Mat(cv::Size(1,size_patch_w_roi[0]), CV_32F, cv::Scalar(0));
+
+    for (int i = 0; i < hann1t.cols; i++)
+        hann1t.at<float > (0, i) = 0.5 * (1 - std::cos(2 * 3.14159265358979323846 * i / (hann1t.cols - 1)));
+    for (int i = 0; i < hann2t.rows; i++)
+        hann2t.at<float > (i, 0) = 0.5 * (1 - std::cos(2 * 3.14159265358979323846 * i / (hann2t.rows - 1)));
+
+    cv::Mat hann2d = hann2t * hann1t;
+    // HOG features
+    if (_hogfeatures) {
+        cv::Mat hann1d = hann2d.reshape(1,1); // Procedure do deal with cv::Mat multichannel bug
+
+        hann_wroi = cv::Mat(cv::Size(size_patch_w_roi[0]*size_patch_w_roi[1], size_patch_w_roi[2]), CV_32F, cv::Scalar(0));
+        for (int i = 0; i < size_patch_w_roi[2]; i++) {
+            for (int j = 0; j<size_patch_w_roi[0]*size_patch_w_roi[1]; j++) {
+                hann_wroi.at<float>(i,j) = hann1d.at<float>(0,j);
+            }
+        }
+    }
+    // Gray features
+    else {
+        hann_wroi = hann2d;
+    }
+}
+
 
   
 float KCFTracker::subPixelPeak(float left, float center, float right)
