@@ -1,13 +1,13 @@
 \documentclass[10pt,twocolumn,letterpaper]{article}
-
 \usepackage{cvpr}
 \usepackage{times}
 \usepackage{epsfig}
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{algorithm}% http://ctan.org/pkg/algorithms
-\usepackage{algpseudocode}% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
+\usepackage{mathtools} % mathtools builds on and extends amsmath package
+\usepackage{algorithm}		% http://ctan.org/pkg/algorithms
+\usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
 
 % If you comment hyperref and then uncomment it, you should delete
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
@@ -260,48 +260,59 @@ Our MKCF based tracking framework employs different capabilities and tasks to ea
 	\begin{algorithmic}[1]
 	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n$,
 	\State \textbf{Output} : 
-								\If{$fc\:\%\:n=0$} \Comment{Condition 1}
-										\State Estimated Target State $x_{t} = (x_{t-1},y_{t-1},s_{t})$,
-										Scale filter (\textit{target-only}) model $R_{s}$.
-								     \EndIf
-								     \If{$fc\:\%\:n=1$}\Comment{Condition 2}
-										\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t_1})$,
-										Large Area Translation Filter model $R_{t}^{L}$.
-								     \EndIf
-								     \If{$fc\:\%\:n>1$}\Comment{Condition 3}
-										\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
-										Small Area Translation Filter model $R_{t}^{S}$.
-								     \EndIf
+				\If{$fc\:\%\:n=0$} \Comment{Condition 1}
+						\State Estimated Target State $x_{t} = (x_{t-1},y_{t-1},s_{t})$,
+						Scale filter (\textit{target-only}) model $R_{s}$.
+			     \EndIf
+				\If{$fc\:\%\:n=1$}\Comment{Condition 2}
+						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t_1})$,
+						Large Area Translation Filter model $R_{t}^{L}$.
+				\EndIf
+				\If{$fc\:\%\:n>1$}\Comment{Condition 3}
+						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
+						Small Area Translation Filter model $R_{t}^{S}$.
+				\EndIf
 	\Procedure{track}{$x_{t-1},y_{t-1},s_{t-1}$} 
-								 \State // Translation Estimation
-								 \State Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $x_{t} = (x_{t},y_{t},s_{t-1})$;
-								 \State // Translation Estimation
-								 \State Crop the ROI for the $R_{t}^{L}$, or $R_{t}^{S}$ given $x_{t}$
-								 and estimate translation ($x_{t}$,$y_{t}$) using $R_{t}^{L}$ (Condition 2) or $R_{t}^{S}$ (Condition 3),
-								 \State Skip translation estimation for $R_{s}$ (Condition 1);
-								 \State // Scale Estimation
-								 \State Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$, using $R_{s}$ (Condition 1) or $R_{t}^{S}$ (Condition 2), 
-								 \State Skip it for $R_{t}^{L}$ (Condition 1),
-								 \State Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$, and for $R_{t}^{S}$ : $\lbrace1.02,1.0,1/1.02\rbrace$;
-								 \State // Update Translation
-								 \State Perform Importance Re-sampling for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
-								 \State // Model Update
-								 \If{$max(y_{R_{s}}) \geq T_{R_{s}}$}
-								 	\State Update $R_{s}$ (Condition 1);
-								 \EndIf							 
-								 \If{$max(y_{R_{t}^{L}}) \geq T_{R_{t}^{L}}$} 
-								 	\State Update $R_{t}^{L}$ (Condition 2);
-								 \EndIf	
-								 \If{$max(y_{R_{t}^{S}}) \geq T_{R_{t}^{S}}$}
-								 	\State Update $R_{t}^{S}$ (Condition 3);
-								 \EndIf		
+				\State // Translation Estimation
+				\State Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $x_{t} = (x_{t},y_{t},s_{t-1})$;
+				\State // Translation Estimation
+				\State Crop the ROI for the $R_{t}^{L}$, or $R_{t}^{S}$ given $x_{t}$
+				and estimate translation ($x_{t}$,$y_{t}$) using $R_{t}^{L}$ (Condition 2) or $R_{t}^{S}$ (Condition 3),
+				\State Skip translation estimation for $R_{s}$ (Condition 1);
+				\State // Scale Estimation
+			    \State Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$, using $R_{s}$ (Condition 1) or $R_{t}^{S}$ (Condition 2), 
+		         \State Skip it for $R_{t}^{L}$ (Condition 1),
+				\State Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$, and for $R_{t}^{S}$ : $\lbrace1.02,1.0,1/1.02\rbrace$;
+				\State // Update Translation
+				\State Perform Importance Re-sampling for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
+			    \State // Model Update
+				\If{$max(y_{R_{s}}) \geq T_{R_{s}}$}
+				\State Update $R_{s}$ (Condition 1);
+				\EndIf							 
+				\If{$max(y_{R_{t}^{L}}) \geq T_{R_{t}^{L}}$} 
+				\State Update $R_{t}^{L}$ (Condition 2);
+				\EndIf	
+			     \If{$max(y_{R_{t}^{S}}) \geq T_{R_{t}^{S}}$}
+				\State Update $R_{t}^{S}$ (Condition 3);
+			     \EndIf		
 	\EndProcedure	
 	\end{algorithmic}
 \end{algorithm}
 
 \section{Particle Filter}
 \label{sc:PF}
+The proposed MKCF algorithm can cause undesired drift and noise in tracking due to independent application of the correlation filters. To mitigate the drift effect and reduce the noise, a Bayes Filter representing the evolution of target's motion can be added into the MKCF tracking framework. In this study, we consider a variant of a Bayes Filter, \textit{Particle Filter}. The Particle Filter is a Sequential Monte Carlo method that can approximate posterior probability density functions (pdf) of a target motion. The approximation becomes optimal with the infinite number of particles, however, its run-time complexity grows exponentially with the number of elements in the state space matrix, $X_{t}$. As the focus of this study is to design a high speed tracker, we keep the number of state space elements low and implement computationally cheap \textit{Weight Function} and \textit{Importance-Resampling} modules. We represent the state space matrix as $X_{t} = \lbrace x,y,V_{x},V_{y}\rbrace$ where $x$ and $y$ are the centroid of the target and $V$ represents the velocity components. We transit the particles with the well-known first order Constant Velocity model. The centroid components are applied Gaussian Noise whereas the velocity components are assigned uniform noise representative of most of the objects. The observation likelihood is modeled based on the confidence map of $R_{t}^{L}$,$R_{t}^{S}$, and $R_{s}$. It can also be modeled based on the euclidean distance between particle's centroid to the peak of the confidence maps, however, we believe that the former approach could result in further drifts in the case of multi-modal distributions. The weights for the particles are computed with the bilinear interpolation method.
+\begin{equation}
+	w_{p_{t}}(x_{t},y_{t}) = \dfrac{\splitfrac{y_{R}(x_{t}-1,y_{t}-1)+y_{R}(x_{t}+1,y_{t}+1)+}{y_{R}(x_{t}+1,y_{t}-1)+y_{R}(x_{t}-1,y_{t}+1)}}{4}
+\end{equation}
+where $w_{p}$ denotes the weight of the particle. The importance re-sampling module is triggered when the number of effective particles is smaller than a pre-defined threshold [Cite - Effective Number Samples Metric] to avoid variance getting too small. Re-sampling is implemented with highly efficient low-variance ratio method [cite]. Finally, the expected mean of the approximated posterior pdf is computed as
+\begin{equation}
+	\hat{X}_{t} = \sum_{p=1}^{P}w_{p_{t}} X_{t}
+\end{equation}
 
+The particles are assigned equal weight ($\dfrac{1}{P}$) after the importance re-sampling step. It should be emphasized that we skip importance re-sampling step in the scale filter operation as the scale filter contains \textit{target-only} area. In this case, the particles outside of the scale filter ROI do not have weight correspondence in the confidence map. Also, it is more likely to get noisy translation estimation from the scale filter.
+
+WE SHOULD ASSIGN THE PRIOR WEIGHTS TO EXPECTED MEAN ESTIMATION OF THE POSTERIORS WHEN THE RE-SAMPLING IS SKIPPED.
 \section{Track Re-initilization via Re-detection}
 \label{sc:Re-initialization}
 
