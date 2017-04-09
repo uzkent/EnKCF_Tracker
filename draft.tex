@@ -8,6 +8,7 @@
 \usepackage{mathtools} % mathtools builds on and extends amsmath package
 \usepackage{algorithm}		% http://ctan.org/pkg/algorithms
 \usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
+\usepackage{comment}
 
 % If you comment hyperref and then uncomment it, you should delete
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
@@ -49,7 +50,7 @@ Rochester Institute of Technology\\
 \and
 YoungWoo Seo\\
 Affiliation\\
-{\tt\small yseo@autelrobotics.edu}
+{\tt\small youngwoo.blank.seo@gmail.com}
 }
 
 \maketitle
@@ -80,29 +81,49 @@ A practical solution to target-following mode
 \item Conclusion
 \end{itemize}
 
-The tracking-by-detection methods have recently emerged as robust,
-powerful, and highly discriminative trackers replacing the preceding
-generative trackers that focused on only target modeling. Some of the
-recent tracking-by-detection algorithms are
-Tracking-Learning-Detection \cite{kalal2012tracking}, Multiple
+The tracking-by-detection methods have recently used extensively as a
+robust, powerful, and highly discriminative vision-based, object
+tracking method replacing the preceding, generative object tracking
+methods that primarily concerned about learning the appearance of the
+target. The recent examples of the tracking-by-detection algorithms
+include Tracking-Learning-Detection \cite{kalal2012tracking}, Multiple
 Instance Learning \cite{babenko2009visual}, Correlation Filter based
 trackers \cite{bolme2010visual,henriques2015high}, and Struck
-\cite{hare2012efficient}. These tracking-by-detection methods train an
-object-specific classifier on the fly with the focus of discriminating
-the target from the background. Learning an object-specific classifier
-in an online manner can better handle challenging scenarios with the
-cost of increased complexity. In order to train a classifier, one need
-positive and negative samples. Randomly collecting negative samples
-from the background area can be one straightforward way of building
-training data to train the classifier. However, there can be two
-issues in this framework. First, the randomly collected samples can
-have large correlation resulting in a weak classifier. Also, such
-framework is not feasible for real-time tracking as the number of
-samples gradually increases. Most of the tracking-by-detection
-algorithms focus on efficient incremental update of a classifier
-together with more useful background sampling.
+\cite{hare2012efficient}. These tracking-by-detection methods learn
+the model of the target's appearance on the fly while discriminating
+the target from the background. 
 
-The workflow of our MKCF based long-term target following method can be visualized in fig.~\ref{Workflow_figure}. Summarize what we discuss in the next sections.
+{\it Burak: It isn't clear what you're getting at here} Learning
+an object-specific classifier in an online manner can better handle
+challenging scenarios with the cost of increased complexity.
+
+To train a (binary) classifier to detect the target at every frame,
+the classifier needs positive and negative examples. In a typical set
+up, a positive example is assumed to be given whereas a set of
+negative examples can be randomly collected from the background around
+the given positive example. Such a typical setup for a
+tracking-by-detection method might have two issues related to its
+performance: Firstly, the appearance of the randomly sampled negative
+examples might be highly correlated with that of positive one,
+resulting in ambiguous boundary between positive and negative
+classes. Secondly for a real-time tracking, such a setup would not be
+feasible for the practice because the number of training data
+gradually increases. Due to these issues, most of the
+tracking-by-detection methods focus on efficiently handling
+incremental update of the learned classifier and on collecting a
+small, but informative negative examples.
+\begin{comment}
+However, there can be two issues in this framework. First,
+the randomly collected samples can have large correlation resulting in
+a weak classifier. Also, such framework is not feasible for real-time
+tracking as the number of samples gradually increases. Most of the
+tracking-by-detection algorithms focus on efficient incremental update
+of a classifier together with more useful background sampling.
+\end{comment}
+
+The workflow of our MKCF based long-term target following method can
+be visualized in fig.~\ref{Workflow_figure}. Summarize what we discuss
+in the next sections.
 \begin{figure*}[!t]
 \includegraphics[width=\textwidth]{figures/Workflow_MKCF+PF.pdf}
 \caption{The workflow of our Multiple KCF and Particle Filter based tracking method without the track re-detection module.}
