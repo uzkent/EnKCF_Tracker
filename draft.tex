@@ -64,7 +64,24 @@ Affiliation\\
 %%%%%%%%% BODY TEXT
 \section{Introduction}
 
-A practical solution to target-following mode
+\begin{comment}
+Maybe the goal of this work is to public a journal paper about a
+practical solution for a drone to follow a single target. For this, we need
+\begin{itemize}
+\item A vision-based, single target tracking algorithm.
+\item Other components for making a drone follow a target.
+\begin{itemize}
+\item An architecture diagram
+\item Descriptions of vehicle control, motion planning, behavior
+  generation, estimation of relative geometry between a drone and a
+  target, etc
+\item Experimental results or example videos
+\end{itemize}
+\end{itemize}
+
+For the BMVC-17 submission, we're going to just focus on the first
+part. This is because we need to build a drone for the second part.
+\end{comment}
 
 \begin{itemize}
 \item Introduction: Should talk about, at least, motivation of this
@@ -74,8 +91,7 @@ A practical solution to target-following mode
 \begin{itemize}
 \item Kernelized Correlation Filter
 \item A variant of KCF: Multiple KCF w/ PF
-\item Re-detection
-\item Estimation of geometry between a target and a drone
+\item Re-detection for re-initialization
 \end{itemize}
 \item Experiment: Detail the data, and experimental setup; results and findings
 \item Conclusion
