@@ -128,6 +128,10 @@ gradually increases. Due to these issues, most of the
 tracking-by-detection methods focus on efficiently handling
 incremental update of the learned classifier and on collecting a
 small, but informative negative examples.
+
+{\it Burak: Why do we even mention these issues? Is this somehow
+  related to what we did for this paper?}
+
 \begin{comment}
 However, there can be two issues in this framework. First,
 the randomly collected samples can have large correlation resulting in
@@ -146,11 +150,22 @@ in the next sections.
 \label{Workflow_figure}
 \end{figure*}
 
+An object tracking method based on the correlation filter in frequency
+domain has gained attention due to its fast computation.
+
+\begin{comment}
+{\it Burak: This is not entirely true. If this is the case, people
+  including us don't have to invent their own, other than just using
+  KCF.}
+
 Frequency domain correlation filter based trackers in the
 tracking-by-detection paradigm has recently seen growing popularity
 due to its superior computation and robustness to geometric and
-photometric variations. The first correlation filter tracker proposed
-by \cite{bolme2010visual} focused on learning and detection in the
+photometric variations. 
+\end{comment}
+
+The first correlation filter tracker proposed by
+\cite{bolme2010visual} focused on learning and detection in the
 frequency domain. The idea was to minimize the sum of squared error in
 the frequency domain. Hence, the convolution in the original domain is
 avoided, instead, element-wise multiplication is needed in the
