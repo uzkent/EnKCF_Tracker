@@ -85,7 +85,7 @@ int main(int argc, char* argv[])
    bool FIXEDWINDOW = false;  // Fixed Window
    bool MULTISCALE = true;    // Scale Space Search Enabled
    bool SILENT = false;	      // Suppress the Outputs
-   bool LAB = false;	      // Enable or Disable Color Features
+   bool LAB = true;	      // Enable or Disable Color Features
    char szDataFile[256];
    char szImageFile[256];
    char szSaveVideofile[256];
@@ -265,7 +265,7 @@ int main(int argc, char* argv[])
 	*/
 	
 	// Re-Initiate the Track
-	if (tracker.PSR_scale < 10){
+	if (tracker.PSR_scale < 3){
 	    // Apply BING Algorithm for Saliency Map Extraction and Box Proposals
 	    detector.computeSaliency(frame,BoundingBoxes);
 	    // std::vector<float> objectnessScores = detector.getobjectnessValues();
@@ -276,7 +276,7 @@ int main(int argc, char* argv[])
             Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
 	    Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2] - BoundingBoxes[MatchedBoxIndex.first][0]; 
 	    Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3] - BoundingBoxes[MatchedBoxIndex.first][1];
-	    // tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
+	    tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
 	    // Draw the Selected Rectangle
             std::string rd_confidence = to_string(float(MatchedBoxIndex.second));
             cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
