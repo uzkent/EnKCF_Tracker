@@ -16,6 +16,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "opencv2/imgcodecs/imgcodecs.hpp"
 #include "opencv2/videoio/videoio.hpp"
+#include "opencv2/saliency.hpp"
 #include <unistd.h>
 #include <stack>
 #include <ctime>
@@ -23,11 +24,11 @@
 
 using namespace std;
 using namespace cv;
+using namespace saliency;
 using std::default_random_engine;
 using std::uniform_int_distribution;
 
 std::stack<clock_t> tictoc_stack;
-
 ///
 /// tic and toc is used to measure the time to process an operation
 ///
@@ -69,31 +70,19 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
     switch( event )
     {
     case EVENT_MOUSEMOVE:
-	// cout << "MOUSEMOVE" << endl;
         break;
     case EVENT_LBUTTONDOWN:
         xMin = x;
         yMin = y;
-	// cout << "BOTTOM DOWN" << endl;
         break;
     case EVENT_LBUTTONUP:
         pos.x = x;
         pos.y = y;
         width = x - xMin;
         height =  y - yMin;
-	// cout << "BOTTOM UP" << endl;
         cout << "xMin = " << xMin << " yMin = " << yMin << "  width = " << width << "  height = " << height << endl;
-//        var1=0;
         break;
     }
-/*   
-   if  ( event == EVENT_LBUTTONDOWN )
-   {
-      pos.x=x;
-      pos.y=y;
-      var1=0;
-   }
-*/
 }
 
 int main(int argc, char* argv[])
@@ -180,7 +169,6 @@ int main(int argc, char* argv[])
    cout << szDataFile << endl;
    VideoCapture capt;
    if (strncmp(argv[2],"video",5) == 0){
-      cout << "INNNN" << endl;
       string path = szDataFile;
       capt.open(path);
       if (capt.isOpened())
@@ -192,8 +180,15 @@ int main(int argc, char* argv[])
    namedWindow("Name", WINDOW_NORMAL);
    resizeWindow("Name", 800,800);
    
+   // Instantiation of the BING Object from Saliency Library  
+   ObjectnessBING detector;
+   string training_path = "/tmp/opencv3-20170409-82959-bgyg9v/opencv-3.2.0/opencv_contrib/modules/saliency/samples/ObjectnessTrainedModel";
+   detector.setTrainingPath(training_path);
+   vector<Vec4i> BoundingBoxes;
+
    while (1) // Read the Next Frame
    {
+     // Read the Frame to Perform Tracking
      std::stringstream ss;
      ss << std::setfill('0') << std::setw(5) << nFrames+1;
      string frame_id = to_string(nFrames); 
@@ -232,62 +227,68 @@ int main(int argc, char* argv[])
          // Observation on the first frame given by the user
          Obs[0] = xMin+width/2; Obs[1] = yMin+height/2; Obs[2] = width; Obs[3] = height;
          ///
-	     /// Initiate the Kernelized Correlation Filter Trackers - Translation and Scale Filters
-	     /// \param[in] Rect : Rectangle Object for the Bounding Box
-	     /// \param[in] frame : The First Frame
-	     ///
+	 /// Initiate the Kernelized Correlation Filter Trackers - Translation and Scale Filters
+	 /// \param[in] Rect : Rectangle Object for the Bounding Box
+	 /// \param[in] frame : The First Frame
+	 ///
 	     tracker.init( Rect(xMin, yMin, width, height), frame );
          ///
-	     /// Initiate the Particle of the Particle Filter
-	     /// \param[in] Obs : Observation given by the user in the first frame
-	     ///
+	 /// Initiate the Particle of the Particle Filter
+	 /// \param[in] Obs : Observation given by the user in the first frame
+	 ///
          Tracker.particle_initiation(Obs);
          rectangle( frame, Point( xMin, yMin ), Point( xMin+width, yMin+height), Scalar( 0, 255, 255 ), 15, 8 );
       }
       else {
-
-    	 /// -------------------- UPDATE STEP --------------------------------------------
-         // Use Translation and Scale Filter Interchangeably
+    	/// -------------------- UPDATE STEP --------------------------------------------
+        /// Use Translation and Scale Filter Interchangeably
         if (nFrames % 5 > 1)
         {
-            tic();
             result = tracker.update(frame);        // Estimate Translation
-            toc();
         }
         if (nFrames % 5 == 1)
         {
-            tic();
             result = tracker.updateWROI(frame);   // Estimate Translation using Wider ROI
-            toc();
          }
         if ( nFrames % 5 == 0)
         {
-            tic();
             result = tracker.updateScale(frame);   // Estimate Scale
-            toc();
-         }
-
+        }
         /// -------------------------------------------------------------------------------
 
-	     /*
-     	 // Observation from the Tracking-by-Detection Output
-             Obs[0] = result.x + result.width/2; Obs[1] = result.y + result.height/2;
-             Obs[2] = result.width; Obs[3] = result.height;
+	/*
+	// Observation from the Tracking-by-Detection Output
+	Obs[0] = result.x + result.width/2; Obs[1] = result.y + result.height/2;
+	Obs[2] = result.width; Obs[3] = result.height;
 
-             Tracker.particle_transition(); // Transit the Particles to the Current Frame
+	Tracker.particle_transition(); // Transit the Particles to the Current Frame
 
-             Tracker.particle_weights(Obs); // Assign Particle Weights
+	Tracker.particle_weights(Obs); // Assign Particle Weights
 
-             Tracker.particle_resampling();  // Resample the Particles
+	Tracker.particle_resampling();  // Resample the Particles
 
-             State_Mean[0] = 0; State_Mean[1] = 0; // Initiate the State Mean
-             Tracker.mean_estimation(State_Mean); // Estimate the State Mean
+	State_Mean[0] = 0; State_Mean[1] = 0; // Initiate the State Mean
+	Tracker.mean_estimation(State_Mean); // Estimate the State Mean
 
-             // Update the Tracking-by-Detection Result by the PF results
-             result.x = State_Mean[0] - result.width/2;
-             result.y = State_Mean[1] - result.height/2;
-             tracker.updateKCFbyPF(result);
-	     */
+	// Update the Tracking-by-Detection Result by the PF results
+	result.x = State_Mean[0] - result.width/2;
+	result.y = State_Mean[1] - result.height/2;
+	tracker.updateKCFbyPF(result);
+	*/
+
+	// Apply BING Algorithm for Saliency Map Extraction and Box Proposals
+	detector.computeSaliency(frame,BoundingBoxes);
+	vector<float> objectnessScores = detector.getobjectnessValues();
+	// The result are sorted by objectness. We only use the first 20 boxes here.
+        for (int i = 0; i < 20; i++) {
+           Vec4i bb = BoundingBoxes[i];
+           rectangle(frame, Point(bb[0], bb[1]), Point(bb[2], bb[3]), Scalar(0, 0, 255), 4);
+           char label[256];
+           sprintf(label, "#%d", i+1);
+      	   putText(frame, label, Point(bb[0], bb[1]+30), FONT_HERSHEY_SIMPLEX, 1, Scalar(0, 0, 255), 3);
+         }
+
+	 // TRACKING RESULTS
          // Draw Points on to the Rectangle
          rectangle( frame, Point(result.x,result.y), Point(result.x+result.width,result.y+result.height), Scalar(255,0,0),4,8);
 
