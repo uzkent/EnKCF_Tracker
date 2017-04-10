@@ -5,8 +5,6 @@
 #include <algorithm>
 #include "kcftracker.hpp"
 #include "Filter_Definition.h"
-#include <dirent.h>
-#include <ctime>
 #include <vector>
 #include <math.h>
 #include <string>
@@ -19,7 +17,6 @@
 #include "opencv2/saliency.hpp"
 #include <unistd.h>
 #include <stack>
-#include <ctime>
 #include <random>
 
 std::stack<clock_t> tictoc_stack;
@@ -150,7 +147,6 @@ int main(int argc, char* argv[])
    // Video to Overlay Bounding Boxes on the Frames
    cv::VideoWriter outvid;
    int codec = cv::VideoWriter::fourcc('W', 'M','V', '2');  // select desired codec (must be available at runtime)
-   // outvid.open(szSaveVideofile,codec,25,Size(800,800),1);
    std::vector<std::vector<double> > RMSE(2);
 
    // Generate Random Numbers used in the Particle Filter
@@ -165,6 +161,8 @@ int main(int argc, char* argv[])
       capt.open(path);
    }
    int nFrames = 0;
+   int fontFace = cv::FONT_HERSHEY_SCRIPT_SIMPLEX;
+   int thickness = 2;
    cv::namedWindow("Name", WINDOW_NORMAL);
    cv::resizeWindow("Name", 800,800);
    
@@ -178,7 +176,7 @@ int main(int argc, char* argv[])
    {
      // Read the Frame to Perform Tracking
      std::stringstream ss;
-     ss << std::setfill('0') << std::setw(5) << nFrames+1;
+     ss << std::setfill('0') << std::setw(8) << nFrames+1;
      string frame_id = to_string(nFrames); 
      if (strncmp(argv[2],"video",5) == 0){
 	capt >> frame;  // Read Next Frame
@@ -223,22 +221,26 @@ int main(int argc, char* argv[])
 	 /// \param[in] Obs : Observation given by the user in the first frame
 	 ///
          Tracker.particle_initiation(Obs);
-         cv::rectangle( frame, cv::Point( xMin, yMin ), cv::Point( xMin+width, yMin+height), cv::Scalar( 0, 255, 255 ), 15, 8 );
       }
       else {
     	/// -------------------- UPDATE STEP --------------------------------------------
         /// Use Translation and Scale Filter Interchangeably
+	tracker.PSR_scale = 10;
+	float PSR;
         if (nFrames % 5 > 1)
         {
             result = tracker.update(frame);        // Estimate Translation
+	    PSR = tracker.PSR_sroi;
         }
         if (nFrames % 5 == 1)
         {
             result = tracker.updateWROI(frame);   // Estimate Translation using Wider ROI
-         }
+	    PSR = tracker.PSR_wroi;
+        }
         if ( nFrames % 5 == 0)
         {
             result = tracker.updateScale(frame);   // Estimate Scale
+	    PSR = tracker.PSR_scale;
         }
         /// -------------------------------------------------------------------------------
 
@@ -261,31 +263,36 @@ int main(int argc, char* argv[])
 	result.y = State_Mean[1] - result.height/2;
 	tracker.updateKCFbyPF(result);
 	*/
+	
+	// Re-Initiate the Track
+	if (tracker.PSR_scale < 10){
+	    // Apply BING Algorithm for Saliency Map Extraction and Box Proposals
+	    detector.computeSaliency(frame,BoundingBoxes);
+	    // std::vector<float> objectnessScores = detector.getobjectnessValues();
+            // Perform Re-detection - Re-detection Interface
+   	    std::pair<int,float> MatchedBoxIndex = tracker.target_redetection(BoundingBoxes, frame);
+            
+            // Re-initiate the KCF
+            Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
+	    Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2] - BoundingBoxes[MatchedBoxIndex.first][0]; 
+	    Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3] - BoundingBoxes[MatchedBoxIndex.first][1];
+	    // tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
+	    // Draw the Selected Rectangle
+            std::string rd_confidence = to_string(float(MatchedBoxIndex.second));
+            cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
+	    cv::putText(frame,rd_confidence, cv::Point(Obs[0],Obs[1]), fontFace, 4, cv::Scalar::all(255), thickness, 4);
+	    
+	    // Re-initiate the Particle Filter
+	    Obs[0] += Obs[2]/2.0; Obs[1] += Obs[1]/2.0;
+            // Tracker.particle_initiation(Obs);
+	}
 
-	// Apply BING Algorithm for Saliency Map Extraction and Box Proposals
-	detector.computeSaliency(frame,BoundingBoxes);
-	std::vector<float> objectnessScores = detector.getobjectnessValues();
-	// The result are sorted by objectness. We only use the first 20 boxes here.
-        for (int i = 0; i < 5; i++) {
-           cv::Vec4i bb = BoundingBoxes[i];
-           cv::rectangle(frame, cv::Point(bb[0], bb[1]), cv::Point(bb[2], bb[3]), cv::Scalar(0, 0, 255), 4);
-         }
+	// TRACKING RESULTS
+        cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
 
-	 // TRACKING RESULTS
-         // Draw Points on to the Rectangle
-         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
-
-         // Draw ROI on the Frame - Both Translation and Scale ROI
-         cv::Rect _roi = tracker.extracted_roi;
-         cv::rectangle(frame,cv::Point(_roi.x,_roi.y),cv::Point(_roi.x+_roi.width,_roi.y+_roi.height),cv::Scalar(0,0,25),4,8);
-         cv::Rect _roi_scale = tracker.extracted_roi_scale;
-         // rectangle(frame,Point(_roi_scale.x,_roi_scale.y),Point(_roi_scale.x+_roi_scale.width,_roi_scale.y+_roi_scale.height),Scalar(255,0,25),4,8);
-
-         // Display Text on the Frame - CONFIDENCE from Translation and Scale Filter Interchangeably
-         string confidence = to_string(int(tracker.PSR));
-         int fontFace = cv::FONT_HERSHEY_SCRIPT_SIMPLEX;
-         int thickness = 2;
-         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
+        // Display Text on the Frame - CONFIDENCE from Translation and Scale Filter Interchangeably
+        std::string confidence = to_string(int(PSR));
+        cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
 
       }
       /// Save the Frame into the Output Video

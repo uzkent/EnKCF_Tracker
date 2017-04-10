@@ -362,18 +362,8 @@ cv::Point2f KCFTracker::detect(cv::Mat z, cv::Mat x, float &peak_value)
 {
     using namespace FFTTools;
 
-    /* 
-    cv::Mat _alphaf2 = _tmpl.clone();
-    cv::Mat w_model = real(fftd(_alphaf2,true));
-    */
-
     cv::Mat k = gaussianCorrelation(x, z); // Apply Kernel Trick with the Test Template
     cv::Mat res = (real(fftd(complexMultiplication(_alphaf, fftd(k)), true))); // Response Map
-
-    /*
-    cv::imshow("Translation Correlation Map", res);
-    cv::waitKey(2);
-    */
 
     // minMaxLoc only accepts doubles for the peak, and integer points for the coordinates
     cv::Point2i pi;
@@ -384,7 +374,7 @@ cv::Point2f KCFTracker::detect(cv::Mat z, cv::Mat x, float &peak_value)
     // Compute the Peak-to-Sidelobe Ratio
     cv::Scalar mean, stdev;
     cv::meanStdDev(res,mean,stdev);
-    PSR = (peak_value - mean[0])/stdev[0];
+    PSR_sroi = (peak_value - mean[0])/stdev[0];
 
     // subpixel peak estimation, coordinates will be non-integer
     cv::Point2f p((float)pi.x, (float)pi.y);
@@ -420,7 +410,7 @@ cv::Point2f KCFTracker::detectWROI(cv::Mat z, cv::Mat x, float &peak_value)
     // Compute the Peak-to-Sidelobe Ratio
     cv::Scalar mean, stdev;
     cv::meanStdDev(res,mean,stdev);
-    PSR = (peak_value - mean[0])/stdev[0];
+    PSR_wroi = (peak_value - mean[0])/stdev[0];
 
     // subpixel peak estimation, coordinates will be non-integer
     cv::Point2f p((float)pi.x, (float)pi.y);
@@ -447,11 +437,6 @@ cv::Point2f KCFTracker::detectScale(cv::Mat z, cv::Mat x, float &peak_value)
     cv::Mat k = gaussianCorrelationScale(x, z); // Apply Kernel Trick with the Test Template
     cv::Mat res = (real(fftd_scale(complexMultiplication(_alphafScale, fftd_scale(k)), true))); // Response Map
 
-    /*
-    cv::imshow("Scale Correlation Map", res);
-    cv::waitKey(2);
-    */
-
     // minMaxLoc only accepts doubles for the peak, and integer points for the coordinates
     cv::Point2i pi;
     double pv;
@@ -461,10 +446,7 @@ cv::Point2f KCFTracker::detectScale(cv::Mat z, cv::Mat x, float &peak_value)
     // Compute the Peak-to-Sidelobe Ratio
     cv::Scalar mean, stdev;
     cv::meanStdDev(res,mean,stdev);
-    PSR = (peak_value - mean[0])/stdev[0];
-
-    // Use PSR value instead of the Maximum of the Confidence Map
-    // peak_value = PSR;
+    PSR_scale = (peak_value - mean[0])/stdev[0];
 
     // subpixel peak estimation, coordinates will be non-integer
     cv::Point2f p((float)pi.x, (float)pi.y);
@@ -1053,7 +1035,7 @@ cv::Mat KCFTracker::getFeaturesWROI(const cv::Mat & image, bool inithann, float 
 }
 
 // Obtain sub-window from image, with replication-padding and extract features
-cv::Mat KCFTracker::getFeaturesScale(const cv::Mat & image, bool inithann, float scale_adjust)
+cv::Mat KCFTracker::getFeaturesScale(const cv::Mat &image, bool inithann, float scale_adjust)
 {
     // cv::Rect extracted_roi;
 
@@ -1107,9 +1089,11 @@ cv::Mat KCFTracker::getFeaturesScale(const cv::Mat & image, bool inithann, float
     extracted_roi_scale.x = cx - extracted_roi_scale.width / 2;
     extracted_roi_scale.y = cy - extracted_roi_scale.height / 2;
 
+    // Crop the Scale Filter ROI
     cv::Mat FeaturesMap;  
     cv::Mat z = RectTools::subwindow(image, extracted_roi_scale, cv::BORDER_REPLICATE);
     
+    // Resize the ROI Template
     if (z.cols != _tmpl_sz_scale.width || z.rows != _tmpl_sz_scale.height) {
         cv::resize(z, z, _tmpl_sz_scale);
     } 
@@ -1250,8 +1234,6 @@ void KCFTracker::createHanningMatsWROI()
         hann_wroi = hann2d;
     }
 }
-
-
   
 float KCFTracker::subPixelPeak(float left, float center, float right)
 {   
@@ -1261,5 +1243,138 @@ float KCFTracker::subPixelPeak(float left, float center, float right)
         return 0;
     
     return 0.5 * (right - left) / divisor;
+}
+
+// Perform Target Re-detection
+std::pair<int,float> KCFTracker::target_redetection(std::vector<cv::Vec4i> BoundingBoxes, cv::Mat frame){
+
+    // Search through the Proposed Boxes
+    float rd_max_confidence = -0.1;
+    int rd_index;
+    std::pair<int,float> BoxElements;
+    for(int boxIndex = 0; boxIndex < 1000; boxIndex++){
+
+	// Get the Next Proposed Box
+	cv::Vec4i bb = BoundingBoxes[boxIndex];
+    	/// Detect the Peak at the Same Scale and Corresponding Value
+    	float rd_peak_value;
+    	detectScaleRedetection(_tmplScale, getFeaturesScaleRedetection(frame, bb), rd_peak_value);
+
+	// Update the Index and Confidence
+	if (rd_peak_value > rd_max_confidence){
+	    rd_max_confidence = rd_peak_value;
+	    BoxElements.first = boxIndex;
+	    BoxElements.second = rd_peak_value;
+	}    
+    }
+    return BoxElements;
+}
+
+// Detect object in the current frame.
+void KCFTracker::detectScaleRedetection(cv::Mat z, cv::Mat x, float &peak_value)
+{
+    using namespace FFTTools;
+
+    cv::Mat k = gaussianCorrelationScale(x, z); // Apply Kernel Trick with the Test Template
+    cv::Mat res = (real(fftd_scale(complexMultiplication(_alphafScale, fftd_scale(k)), true))); // Response Map
+
+    // minMaxLoc only accepts doubles for the peak, and integer points for the coordinates
+    cv::Point2i pi;
+    double pv;
+    cv::minMaxLoc(res, NULL, &pv, NULL, &pi);
+    peak_value = (float) pv;
+
+}
+
+// Obtain sub-window from image, with replication-padding and extract features
+cv::Mat KCFTracker::getFeaturesScaleRedetection(const cv::Mat &image, cv::Vec4i box)
+{
+    // New ROI for Proposed Box
+    cv::Rect roi_proposal;
+    roi_proposal.width = box[2] - box[0];
+    roi_proposal.height = box[3] - box[1];
+    roi_proposal.x = box[0];
+    roi_proposal.y = box[1];
+
+    // Crop the Scale Filter ROI
+    cv::Mat FeaturesMap;  
+    cv::Mat z = RectTools::subwindow(image, roi_proposal, cv::BORDER_REPLICATE);
+    
+    // Resize the ROI Template
+    if (z.cols != _tmpl_sz_scale.width || z.rows != _tmpl_sz_scale.height) {
+        cv::resize(z, z, _tmpl_sz_scale);
+    } 
+
+    // HOG features
+    if (_hogfeatures) {
+        IplImage z_ipl = z;
+        CvLSVMFeatureMapCaskade *map;
+        getFeatureMaps(&z_ipl, cell_size, &map);
+        normalizeAndTruncate(map,0.2f);
+        PCAFeatureMaps(map);
+        size_patch_scale[0] = map->sizeY;
+        size_patch_scale[1] = map->sizeX;
+        size_patch_scale[2] = map->numFeatures;
+
+        FeaturesMap = cv::Mat(cv::Size(map->numFeatures,map->sizeX*map->sizeY), CV_32F, map->map);  // Procedure do deal with cv::Mat multichannel bug
+        FeaturesMap = FeaturesMap.t();
+        freeFeatureMapObject(&map);
+
+        // Lab features
+        if (_labfeatures) {
+            cv::Mat imgLab;
+            cvtColor(z, imgLab, CV_BGR2Lab);
+            unsigned char *input = (unsigned char*)(imgLab.data);
+
+            // Sparse output vector
+            cv::Mat outputLab = cv::Mat(_labCentroids.rows, size_patch_scale[0]*size_patch_scale[1], CV_32F, float(0));
+
+            int cntCell = 0;
+            // Iterate through each cell
+            for (int cY = cell_size; cY < z.rows-cell_size; cY+=cell_size){
+                for (int cX = cell_size; cX < z.cols-cell_size; cX+=cell_size){
+                    // Iterate through each pixel of cell (cX,cY)
+                    for(int y = cY; y < cY+cell_size; ++y){
+                        for(int x = cX; x < cX+cell_size; ++x){
+                            // Lab components for each pixel
+                            float l = (float)input[(z.cols * y + x) * 3];
+                            float a = (float)input[(z.cols * y + x) * 3 + 1];
+                            float b = (float)input[(z.cols * y + x) * 3 + 2];
+
+                            // Iterate trough each centroid
+                            float minDist = FLT_MAX;
+                            int minIdx = 0;
+                            float *inputCentroid = (float*)(_labCentroids.data);
+                            for(int k = 0; k < _labCentroids.rows; ++k){
+                                float dist = ( (l - inputCentroid[3*k]) * (l - inputCentroid[3*k]) )
+                                           + ( (a - inputCentroid[3*k+1]) * (a - inputCentroid[3*k+1]) ) 
+                                           + ( (b - inputCentroid[3*k+2]) * (b - inputCentroid[3*k+2]) );
+                                if(dist < minDist){
+                                    minDist = dist;
+                                    minIdx = k;
+                                }
+                            }
+                            // Store result at output
+                            outputLab.at<float>(minIdx, cntCell) += 1.0 / cell_sizeQ; 
+                            //((float*) outputLab.data)[minIdx * (size_patch_scale[0]*size_patch_scale[1]) + cntCell] += 1.0 / cell_sizeQ; 
+                        }
+                    }
+                    cntCell++;
+                }
+            }
+            // Update size_patch_scale[2] and add features to FeaturesMap
+            size_patch_scale[2] += _labCentroids.rows;
+            FeaturesMap.push_back(outputLab);
+        }
+    }
+    else {
+        FeaturesMap = RectTools::getGrayImage(z);
+        FeaturesMap -= (float) 0.5; // In Paper;
+        size_patch_scale[0] = z.rows;
+        size_patch_scale[1] = z.cols;
+        size_patch_scale[2] = 1;  
+    }
+    
+    return FeaturesMap;
 }
 
