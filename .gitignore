@@ -7,5 +7,7 @@
 !figures/*
 !MKCF_C++
 !*.bst
+!C++_Implementation
+!C++_Implementation/*
 
 *.DS_Store
