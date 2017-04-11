@@ -15,7 +15,7 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "opencv2/imgcodecs/imgcodecs.hpp"
 #include "opencv2/videoio/videoio.hpp"
-// #include "opencv2/saliency.hpp"
+#include "opencv2/saliency.hpp"
 #include <unistd.h>
 #include <stack>
 #include <random>
@@ -167,11 +167,17 @@ int main(int argc, char* argv[])
    cv::namedWindow("Name", WINDOW_NORMAL);
    cv::resizeWindow("Name", 800,800);
    
+   // Instantiation of the BING Object from Saliency Library  
+   saliency::ObjectnessBING detector;
+   string training_path = "/tmp/opencv3-20170409-82959-bgyg9v/opencv-3.2.0/opencv_contrib/modules/saliency/samples/ObjectnessTrainedModel";
+   detector.setTrainingPath(training_path);
+   std::vector<cv::Vec4i> BoundingBoxes;
+
    while (1) // Read the Next Frame
    {
      // Read the Frame to Perform Tracking
      std::stringstream ss;
-     ss << std::setfill('0') << std::setw(5) << nFrames+1;
+     ss << std::setfill('0') << std::setw(8) << nFrames+1;
      string frame_id = to_string(nFrames); 
      if (strncmp(argv[2],"video",5) == 0){
 	capt >> frame;  // Read Next Frame
@@ -179,7 +185,7 @@ int main(int argc, char* argv[])
       }
       else{
 	frame = cv::imread(szDataFile+ss.str()+".jpg");
-      }
+     }
       using std::default_random_engine; // Initiate the random device at each step
       using std::uniform_int_distribution;
 
@@ -218,7 +224,6 @@ int main(int argc, char* argv[])
       }
       else {
     	/// -------------------- UPDATE STEP --------------------------------------------
- 
 	/// Apply Camera Motion Model	
 	cv::Mat homography = cameraMotionModel(frame,frame);
 
@@ -246,7 +251,51 @@ int main(int argc, char* argv[])
             result = tracker.updateScale(frame);   // Estimate Scale
 	    PSR = tracker.PSR_scale;
         }
-       
+        /// -------------------------------------------------------------------------------
+
+	/*
+	// Observation from the Tracking-by-Detection Output
+	Obs[0] = result.x + result.width/2; Obs[1] = result.y + result.height/2;
+	Obs[2] = result.width; Obs[3] = result.height;
+
+	Tracker.particle_transition(); // Transit the Particles to the Current Frame
+
+	Tracker.particle_weights(Obs); // Assign Particle Weights
+
+	Tracker.particle_resampling();  // Resample the Particles
+
+	State_Mean[0] = 0; State_Mean[1] = 0; // Initiate the State Mean
+	Tracker.mean_estimation(State_Mean); // Estimate the State Mean
+
+	// Update the Tracking-by-Detection Result by the PF results
+	result.x = State_Mean[0] - result.width/2;
+	result.y = State_Mean[1] - result.height/2;
+	tracker.updateKCFbyPF(result);
+	*/
+	
+	// Re-Initiate the Track
+	if (tracker.PSR_scale < 3){
+	    // Apply BING Algorithm for Saliency Map Extraction and Box Proposals
+	    detector.computeSaliency(frame,BoundingBoxes);
+	    // std::vector<float> objectnessScores = detector.getobjectnessValues();
+            // Perform Re-detection - Re-detection Interface
+   	    std::pair<int,float> MatchedBoxIndex = tracker.target_redetection(BoundingBoxes, frame);
+            
+            // Re-initiate the KCF
+            Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
+	    Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2] - BoundingBoxes[MatchedBoxIndex.first][0]; 
+	    Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3] - BoundingBoxes[MatchedBoxIndex.first][1];
+	    tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
+	    // Draw the Selected Rectangle
+            std::string rd_confidence = to_string(float(MatchedBoxIndex.second));
+            cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
+	    cv::putText(frame,rd_confidence, cv::Point(Obs[0],Obs[1]), fontFace, 4, cv::Scalar::all(255), thickness, 4);
+	    
+	    // Re-initiate the Particle Filter
+	    Obs[0] += Obs[2]/2.0; Obs[1] += Obs[1]/2.0;
+            // Tracker.particle_initiation(Obs);
+	}
+
 	// TRACKING RESULTS
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
 
@@ -255,6 +304,7 @@ int main(int argc, char* argv[])
         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
 
       }
+      
       /// Save the Frame into the Output Video
       if (strncmp(argv[2],"video",5) == 0){
          cv::resize(frame,frame,cv::Size(800,800));

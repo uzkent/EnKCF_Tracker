@@ -938,7 +938,6 @@ cv::Mat KCFTracker::getFeaturesScale(const cv::Mat &image, bool inithann, float 
         size_patch_scale[1] = z.cols;
         size_patch_scale[2] = 1;  
     }
-
     return FeaturesMap;
 }
 
