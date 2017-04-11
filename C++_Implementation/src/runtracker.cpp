@@ -5,7 +5,7 @@
 #include <algorithm>
 #include "kcftracker.hpp"
 #include "Filter_Definition.h"
-#include "findHomography.hpp"
+#include "findHom.hpp"
 #include <vector>
 #include <math.h>
 #include <string>
@@ -137,7 +137,7 @@ int main(int argc, char* argv[])
    Particle_Filter Tracker(N_Particles,dimension,beta,Q,R);
 
    // Frame read
-   cv::Mat frame;
+   cv::Mat frame, frame_old;
 
    // Tracker results
    cv::Rect result;
@@ -178,7 +178,7 @@ int main(int argc, char* argv[])
    {
      // Read the Frame to Perform Tracking
      std::stringstream ss;
-     ss << std::setfill('0') << std::setw(8) << nFrames+1;
+     ss << std::setfill('0') << std::setw(6) << nFrames+1;
      string frame_id = to_string(nFrames); 
      if (strncmp(argv[2],"video",5) == 0){
 	capt >> frame;  // Read Next Frame
@@ -222,11 +222,15 @@ int main(int argc, char* argv[])
 	 /// \param[in] Obs : Observation given by the user in the first frame
 	 ///
          Tracker.particle_initiation(Obs);
+	
+	 // Transfer Frame to Old Frame Holder
+	 frame_old = frame.clone();
       }
       else {
     	/// -------------------- UPDATE STEP --------------------------------------------
 	/// Apply Camera Motion Model	
-	cv::Mat homography = cameraMotionModel(frame,frame);
+	/// cv::Mat homography = cameraMotionModel(frame_old,frame);
+        frame_old = frame.clone();
 
         /// Use Translation and Scale Filter Interchangeably
 	tracker.PSR_scale = 10;
@@ -234,21 +238,21 @@ int main(int argc, char* argv[])
         if (nFrames % 5 > 1)
         {
 	    // Apply Homography to the Track Position at Previous Frame
-	    tracker._roi = tracker.applyHomography(homography, tracker._roi);
+	    // tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);
             result = tracker.update(frame);        // Estimate Translation
 	    PSR = tracker.PSR_sroi;
         }
         if (nFrames % 5 == 1)
         {
             // Apply Homography to the Track Position at Previous Frame
-            tracker._roi_w = tracker.applyHomography(homography, tracker._roi_w);
+            // tracker._roi_w = tracker.applyHomography(homography, frame, tracker._roi_w);
             result = tracker.updateWROI(frame);   // Estimate Translation using Wider ROI
 	    PSR = tracker.PSR_wroi;
         }
         if ( nFrames % 5 == 0)
         {
             // Apply Homography to the Track Position at Previous Frame
-            tracker._roi_scale = tracker.applyHomography(homography, tracker._roi_scale);
+            // tracker._roi_scale = tracker.applyHomography(homography, frame, tracker._roi_scale);
             result = tracker.updateScale(frame);   // Estimate Scale
 	    PSR = tracker.PSR_scale;
         }

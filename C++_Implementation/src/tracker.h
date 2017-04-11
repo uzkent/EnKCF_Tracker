@@ -13,7 +13,7 @@ public:
     virtual cv::Rect  update( cv::Mat image) = 0;
     virtual cv::Rect  updateWROI( cv::Mat image) = 0;
     virtual cv::Rect  updateScale( cv::Mat image) = 0;
-    virtual cv::Rect_<float> applyHomography(cv::Mat homography, cv::Rect_<float> oldroi) = 0;
+    virtual cv::Rect_<float> applyHomography(cv::Mat homography, cv::Mat image, cv::Rect_<float> oldroi) = 0;
     double PSR_sroi, PSR_wroi, PSR_scale;
     cv::Rect_<float> _roi, _roi_w, _roi_scale;
     cv::Rect extracted_roi, extracted_w_roi, extracted_roi_scale;

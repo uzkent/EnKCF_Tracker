@@ -29,7 +29,7 @@ public:
     void updateKCFbyPF(cv::Rect _roi);
 
     // Apply Homography to Previous Target Position for Motion Removal
-    cv::Rect_<float> applyHomography(cv::Mat homography, cv::Rect_<float> oldRoi);
+    cv::Rect_<float> applyHomography(cv::Mat homography, cv::Mat image, cv::Rect_<float> oldRoi);
     
     // Target Re-detection Module
     std::pair<int,float> target_redetection(std::vector<cv::Vec4i> BoundingBoxes, cv::Mat frame);

@@ -1143,19 +1143,27 @@ cv::Mat KCFTracker::getFeaturesScaleRedetection(const cv::Mat &image, cv::Vec4i 
     return FeaturesMap;
 }
 
-cv::Rect_<float> KCFTracker::applyHomography(cv::Mat homography, cv::Rect_<float> roi){
+cv::Rect_<float> KCFTracker::applyHomography(cv::Mat homography, cv::Mat image, cv::Rect_<float> roi){
 
-    float cx = roi.x + roi.width /2.0; // Determine the Central Point
+    float cx = roi.x + roi.width/2.0;  // Determine the Central Point
     float cy = roi.y + roi.height/2.0; // Determine the Central Point
 
     // Transform to the New Position
-    cx = cx * homography.at<float>(0,0) + cy * homography.at<float>(0,1) + 1 * homography.at<float>(0,2);
-    cy = cx * homography.at<float>(1,0) + cy * homography.at<float>(1,1) + 1 * homography.at<float>(1,2);
-    float cz = cx * homography.at<float>(2,0) + cy * homography.at<float>(2,1) + 1 * homography.at<float>(2,2);
+    cx = cx * homography.at<double>(0,0) + cy * homography.at<double>(0,1) + 1 * homography.at<double>(0,2);
+    cy = cx * homography.at<double>(1,0) + cy * homography.at<double>(1,1) + 1 * homography.at<double>(1,2);
+    float cz = cx * homography.at<double>(2,0) + cy * homography.at<double>(2,1) + 1 * homography.at<double>(2,2);
 
     // Find the new ROI
     roi.x = cx - roi.width/2.0;
     roi.y = cy - roi.height/2.0;
-    
+ 
+    // Boundary condition
+    if (roi.x + roi.width <= 0)  roi.x = -roi.width + 1;
+    if (roi.y + roi.height <= 0) roi.y = -roi.height + 1;
+    if (roi.x >= image.cols - 1) roi.x = image.cols - 2;
+    if (roi.y >= image.rows - 1) roi.y = image.rows - 2;
+
+    assert(roi.width >= 0 && roi.height >= 0);
+ 
     return roi;
 }
