@@ -37,7 +37,7 @@
 
 
 %%%%%%%%% TITLE
-\title{Multiple Kernelized Correlation Filters based High Speed Target Following}
+\title{{\itE}nKCF: Ensemble of Kernelized Correlation Filters for Object Tracking in High Speed, 300Hz}
 
 \author{Burak Uzkent\\
 Rochester Institute of Technology\\
@@ -90,10 +90,17 @@ part. This is because we need to build a drone for the second part.
   architecture or pseudo code
 \begin{itemize}
 \item Kernelized Correlation Filter
-\item A variant of KCF: Multiple KCF w/ PF
+\item A variant of KCF: Multiple KCF w/ PF ({\it E}nKCF, ${\it E}nKCF_{+RD}$
 \item Re-detection for re-initialization
 \end{itemize}
 \item Experiment: Detail the data, and experimental setup; results and findings
+\item {\it E}nKCF, Naive{\it E}nKCF, ${\it E}nKCF_{+RD}$, LCT, DSST,
+  vanilla-KCF w/ a fixed scale, KCF w/ three different scales, STC,
+\begin{itemize}
+\item DTB-70: w/ and w/o motion estimation,
+\item UAV data, https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx
+\item VOT
+\end{itemize}
 \item Conclusion
 \end{itemize}
 
