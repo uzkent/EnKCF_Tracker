@@ -1143,7 +1143,7 @@ cv::Mat KCFTracker::getFeaturesScaleRedetection(const cv::Mat &image, cv::Vec4i 
     return FeaturesMap;
 }
 
-cv::Rect_<float> applyHomography(cv::Mat homography, cv::Rect_<float> roi){
+cv::Rect_<float> KCFTracker::applyHomography(cv::Mat homography, cv::Rect_<float> roi){
 
     float cx = roi.x + roi.width /2.0; // Determine the Central Point
     float cy = roi.y + roi.height/2.0; // Determine the Central Point

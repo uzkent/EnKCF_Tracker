@@ -6,33 +6,34 @@
 #include "opencv2/calib3d.hpp"
 #include "opencv2/xfeatures2d.hpp"
 
+using namespace cv;
+using namespace cv::xfeatures2d;
+
 cv::Mat cameraMotionModel(cv::Mat frame_r, cv::Mat frame_t){
 
   //-- Step 1: Detect the keypoints using SURF Detector
   int minHessian = 400;
 
   // Instantiate Surf Object
-  SurfFeatureDetector detector( minHessian );
+  Ptr<FeatureDetector> detector = FastFeatureDetector::create(minHessian);
 
   // Define Keypoint Vector
   std::vector<KeyPoint> keypoints_reference, keypoints_test;
 
   // Detect Keypoints for the reference
-  detector.detect( img_object, keypoints_reference );
+  detector->detect( frame_r, keypoints_reference );
 
   // Detect Keypoints for the model
-  detector.detect( img_scene, keypoints_test );
+  detector->detect( frame_t, keypoints_test );
 
   //-- Step 2: Calculate descriptors (feature vectors)
-  SurfDescriptorExtractor extractor;
+  Ptr<SURF> extractor = SURF::create();
   cv::Mat descriptors_reference, descriptors_test;
-
-  // Extract the Descriptors
   
   //-- Draw only "good" matches (i.e. whose distance is less than 3*min_dist )
   std::vector< DMatch > good_matches;
-  extractor.compute( img_object, keypoints_reference, descriptors_reference);
-  extractor.compute( img_scene, keypoints_test, descriptors_test);
+  extractor->compute( frame_r, keypoints_reference, descriptors_reference);
+  extractor->compute( frame_t, keypoints_test, descriptors_test);
 
   //-- Step 3: Matching descriptor vectors using FLANN matcher
   FlannBasedMatcher matcher;
@@ -48,7 +49,6 @@ cv::Mat cameraMotionModel(cv::Mat frame_r, cv::Mat frame_t){
   }
 
   // Find the Good Matches
-  std::vector<DMatch> good_matches;
   for( int i = 0; i < descriptors_reference.rows; i++ )
   { 
      if(matches[i].distance<3*min_dist)
@@ -69,7 +69,7 @@ cv::Mat cameraMotionModel(cv::Mat frame_r, cv::Mat frame_t){
   }
 
   // Compute Homography Between Reference and Test Frame
-  Mat H = findHomography( obj, scene, CV_RANSAC );
+  Mat H = findHomography( reference, test, CV_RANSAC );
 
   return H;
 
