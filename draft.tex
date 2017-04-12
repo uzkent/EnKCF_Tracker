@@ -37,7 +37,7 @@
 
 
 %%%%%%%%% TITLE
-\title{{\itE}nKCF: Ensemble of Kernelized Correlation Filters for Object Tracking in High Speed, 300Hz}
+\title{ {\it E}nKCF: Ensemble of Kernelized Correlation Filters for Object Tracking in High Speed, 300Hz}
 
 \author{Burak Uzkent\\
 Rochester Institute of Technology\\
@@ -98,7 +98,9 @@ part. This is because we need to build a drone for the second part.
   vanilla-KCF w/ a fixed scale, KCF w/ three different scales, STC,
 \begin{itemize}
 \item DTB-70: w/ and w/o motion estimation,
-\item UAV data, https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx
+\item UAV123 \footnote{A set of images acquired from an UAV is called
+  ``UAV123'' and publicly available from
+  https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}
 \item VOT
 \end{itemize}
 \item Conclusion
@@ -170,6 +172,17 @@ tracking-by-detection paradigm has recently seen growing popularity
 due to its superior computation and robustness to geometric and
 photometric variations. 
 \end{comment}
+
+{\it YoungWoo: We'll have to mention why such an online tracker is
+  still attractive over any DNN-based counterparts.}
+
+To the best of our knowledge, the dominant framework of online object
+trackers based on the correlation filter is to solve a regression
+problem in the frequency domain. This framework assumes that the
+target information is given at the very first image frame. Given this
+positive example for the regression problem, a set of negative
+examples is mostly collected around the initial, target bounding box
+and represented as a circulant matrix \cite{henriques2015high}.
 
 The first correlation filter tracker proposed by
 \cite{bolme2010visual} focused on learning and detection in the
