@@ -56,7 +56,7 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
         // VOT
         interp_factor = 0.018; 	// Learning Rate for the Translation Filter
         interp_factor_w_roi = 0.020; // Learning Rate for the Wide ROI Translation Filter
-        interp_factor_scale = 0.020; // Learning Rate for the Scale Filter
+        interp_factor_scale = 0.010; // Learning Rate for the Scale Filter
         sigma = 0.65;           // Gaussian Bandwith Parameter for the Gaussian Kernel in KCF
         cell_size = 4;          // Cell Size for the HoG Feature Channels
         _hogfeatures = true;
@@ -131,7 +131,23 @@ void KCFTracker::init(const cv::Rect &roi, cv::Mat image)
     train(_tmpl, 1.0); // train with initial frame - translation filter 
     trainWROI(_tmpl_w_roi,1.0); // train with initial frame - translation filter Wide ROI
     trainScale(_tmplScale,1.0); // train with initial frame - scale filter
- }
+}
+
+// Initialize tracker 
+void KCFTracker::reinit(const cv::Rect &roi, cv::Mat image)
+{
+    _roi = roi;
+    assert(roi.width >= 0 && roi.height >= 0);
+    cv::Mat tmpl = getFeatures(image, 1);      // Compute Feature Channels for the _roi
+
+    _roi_w = roi;
+    cv::Mat tmpl_w_roi = getFeaturesWROI(image, 1);      // Compute Feature Channels for the _roi
+
+    _roi_scale = roi;
+    cv::Mat tmplScale = getFeaturesScale(image, 1); // Compute Feature Channels for the Scale Filter
+}
+
+
 
 // Update position based on the new frame
 cv::Rect KCFTracker::update(cv::Mat image)
@@ -1017,20 +1033,21 @@ std::pair<int,float> KCFTracker::target_redetection(std::vector<cv::Vec4i> Bound
     float rd_max_confidence = -0.1;
     int rd_index;
     std::pair<int,float> BoxElements;
-    for(int boxIndex = 0; boxIndex < 1000; boxIndex++){
+    for(int boxIndex = 0; boxIndex < 100; boxIndex++){
 
-	// Get the Next Proposed Box
-	cv::Vec4i bb = BoundingBoxes[boxIndex];
-    	/// Detect the Peak at the Same Scale and Corresponding Value
-    	float rd_peak_value;
-    	detectScaleRedetection(_tmplScale, getFeaturesScaleRedetection(frame, bb), rd_peak_value);
+        // Get the Next Proposed Box
+        cv::Vec4i bb = BoundingBoxes[boxIndex];
+        /// Detect the Peak at the Same Scale and Corresponding Value
+        float rd_peak_value;
+        detectScaleRedetection(_tmplScale, getFeaturesScaleRedetection(frame, bb), rd_peak_value);
 
-	// Update the Index and Confidence
-	if (rd_peak_value > rd_max_confidence){
-	    rd_max_confidence = rd_peak_value;
-	    BoxElements.first = boxIndex;
-	    BoxElements.second = rd_peak_value;
-	}    
+        // Update the Index and Confidence
+        if (rd_peak_value > rd_max_confidence){
+            rd_max_confidence = rd_peak_value;
+            BoxElements.first = boxIndex;
+            BoxElements.second = rd_peak_value;
+        }    
+
     }
     return BoxElements;
 }
@@ -1049,6 +1066,12 @@ void KCFTracker::detectScaleRedetection(cv::Mat z, cv::Mat x, float &peak_value)
     cv::minMaxLoc(res, NULL, &pv, NULL, &pi);
     peak_value = (float) pv;
 
+    // Compute the Peak-to-Sidelobe Ratio
+    cv::Scalar mean, stdev;
+    cv::meanStdDev(res,mean,stdev);
+    float psr = (peak_value - mean[0])/stdev[0];
+    // peak_value = psr;
+    
 }
 
 // Obtain sub-window from image, with replication-padding and extract features
@@ -1056,15 +1079,15 @@ cv::Mat KCFTracker::getFeaturesScaleRedetection(const cv::Mat &image, cv::Vec4i 
 {
     // New ROI for Proposed Box
     cv::Rect roi_proposal;
-    roi_proposal.width = box[2] - box[0];
-    roi_proposal.height = box[3] - box[1];
+    roi_proposal.width = box[2];
+    roi_proposal.height = box[3];
     roi_proposal.x = box[0];
     roi_proposal.y = box[1];
 
     // Crop the Scale Filter ROI
     cv::Mat FeaturesMap;  
     cv::Mat z = RectTools::subwindow(image, roi_proposal, cv::BORDER_REPLICATE);
-    
+ 
     // Resize the ROI Template
     if (z.cols != _tmpl_sz_scale.width || z.rows != _tmpl_sz_scale.height) {
         cv::resize(z, z, _tmpl_sz_scale);

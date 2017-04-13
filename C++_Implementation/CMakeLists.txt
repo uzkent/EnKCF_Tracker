@@ -1,16 +1,16 @@
 cmake_minimum_required(VERSION 2.8)
-project(KCF+ParticleFilter)
+
+project(EnKCF+ParticleFilter)
 
 find_package(OpenCV REQUIRED)
 
-if(NOT WIN32)
-   set(CMAKE_CXX_FLAGS "-std=c++11")
-endif(NOT WIN32)
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 
 # uncomment bellow if you want to use ground truth
 # add_definitions( -D_USE_GROUND_TRUTH_ )
-include_directories(src) 
-FILE(GLOB_RECURSE sourcefiles "src/*.cpp")
-add_executable( KCF ${sourcefiles} )
-target_link_libraries( KCF ${OpenCV_LIBS})
+FILE(GLOB_RECURSE sourcefiles "./src/*.cpp" ./main/src/interface.cpp ./edge/src/edge_boxes_interface.cpp ./edge/src/edge_box.cpp ./edge/src/edge_detection.cpp ./tools/src/conv_triangle.cpp ./tools/src/gradient.cpp ./tools/src/image_tools.cpp ./tools/src/data_define.cpp)
+INCLUDE_DIRECTORIES(./src ./main/include/ ../edge/include/ ../tools/include/)
+add_executable( EnKCF ${sourcefiles} )
+target_link_libraries( EnKCF ${OpenCV_LIBS})
 

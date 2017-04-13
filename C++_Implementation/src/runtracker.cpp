@@ -5,7 +5,6 @@
 #include <algorithm>
 #include "kcftracker.hpp"
 #include "Filter_Definition.h"
-#include "findHom.hpp"
 #include <vector>
 #include <math.h>
 #include <string>
@@ -15,12 +14,18 @@
 #include <opencv2/imgproc/imgproc.hpp>
 #include "opencv2/imgcodecs/imgcodecs.hpp"
 #include "opencv2/videoio/videoio.hpp"
-#include "opencv2/saliency.hpp"
 #include <unistd.h>
 #include <stack>
 #include <random>
+#include "../main/include/interface.h"
+#include "../tools/include/image_tools.h"
+#include "../edge/include/edge_boxes_interface.h"
+
+using namespace cv;
+using namespace std;
 
 std::stack<clock_t> tictoc_stack;
+
 ///
 /// tic and toc is used to measure the time to process an operation
 ///
@@ -78,6 +83,7 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
     }
 }
 
+
 int main(int argc, char* argv[])
 {
 
@@ -87,18 +93,20 @@ int main(int argc, char* argv[])
    bool FIXEDWINDOW = false;  // Fixed Window
    bool MULTISCALE = true;    // Scale Space Search Enabled
    bool SILENT = false;	      // Suppress the Outputs
-   bool LAB = true;	      // Enable or Disable Color Features
+   bool LAB = false;	      // Enable or Disable Color Features
    char szDataFile[256];
+   char gtDataFile[256];
    char szImageFile[256];
    char szSaveVideofile[256];
- 
+   char path_model[256] = "/home/buzkent/EdgeBox/model_train.txt"; 
+   
    // Terminate if less than 9 inputs are provided
-   if (argc < 5) {
+   if (argc < 7) {
       help();
       return -2;
    }
 
-   while ((opt = getopt(argc,argv,"e:d:")) != EOF) {
+   while ((opt = getopt(argc,argv,"e:d:g:")) != EOF) {
       switch(opt)
       {
          case 'e': memset(szImageFile, '\0', sizeof(szImageFile));
@@ -108,6 +116,10 @@ int main(int argc, char* argv[])
          case 'd': memset(szDataFile, '\0', sizeof(szDataFile));
             strcpy(szDataFile, optarg); 
             cout <<" Input MOV Data File: "<< optarg <<endl; 
+            break;
+         case 'g': memset(gtDataFile, '\0', sizeof(gtDataFile));
+            strcpy(gtDataFile, optarg);
+            cout <<" Input MOV Data File: "<< optarg <<endl;
             break;
       }
    }
@@ -168,12 +180,11 @@ int main(int argc, char* argv[])
    cv::namedWindow("Name", WINDOW_NORMAL);
    cv::resizeWindow("Name", 800,800);
    
-   // Instantiation of the BING Object from Saliency Library  
-   saliency::ObjectnessBING detector;
-   string training_path = "/tmp/opencv3-20170409-82959-bgyg9v/opencv-3.2.0/opencv_contrib/modules/saliency/samples/ObjectnessTrainedModel";
-   detector.setTrainingPath(training_path);
-   std::vector<cv::Vec4i> BoundingBoxes;
-
+   // Read the Ground Truth Text File
+   int gX, gY, gWidth, gHeight;
+   std::ifstream groundTruth(gtDataFile);
+   std::cout << gtDataFile << std::endl;
+   char ch;
    while (1) // Read the Next Frame
    {
      // Read the Frame to Perform Tracking
@@ -181,7 +192,7 @@ int main(int argc, char* argv[])
      ss << std::setfill('0') << std::setw(6) << nFrames+1;
      string frame_id = to_string(nFrames); 
      if (strncmp(argv[2],"video",5) == 0){
-	capt >> frame;  // Read Next Frame
+        capt >> frame;  // Read Next Frame
         cv::resize(frame,frame,cv::Size(1280,720)); // Resize it to Make it Same with H2 Implementation     
       }
       else{
@@ -189,124 +200,116 @@ int main(int argc, char* argv[])
      }
       using std::default_random_engine; // Initiate the random device at each step
       using std::uniform_int_distribution;
-
+     
       ///
       /// PERFORM TRACKING
       ///
       if (nFrames == 0) 
       {
-         cout << "\nPlease Select ROI: \n";
-	 while(var1==1)
-         {
-    	    // namedWindow("Name");
-            setMouseCallback("Name", CallBackFunc, NULL);
-            cv::imshow("Name", frame);
-            // Wait until user press some key
-            char c = (char)waitKey(10);
-	    if( c == 'c' || c == 'C' ) {
-               var1=0;
-               break;
-            }
-         }
-         // Observation on the first frame given by the user
-         Obs[0] = xMin+width/2; Obs[1] = yMin+height/2; Obs[2] = width; Obs[3] = height;
-         ///
-	 /// Initiate the Kernelized Correlation Filter Trackers - Translation and Scale Filters
-	 /// \param[in] Rect : Rectangle Object for the Bounding Box
-	 /// \param[in] frame : The First Frame
-	 ///
-	 tracker.init( Rect(xMin, yMin, width, height), frame );
-         
-	 ///
-	 /// Initiate the Particle of the Particle Filter
-	 /// \param[in] Obs : Observation given by the user in the first frame
-	 ///
-         Tracker.particle_initiation(Obs);
-	
-	 // Transfer Frame to Old Frame Holder
-	 frame_old = frame.clone();
+        var1 = 0;
+        /// Observation on the first frame given by the user
+        // Obs[0] = xMin+width/2; Obs[1] = yMin+height/2; Obs[2] = width; Obs[3] = height;
+        groundTruth >> gX >> ch >> gY >> ch >> gWidth >> ch >> gHeight;
+        Obs[0] = gX; Obs[1] = gY; Obs[2] = gWidth; Obs[3] = gHeight;
+
+        ///
+        /// Initiate the Kernelized Correlation Filter Trackers - Translation and Scale Filters
+        /// \param[in] Rect : Rectangle Object for the Bounding Box
+        /// \param[in] frame : The First Frame
+        ///
+        tracker.init( Rect(gX, gY, gWidth, gHeight), frame );
+
+        ///
+        /// Initiate the Particle of the Particle Filter
+        /// \param[in] Obs : Observation given by the user in the first frame
+        ///
+        // Tracker.particle_initiation(Obs);
       }
       else {
-    	/// -------------------- UPDATE STEP --------------------------------------------
-	/// Apply Camera Motion Model	
-	/// cv::Mat homography = cameraMotionModel(frame_old,frame);
-        frame_old = frame.clone();
-
+        /// -------------------- UPDATE STEP --------------------------------------------
         /// Use Translation and Scale Filter Interchangeably
-	tracker.PSR_scale = 10;
-	float PSR;
+        tracker.PSR_scale = 10;
+        float PSR;
         if (nFrames % 5 > 1)
         {
-	    // Apply Homography to the Track Position at Previous Frame
-	    // tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);
-            result = tracker.update(frame);        // Estimate Translation
-	    PSR = tracker.PSR_sroi;
+            // Apply Homography to the Track Position at Previous Frame
+            // tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);
+            result = tracker.update(frame);      // Estimate Translation
+            PSR = tracker.PSR_sroi;
         }
         if (nFrames % 5 == 1)
         {
             // Apply Homography to the Track Position at Previous Frame
             // tracker._roi_w = tracker.applyHomography(homography, frame, tracker._roi_w);
-            result = tracker.updateWROI(frame);   // Estimate Translation using Wider ROI
-	    PSR = tracker.PSR_wroi;
+            result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
+            PSR = tracker.PSR_wroi;
         }
         if ( nFrames % 5 == 0)
         {
             // Apply Homography to the Track Position at Previous Frame
             // tracker._roi_scale = tracker.applyHomography(homography, frame, tracker._roi_scale);
-            result = tracker.updateScale(frame);   // Estimate Scale
-	    PSR = tracker.PSR_scale;
+            result = tracker.updateScale(frame); // Estimate Scale
+            PSR = tracker.PSR_scale;
         }
         /// -------------------------------------------------------------------------------
 
-	/*
-	// Observation from the Tracking-by-Detection Output
-	Obs[0] = result.x + result.width/2; Obs[1] = result.y + result.height/2;
-	Obs[2] = result.width; Obs[3] = result.height;
+        /// opencv read image
+        std::vector<cv::Mat> src;
+        cv::split(frame,src);
+        std::cout << frame.channels() << std::endl;
+        
+        ///
+        /// Fill in the Image Data Structure Parameters
+        ///
+        autel::computer_vision::AuMat image;
+        image.cols_ = frame.cols;
+        image.rows_ = frame.rows;
+        image.depth_ = 0;
+        image.dims_ = 2;
+        image.channels_ = frame.channels();
+        image.step_[1] = image.channels_;
+        image.step_[0] = image.cols_ * image.step_[1];
+        unsigned char* memory_image = (unsigned char*)malloc(frame.cols*frame.rows*frame.channels());
+        image.data_ = memory_image;
+        for (int i = 0; i < frame.rows ; i++){
+            for(int j = 0; j < frame.cols ; j++){
+               image.data_[(i*frame.cols+j) * frame.channels()] = src[0].at<uchar>(i,j);
+               image.data_[(i*frame.cols+j) * frame.channels()+1] = src[1].at<uchar>(i,j);
+               image.data_[(i*frame.cols+j) * frame.channels()+2] = src[2].at<uchar>(i,j);
+           }
+        }
 
-	Tracker.particle_transition(); // Transit the Particles to the Current Frame
+	if (tracker.PSR_scale < 2.5){
+           // Initialize edge box
+           InitializedBox(path_model);
+           std::vector<cv::Vec4i> BoundingBoxes;
+           BoundingBoxes = EdgeBoxInterface(image);
+           // std::cout << BoundingBoxes.size() << std::endl;
 
-	Tracker.particle_weights(Obs); // Assign Particle Weights
+           // Perform Re-detection - Re-detection Interface
+           std::pair<int,float> MatchedBoxIndex = tracker.target_redetection(BoundingBoxes, frame);
+        
+           // Re-initiate the KCF
+           Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
+           Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2]; Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3];
+           if (MatchedBoxIndex.second > 0.1){
+              tracker.reinit( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
+           }
+           // Draw the Selected Rectangle
+           std::string rd_confidence = to_string(float(MatchedBoxIndex.second));
+           cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
+           cv::putText(frame,rd_confidence, cv::Point(Obs[0],Obs[1]), fontFace, 4, cv::Scalar::all(255), thickness, 4);
+        }
 
-	Tracker.particle_resampling();  // Resample the Particles
-
-	State_Mean[0] = 0; State_Mean[1] = 0; // Initiate the State Mean
-	Tracker.mean_estimation(State_Mean); // Estimate the State Mean
-
-	// Update the Tracking-by-Detection Result by the PF results
-	result.x = State_Mean[0] - result.width/2;
-	result.y = State_Mean[1] - result.height/2;
-	tracker.updateKCFbyPF(result);
-	*/
-	
-	// Re-Initiate the Track
-	if (tracker.PSR_scale < 3){
-	    // Apply BING Algorithm for Saliency Map Extraction and Box Proposals
-	    detector.computeSaliency(frame,BoundingBoxes);
-	    // std::vector<float> objectnessScores = detector.getobjectnessValues();
-            // Perform Re-detection - Re-detection Interface
-   	    std::pair<int,float> MatchedBoxIndex = tracker.target_redetection(BoundingBoxes, frame);
-            
-            // Re-initiate the KCF
-            Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
-	    Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2] - BoundingBoxes[MatchedBoxIndex.first][0]; 
-	    Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3] - BoundingBoxes[MatchedBoxIndex.first][1];
-	    tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
-	    // Draw the Selected Rectangle
-            std::string rd_confidence = to_string(float(MatchedBoxIndex.second));
-            cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
-	    cv::putText(frame,rd_confidence, cv::Point(Obs[0],Obs[1]), fontFace, 4, cv::Scalar::all(255), thickness, 4);
-	    
-	    // Re-initiate the Particle Filter
-	    Obs[0] += Obs[2]/2.0; Obs[1] += Obs[1]/2.0;
-            // Tracker.particle_initiation(Obs);
-	}
-
-	// TRACKING RESULTS
+        // TRACKING RESULTS
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
 
         // Display Text on the Frame - CONFIDENCE from Translation and Scale Filter Interchangeably
         std::string confidence = to_string(int(PSR));
         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
+
+	// Compute Euclidean Distance Between Ground Truth and Tracking
+        groundTruth >> gX >> ch >> gY >> ch >> gWidth >> ch >> gHeight; 
 
       }
       
