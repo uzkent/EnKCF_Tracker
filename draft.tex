@@ -91,12 +91,30 @@ part. This is because we need to build a drone for the second part.
 \begin{itemize}
 \item Kernelized Correlation Filter
 \item A variant of KCF: Multiple KCF w/ PF ({\it E}nKCF, ${\it E}nKCF_{+RD}$
-\item Re-detection for re-initialization
+\item Re-detection for re-initialization: Modules for reliably
+  detecting target-lost, for extensively searching the lost target,
+  and for picking up the same target with a help from an appearance
+  model or other models.
+\begin{itemize}
+\item To filter out unlikely box proposals,
+\begin{itemize}
+\item Use a prior information about box, our outputs, dimensions
+  (e.g., a combination of width and height, aspect ratio, etc.)
+\item Use the information about the trajectory of the target before we
+  lose the target.
+\end{itemize}
+\item MTH: revisited
+\item To make a box tighter, generate our own box proposals based on
+  the locations of top $k$ box proposals from object proposal methods,
+  e.g., Edge Box.
+\end{itemize}
 \end{itemize}
 \item Experiment: Detail the data, and experimental setup; results and findings
 \item {\it E}nKCF, Naive{\it E}nKCF, ${\it E}nKCF_{+RD}$, LCT, DSST,
   vanilla-KCF w/ a fixed scale, KCF w/ three different scales, STC,
+  Struck
 \begin{itemize}
+\item Visual tracker benchmark (VTB)
 \item DTB-70: w/ and w/o motion estimation,
 \item UAV123 \footnote{A set of images acquired from an UAV is called
   ``UAV123'' and publicly available from
