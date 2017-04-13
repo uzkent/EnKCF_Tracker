@@ -1190,3 +1190,21 @@ cv::Rect_<float> KCFTracker::applyHomography(cv::Mat homography, cv::Mat image, 
  
     return roi;
 }
+
+
+void PrecisionCurve(std::vector<float> EucDistance)
+{
+    std::vector<float> prScore; /// \param[in] prScore vector of vector to store precision
+    for (int i = 1; i < 101; i++){      /// \param[in] i Spatial Threshold
+        std::vector<int> precision{0};
+        for(int j = 0; j < EucDistance.size(); j++){ /// Check each time step
+            if (EucDistance[j] < i){
+                precision[0] += 1; // Successfull tracking
+	    }
+	}
+        prScore.push_back(double(precision[0])/EucDistance.size()); // Precision Score for the Video - TBM
+        std::cout << prScore[i-1] << "---------------" << i << std::endl;
+    }
+}
+
+

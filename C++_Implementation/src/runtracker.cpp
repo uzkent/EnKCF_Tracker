@@ -185,22 +185,32 @@ int main(int argc, char* argv[])
    std::ifstream groundTruth(gtDataFile);
    std::cout << gtDataFile << std::endl;
    char ch;
+
+   // Declare A Vector for Euclidean Distance
+   std::vector<float> EucDistance;
+#ifdef _USE_VIDEO_INPUT__
    while (1) // Read the Next Frame
    {
-     // Read the Frame to Perform Tracking
-     std::stringstream ss;
-     ss << std::setfill('0') << std::setw(6) << nFrames+1;
-     string frame_id = to_string(nFrames); 
-     if (strncmp(argv[2],"video",5) == 0){
-        capt >> frame;  // Read Next Frame
-        cv::resize(frame,frame,cv::Size(1280,720)); // Resize it to Make it Same with H2 Implementation     
+#endif
+
+#ifdef _USE_IMAGE_INPUT_
+   while(groundTruth >> gX >> ch >> gY >> ch >> gWidth >> ch >> gHeight)
+   {
+#endif
+      // Read the Frame to Perform Tracking
+      std::stringstream ss;
+      ss << std::setfill('0') << std::setw(6) << nFrames+1;
+      string frame_id = to_string(nFrames); 
+      if (strncmp(argv[2],"video",5) == 0){
+         capt >> frame;  // Read Next Frame
+         cv::resize(frame,frame,cv::Size(1280,720)); // Resize it to Make it Same with H2 Implementation     
       }
       else{
 	frame = cv::imread(szDataFile+ss.str()+".jpg");
-     }
+      }
       using std::default_random_engine; // Initiate the random device at each step
       using std::uniform_int_distribution;
-     
+
       ///
       /// PERFORM TRACKING
       ///
@@ -209,7 +219,6 @@ int main(int argc, char* argv[])
         var1 = 0;
         /// Observation on the first frame given by the user
         // Obs[0] = xMin+width/2; Obs[1] = yMin+height/2; Obs[2] = width; Obs[3] = height;
-        groundTruth >> gX >> ch >> gY >> ch >> gWidth >> ch >> gHeight;
         Obs[0] = gX; Obs[1] = gY; Obs[2] = gWidth; Obs[3] = gHeight;
 
         ///
@@ -230,19 +239,19 @@ int main(int argc, char* argv[])
         /// Use Translation and Scale Filter Interchangeably
         tracker.PSR_scale = 10;
         float PSR;
-        if (nFrames % 5 > 1)
-        {
-            // Apply Homography to the Track Position at Previous Frame
-            // tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);
-            result = tracker.update(frame);      // Estimate Translation
-            PSR = tracker.PSR_sroi;
-        }
         if (nFrames % 5 == 1)
         {
             // Apply Homography to the Track Position at Previous Frame
             // tracker._roi_w = tracker.applyHomography(homography, frame, tracker._roi_w);
             result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
             PSR = tracker.PSR_wroi;
+        }
+        if (nFrames % 5 > 1)
+        {
+            // Apply Homography to the Track Position at Previous Frame
+            // tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);
+            result = tracker.update(frame);      // Estimate Translation
+            PSR = tracker.PSR_sroi;
         }
         if ( nFrames % 5 == 0)
         {
@@ -256,7 +265,6 @@ int main(int argc, char* argv[])
         /// opencv read image
         std::vector<cv::Mat> src;
         cv::split(frame,src);
-        std::cout << frame.channels() << std::endl;
         
         ///
         /// Fill in the Image Data Structure Parameters
@@ -293,8 +301,11 @@ int main(int argc, char* argv[])
            Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
            Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2]; Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3];
            if (MatchedBoxIndex.second > 0.1){
-              tracker.reinit( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
+              // Re-Initiate the Track
+              tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
+              result.x = Obs[0]; result.y = Obs[1]; result.width = Obs[2]; result.height = Obs[3];
            }
+           
            // Draw the Selected Rectangle
            std::string rd_confidence = to_string(float(MatchedBoxIndex.second));
            cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
@@ -308,8 +319,9 @@ int main(int argc, char* argv[])
         std::string confidence = to_string(int(PSR));
         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
 
-	// Compute Euclidean Distance Between Ground Truth and Tracking
-        groundTruth >> gX >> ch >> gY >> ch >> gWidth >> ch >> gHeight; 
+
+	// Compute the Euclidean Distance
+        EucDistance.push_back(pow(pow((gX + gWidth/2.0) - (result.x + result.width/2),2) + pow((gY + gHeight/2.0) - (result.y + result.height/2.0),2),0.5));  
 
       }
       
@@ -325,6 +337,6 @@ int main(int argc, char* argv[])
          cv::waitKey(2);
       }
    }
-// Estimate Precision Curve
-// precision_curve(RMSE);
+   // Estimate Precision Curve
+   PrecisionCurve(EucDistance);
 }
