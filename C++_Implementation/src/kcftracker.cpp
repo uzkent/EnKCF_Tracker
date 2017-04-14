@@ -46,19 +46,19 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
 {
 
     // Parameters equal in all cases
-    lambda = 0.0001;    // Regularization Parameter for the Regression Task
-    padding = 2.00;     // The ROI parameter to get n times larger area than the Selected Target - Translation Filter
-    padding_w_roi = 3.00; // The Wider ROI Parameter for the Second Translation Filter
-    padding_scale = 1.00;   // The ROI Parameter for the scale filter
-    output_sigma_factor = 0.125;    // Variance Parameter for the Desired Translation Filter Response
-    output_sigma_factor_w_roi = 0.125 * 1.5; // Variance Parameter for the Wide ROI translation filter Response
-    output_sigma_factor_scale = 0.125 * 0.5; // Variance Parameter for the Desired Scale Filter Response
+    lambda = 0.0001;    		// Regularization Parameter for the Regression Task
+    padding = 2.00;     		// The ROI parameter to get n times larger area than the Selected Target - Translation Filter
+    padding_w_roi = 3.00; 		// The Wider ROI Parameter for the Second Translation Filter
+    padding_scale = 1.00;   		// The ROI Parameter for the scale filter
+    output_sigma_factor = 0.125;    	// Variance Parameter for the Desired Translation Filter Response
+    output_sigma_factor_w_roi = 0.125 * 1.0; 	// Variance Parameter for the Wide ROI translation filter Response
+    output_sigma_factor_scale = 0.125 * 1.0; 	// Variance Parameter for the Desired Scale Filter Response
 
     if (hog) {    // HOG
         // VOT
-        interp_factor = 0.018; 	// Learning Rate for the Translation Filter
-        interp_factor_w_roi = 0.020; // Learning Rate for the Wide ROI Translation Filter
-        interp_factor_scale = 0.010; // Learning Rate for the Scale Filter
+        interp_factor = 0.012; 	// Learning Rate for the Translation Filter
+        interp_factor_w_roi = 0.012; // Learning Rate for the Wide ROI Translation Filter
+        interp_factor_scale = 0.015; // Learning Rate for the Scale Filter
         sigma = 0.65;           // Gaussian Bandwith Parameter for the Gaussian Kernel in KCF
         cell_size = 4;          // Cell Size for the HoG Feature Channels
         _hogfeatures = true;
@@ -66,8 +66,9 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
         if (lab) {  // Activate the LAB Color Features
             // interp_factor = 0.005;
             // sigma = 0.4; 
-            //output_sigma_factor = 0.025;
+            // output_sigma_factor = 0.025;
             // output_sigma_factor = 0.1;
+            // output_sigma_factor_scale = 0.025;
             std::cout << "Lab Features" << std::endl;
             _labfeatures = true;
             _labCentroids = cv::Mat(nClusters, 3, CV_32FC1, &data);
@@ -91,7 +92,7 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
 
 
     if (multiscale) { // Multiscale KCF Implementation
-        template_size = 64;     // Template Size for the Translation Filter
+        template_size = 96;     // Template Size for the Translation Filter
         template_size_w_roi = 96; // Template Size for the Wide ROI Translation Filter
         template_size_scale = 48;   // Template Size for the Scale Filter
         scale_step = 1.05;      // Scale Factor for the Multiscale Search
@@ -328,7 +329,9 @@ cv::Rect KCFTracker::updateScale(cv::Mat image)
     }
     // Train the Scale Filter
     cv::Mat x = getFeaturesScale(image, 0);
-    trainScale(x, interp_factor_scale);
+    if (PSR_scale > 1.5){
+       trainScale(x, interp_factor_scale);
+    }
     /// --------------------------------------------------------------------
 
     return _roi_scale;
@@ -1194,22 +1197,26 @@ cv::Rect_<float> KCFTracker::applyHomography(cv::Mat homography, cv::Mat image, 
 }
 
 
-void PrecisionCurve(std::vector<float> EucDistance, std::string prDataFile)
+void PrecisionCurve(std::vector<std::vector<float>> EucDistance, std::string prDataFile)
 {
-    std::vector<float> prScore; /// \param[in] prScore vector of vector to store precision
-    for (int i = 1; i < 101; i++){      /// \param[in] i Spatial Threshold
-        std::vector<int> precision{0};
-        for(int j = 0; j < EucDistance.size(); j++){ /// Check each time step
-            if (EucDistance[j] < i){
-                precision[0] += 1; // Successfull tracking
-	    }
-	}
-        prScore.push_back(double(precision[0])/EucDistance.size()); // Precision Score for the Video - TBM
-        std::cout << prScore[i-1] << "---------------" << i << std::endl;
-    }
     // Save into the Corresponding Text File
     std::ofstream output_file("/home/buzkent/Downloads/Results/"+prDataFile+".txt");
-    std::ostream_iterator<float> output_iterator(output_file, "\n");
-    std::copy(prScore.begin(), prScore.end(), output_iterator);
+    std::vector<std::vector<float>> prScore(2); /// \param[in] prScore vector of vector to store precision
+    for (int i = 1; i < 101; i++){      /// \param[in] i Spatial Threshold
+        std::vector<int> precision{0,0};
+        for(int j = 0; j < EucDistance[0].size(); j++){ /// Check each time step
+            if (EucDistance[0][j] < i){
+                precision[0] += 1; // Successfull tracking
+	    }
+            if (EucDistance[1][j] > i){
+                precision[1] += 1;
+            }
+	}
+        prScore[0].push_back(double(precision[0])/EucDistance[0].size()); // Precision Score for the Video - TBM
+        prScore[1].push_back(double(precision[1])/EucDistance[1].size()); // Precision Score for the Video - TBM    
+        std::cout << prScore[0][i-1] << "---------------" << i << "++++++++++++" << prScore[1][i-1]<< std::endl;
+        output_file << prScore[0][i-1] << "," << prScore[1][i-1];
+        output_file << std::endl;
+    }
 
 }

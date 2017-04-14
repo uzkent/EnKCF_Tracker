@@ -7,8 +7,7 @@
 #define _OPENCV_KCFTRACKER_HPP_
 #endif
 
-
-void PrecisionCurve(std::vector<float> EucDistance, std::string prDataFile);
+void PrecisionCurve(std::vector<std::vector<float>> EucDistance, std::string prDataFile);
 
 class KCFTracker : public Tracker
 {

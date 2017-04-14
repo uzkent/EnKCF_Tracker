@@ -10,13 +10,15 @@
 
 int main(int argc, char* argv[]){
 
-    float indPrecision;
-    std::string value;
-    std::vector<float> avgPrecision;
+    float indPrecision, indSuccessOverlap;
+    std::vector<std::vector<float> > avgPrecision(2);
+    std::ofstream output_file("/home/buzkent/Downloads/Results/AveragePrecision/Precision.txt");
+
     // Parse through all the Text Files and Compute Average Precision
     struct dirent *pDirent;
     DIR *pDir = opendir("/home/buzkent/Downloads/Results/");
     int fileFirst = 0;
+    char ch;
     while ((pDirent = readdir(pDir)) != NULL) {
 
        std::string fileName = pDirent->d_name;
@@ -33,12 +35,14 @@ int main(int argc, char* argv[]){
        }
        int index = 0;
        char ch;
-       while (prFile >> indPrecision){
+       while (prFile >> indPrecision >> ch >> indSuccessOverlap){
 	   if (fileFirst == 0){
-              avgPrecision.push_back(indPrecision);
+              avgPrecision[0].push_back(indPrecision);
+              avgPrecision[1].push_back(indSuccessOverlap);
            }
            else{
-              avgPrecision[index] += indPrecision;
+              avgPrecision[0][index] += indPrecision;
+              avgPrecision[1][index] += indSuccessOverlap;
               index++;
            }
        }
@@ -48,12 +52,15 @@ int main(int argc, char* argv[]){
     closedir(pDir);
 
     // Save the Results into Another Text File
-    for (int i = 0; i < avgPrecision.size() ; i++){
-        avgPrecision[i] /= fileFirst;
+    for (int i = 0; i < avgPrecision[0].size() ; i++){
+        avgPrecision[0][i] /= fileFirst;
+        avgPrecision[1][i] /= fileFirst;
+        output_file << avgPrecision[0][i] << "," << avgPrecision[1][i];
+        output_file << std::endl;       
     }
-    std::ofstream output_file("/home/buzkent/Downloads/Results/AveragePrecision/Precision.txt");
-    std::ostream_iterator<float> output_iterator(output_file, "\n");
-    std::copy(avgPrecision.begin(), avgPrecision.end(), output_iterator);
+//    std::ofstream output_file("/home/buzkent/Downloads/Results/AveragePrecision/Precision.txt");
+//    std::ostream_iterator<float> output_iterator(output_file, "\n");
+//    std::copy(avgPrecision.begin(), avgPrecision.end(), output_iterator);
   
     return 0;
 }
