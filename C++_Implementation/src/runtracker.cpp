@@ -99,14 +99,15 @@ int main(int argc, char* argv[])
    char szImageFile[256];
    char szSaveVideofile[256];
    char path_model[256] = "/home/buzkent/EdgeBox/model_train.txt"; 
-   
+   char prDataFile[256];   
+
    // Terminate if less than 9 inputs are provided
-   if (argc < 7) {
+   if (argc < 9) {
       help();
       return -2;
    }
 
-   while ((opt = getopt(argc,argv,"e:d:g:")) != EOF) {
+   while ((opt = getopt(argc,argv,"e:d:g:p:")) != EOF) {
       switch(opt)
       {
          case 'e': memset(szImageFile, '\0', sizeof(szImageFile));
@@ -121,6 +122,9 @@ int main(int argc, char* argv[])
             strcpy(gtDataFile, optarg);
             cout <<" Input MOV Data File: "<< optarg <<endl;
             break;
+        case 'p': memset(prDataFile, '\0', sizeof(prDataFile));
+            strcpy(prDataFile, optarg);
+            cout <<" Input MOV Data File: "<< optarg <<endl;
       }
    }
 
@@ -337,6 +341,8 @@ int main(int argc, char* argv[])
          cv::waitKey(2);
       }
    }
+
    // Estimate Precision Curve
-   PrecisionCurve(EucDistance);
+   string performanceFile = prDataFile;
+   PrecisionCurve(EucDistance, prDataFile);
 }

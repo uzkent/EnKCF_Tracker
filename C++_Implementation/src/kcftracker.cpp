@@ -37,6 +37,8 @@ Outputs of update():
 #include "fhog.hpp"
 #include "labdata.hpp"
 #include <unistd.h>
+#include <iterator>
+#include <fstream>
 #endif
 
 // Constructor
@@ -1192,7 +1194,7 @@ cv::Rect_<float> KCFTracker::applyHomography(cv::Mat homography, cv::Mat image, 
 }
 
 
-void PrecisionCurve(std::vector<float> EucDistance)
+void PrecisionCurve(std::vector<float> EucDistance, std::string prDataFile)
 {
     std::vector<float> prScore; /// \param[in] prScore vector of vector to store precision
     for (int i = 1; i < 101; i++){      /// \param[in] i Spatial Threshold
@@ -1205,6 +1207,9 @@ void PrecisionCurve(std::vector<float> EucDistance)
         prScore.push_back(double(precision[0])/EucDistance.size()); // Precision Score for the Video - TBM
         std::cout << prScore[i-1] << "---------------" << i << std::endl;
     }
+    // Save into the Corresponding Text File
+    std::ofstream output_file("/home/buzkent/Downloads/Results/"+prDataFile+".txt");
+    std::ostream_iterator<float> output_iterator(output_file, "\n");
+    std::copy(prScore.begin(), prScore.end(), output_iterator);
+
 }
-
-

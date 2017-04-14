@@ -2,13 +2,13 @@
 
 #include "tracker.h"
 #include "opencv2/opencv.hpp"
-
+#include <string>
 #ifndef _OPENCV_KCFTRACKER_HPP_
 #define _OPENCV_KCFTRACKER_HPP_
 #endif
 
 
-void PrecisionCurve(std::vector<float> EucDistance);
+void PrecisionCurve(std::vector<float> EucDistance, std::string prDataFile);
 
 class KCFTracker : public Tracker
 {
