@@ -89,7 +89,7 @@ int main(int argc, char* argv[])
 
    // Define Parameters for the Kernelized Correlation Filter Tracker - Options
    int opt, verbose = 0;
-   bool HOG = true;   // Enable HoG Features
+   bool HOG = true;  	      // Enable HoG Features
    bool FIXEDWINDOW = false;  // Fixed Window
    bool MULTISCALE = true;    // Scale Space Search Enabled
    bool SILENT = false;	      // Suppress the Outputs
@@ -99,14 +99,15 @@ int main(int argc, char* argv[])
    char szImageFile[256];
    char szSaveVideofile[256];
    char path_model[256] = "/home/buzkent/EdgeBox/model_train.txt"; 
-   
+   char prDataFile[256];   
+
    // Terminate if less than 9 inputs are provided
-   if (argc < 7) {
+   if (argc < 9) {
       help();
       return -2;
    }
 
-   while ((opt = getopt(argc,argv,"e:d:g:")) != EOF) {
+   while ((opt = getopt(argc,argv,"e:d:g:p:")) != EOF) {
       switch(opt)
       {
          case 'e': memset(szImageFile, '\0', sizeof(szImageFile));
@@ -121,6 +122,9 @@ int main(int argc, char* argv[])
             strcpy(gtDataFile, optarg);
             cout <<" Input MOV Data File: "<< optarg <<endl;
             break;
+        case 'p': memset(prDataFile, '\0', sizeof(prDataFile));
+            strcpy(prDataFile, optarg);
+            cout <<" Input MOV Data File: "<< optarg <<endl;
       }
    }
 
@@ -187,7 +191,7 @@ int main(int argc, char* argv[])
    char ch;
 
    // Declare A Vector for Euclidean Distance
-   std::vector<float> EucDistance;
+   std::vector<std::vector<float>> Metrics(2);
 #ifdef _USE_VIDEO_INPUT__
    while (1) // Read the Next Frame
    {
@@ -238,22 +242,23 @@ int main(int argc, char* argv[])
         /// -------------------- UPDATE STEP --------------------------------------------
         /// Use Translation and Scale Filter Interchangeably
         tracker.PSR_scale = 10;
+        tracker.PSR_wroi  = 10;
         float PSR;
-        if (nFrames % 5 == 1)
+        if (nFrames % 5 > 0)
         {
             // Apply Homography to the Track Position at Previous Frame
             // tracker._roi_w = tracker.applyHomography(homography, frame, tracker._roi_w);
             result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
             PSR = tracker.PSR_wroi;
-        }
-        if (nFrames % 5 > 1)
+        }/*
+        if ((nFrames % 5 > 1))
         {
             // Apply Homography to the Track Position at Previous Frame
             // tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);
             result = tracker.update(frame);      // Estimate Translation
             PSR = tracker.PSR_sroi;
-        }
-        if ( nFrames % 5 == 0)
+        }*/
+        if (nFrames % 5 == 0)
         {
             // Apply Homography to the Track Position at Previous Frame
             // tracker._roi_scale = tracker.applyHomography(homography, frame, tracker._roi_scale);
@@ -286,8 +291,8 @@ int main(int argc, char* argv[])
                image.data_[(i*frame.cols+j) * frame.channels()+2] = src[2].at<uchar>(i,j);
            }
         }
-
-	if (tracker.PSR_scale < 2.5){
+        
+	if (tracker.PSR_wroi < 4.5){
            // Initialize edge box
            InitializedBox(path_model);
            std::vector<cv::Vec4i> BoundingBoxes;
@@ -300,7 +305,7 @@ int main(int argc, char* argv[])
            // Re-initiate the KCF
            Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
            Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2]; Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3];
-           if (MatchedBoxIndex.second > 0.1){
+           if (MatchedBoxIndex.second > 0.25){
               // Re-Initiate the Track
               tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
               result.x = Obs[0]; result.y = Obs[1]; result.width = Obs[2]; result.height = Obs[3];
@@ -311,7 +316,7 @@ int main(int argc, char* argv[])
            cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
            cv::putText(frame,rd_confidence, cv::Point(Obs[0],Obs[1]), fontFace, 4, cv::Scalar::all(255), thickness, 4);
         }
-
+        
         // TRACKING RESULTS
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
 
@@ -319,9 +324,17 @@ int main(int argc, char* argv[])
         std::string confidence = to_string(int(PSR));
         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
 
-
 	// Compute the Euclidean Distance
-        EucDistance.push_back(pow(pow((gX + gWidth/2.0) - (result.x + result.width/2),2) + pow((gY + gHeight/2.0) - (result.y + result.height/2.0),2),0.5));  
+        float eucDistance = pow(pow((gX + gWidth/2.0) - (result.x + result.width/2),2) + pow((gY + gHeight/2.0) - (result.y + result.height/2.0),2),0.5);
+        Metrics[0].push_back(eucDistance);  
+
+        // Compute the Success Overlap
+        cv:Rect gtRect(gX,gY,gX+gWidth,gY+gHeight);
+        cv::Rect tRect(result.x,result.y,result.x+result.width,result.y+result.height);
+        cv::Rect Inters = gtRect & tRect;
+        cv::Rect Un = gtRect |  tRect;
+        float sucOverlap= 100.00 * Inters.area() / Un.area();
+        Metrics[1].push_back(sucOverlap);
 
       }
       
@@ -337,6 +350,8 @@ int main(int argc, char* argv[])
          cv::waitKey(2);
       }
    }
+
    // Estimate Precision Curve
-   PrecisionCurve(EucDistance);
+   string performanceFile = prDataFile;
+   PrecisionCurve(Metrics, prDataFile);
 }
