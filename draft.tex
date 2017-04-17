@@ -112,9 +112,17 @@ because we need to build a drone for the second part.
 \end{itemize}
 \end{itemize}
 \item Experiment: Detail the data, and experimental setup; results and findings
-\item {\it E}nKCF, Naive{\it E}nKCF, ${\it E}nKCF_{+RD}$, LCT, DSST,
-  vanilla-KCF w/ a fixed scale, KCF w/ three different scales, STC,
-  Struck
+\item Will compare the performance of {\it E}nKCF, Naive{\it E}nKCF,
+  ${\it E}nKCF_{+RD}$ with those of the following tracking methods.
+\begin{itemize}
+\item LCT (Long-term Correlation Tracking),
+\item vanilla-KCF w/ a fixed scale,
+\item vanilla-KCF w/ three different scales,
+\item MEEM (Multiple Experts using Entropy Minimization)
+\item SAMF (Scale Adaptive KCF)
+\item STC (fast tracking via Spatio-Temporal Context learning),
+\item Struck (Structured Output Tracking with Kernels)
+\end{itemize}
 \begin{itemize}
 \item Visual tracker benchmark (VTB)
 \item DTB-70: w/ and w/o motion estimation,
