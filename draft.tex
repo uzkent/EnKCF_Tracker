@@ -8,7 +8,7 @@
 \usepackage{mathtools} % mathtools builds on and extends amsmath package
 \usepackage{algorithm}		% http://ctan.org/pkg/algorithms
 \usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
-\usepackage{comment}
+\usepackage{comment, url}
 
 % If you comment hyperref and then uncomment it, you should delete
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
@@ -125,6 +125,15 @@ because we need to build a drone for the second part.
 \end{itemize}
 \item Conclusion
 \end{itemize}
+
+A proliferation of unmanned vehicle technologies has ever increased
+interest on deployment of computer vision technologies on mobile
+platforms. For example, an unmanned air vehicle (UAV) equipped with
+object tracking would make it more useful in the application of
+monitoring/surveillance/surveying on private
+properties/wild-life/crop, video recording on sports/movies/events,
+many others. In this paper, we propose an object tracking algorithm
+that could run on any embedded systems with small form factors.
 
 The tracking-by-detection methods have recently used extensively as a
 robust, powerful, and highly discriminative vision-based, object
@@ -292,9 +301,12 @@ The contributions of this study are as follows.
 
 \end{itemize}
 
+%---------------------------------------------------------------------- 
+\section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
+%---------------------------------------------------------------------- 
+
 % ---------------------------------------------------------
-\section{Kernelized Correlation Filter Tracker}
-\label{KCF}
+\subsection{Kernelized Correlation Filter Tracker} \label{KCF}
 % ---------------------------------------------------------
 The Kernelized Correlation Filter tracker has recently been
 increasingly popular due to its operation at hundreds of frames per
@@ -459,8 +471,7 @@ function gives us the estimated translation of the object from time
 step $t$-$1$ to $t$.
 
 %-------------------------------------------------------------------
-\section{Multiple Kernelized Correlation Filter Based Tracking}
-\label{sc:MKCF}
+\subsection{Multiple Kernelized Correlation Filter Based Tracking} \label{sc:MKCF}
 %------------------------------------------------------------------
 The KCF with Multi-channel features outperforms the other
 state-of-the-art object traking algorithms both in terms of run-time
@@ -635,18 +646,25 @@ POSTERIORS WHEN THE RE-SAMPLING IS SKIPPED.
 \section{Track Re-initilization via Re-detection}
 \label{sc:Re-initialization}
 
-\section{Geometry Estimation between Target and Drone}
-\label{sc:Geometry}
+%\section{Geometry Estimation between Target and Drone}
+%\label{sc:Geometry}
 
-\section{Experiments}
-\label{sc:Experiments}
+%----------------------------------------------------------------------
+\section{Experiments} \label{sc:Experiments}
+%---------------------------------------------------------------------- 
+To verify the usefulness of our algorithm, we ran our algorithm using
+three publicly available dataset:
+VOT2015 \footnote{\url{http://www.votchallenge.net/}},
+OTB100 \footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}},
+UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}.
 
-\section{Conclusion}
-\label{sc:Conclusion}
+%---------------------------------------------------------------------- 
+\section{Conclusion} \label{sc:Conclusion}
+%---------------------------------------------------------------------- 
+
 %--------------
 %\section*{Acknowledgements}
 %put stuff here for the accepted , but not the ICCV version
-
 
 \small
 \bibliographystyle{ieee}
