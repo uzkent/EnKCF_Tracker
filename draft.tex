@@ -115,12 +115,19 @@ because we need to build a drone for the second part.
 \item Will compare the performance of {\it E}nKCF, Naive{\it E}nKCF,
   ${\it E}nKCF_{+RD}$ with those of the following tracking methods.
 \begin{itemize}
-\item LCT (Long-term Correlation Tracking),
 \item vanilla-KCF w/ a fixed scale,
 \item vanilla-KCF w/ three different scales,
+\item LCT (Long-term Correlation Tracking) \cite{ma2015long}: Temporal
+  correlation of a target over frames; a pyramid for different scales;
+  re-detection w/ an appearance classifier (i.e., a naive Bayes w/
+  random fern features in combination of sliding window). Temporal
+  context regressor for translation over significant deformation and
+  target regressor for scale variation.
 \item MEEM (Multiple Experts using Entropy Minimization)
+  \cite{zhang2014meem}.
 \item SAMF (Scale Adaptive KCF)
-\item STC (fast tracking via Spatio-Temporal Context learning),
+\item STC (fast tracking via Spatio-Temporal Context learning)
+  \cite{zhang2014fast}: 
 \item Struck (Structured Output Tracking with Kernels)
 \end{itemize}
 \begin{itemize}
@@ -135,13 +142,18 @@ because we need to build a drone for the second part.
 \end{itemize}
 
 A proliferation of unmanned vehicle technologies has ever increased
-interest on deployment of computer vision technologies on mobile
-platforms. For example, an unmanned air vehicle (UAV) equipped with
-object tracking would make it more useful in the application of
-monitoring/surveillance/surveying on private
+interest on deployment of computer vision algorithms on embedded or
+mobile platforms. For example, an unmanned air vehicle (UAV) equipped
+with object or feature following would make it more useful in the
+application of monitoring/surveillance/surveying on private
 properties/wild-life/crop, video recording on sports/movies/events,
 many others. In this paper, we propose an object tracking algorithm
-that could run on any embedded systems with small form factors.
+that aims at running on any embedded or mobile platforms. In
+particular,
+
+{\it We may need to change this introductory sentence based on the
+  results.}
+
 
 The tracking-by-detection methods have recently used extensively as a
 robust, powerful, and highly discriminative vision-based, object
