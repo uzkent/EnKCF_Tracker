@@ -6,11 +6,9 @@
 class Tracker
 {
 public:
-   Tracker()  {}
+    Tracker()  {}
     virtual  ~Tracker() { }
-
     virtual void init(const cv::Rect &roi, cv::Mat image) = 0;
-    virtual void reinit(const cv::Rect &roi, cv::Mat image) = 0;
     virtual cv::Rect  update( cv::Mat image) = 0;
     virtual cv::Rect  updateWROI( cv::Mat image) = 0;
     virtual cv::Rect  updateScale( cv::Mat image) = 0;
