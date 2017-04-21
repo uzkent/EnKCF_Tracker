@@ -58,9 +58,18 @@ int main(int argc, char* argv[]){
         output_file << avgPrecision[0][i] << "," << avgPrecision[1][i];
         output_file << std::endl;       
     }
-//    std::ofstream output_file("/home/buzkent/Downloads/Results/AveragePrecision/Precision.txt");
-//    std::ostream_iterator<float> output_iterator(output_file, "\n");
-//    std::copy(avgPrecision.begin(), avgPrecision.end(), output_iterator);
-  
+
+    // Compute the Area Under Curve for Precision and Success Overlap
+    float aucPrecision = 0;
+    float aucSuccess = 0;
+    for (int i = 0; i < avgPrecision[0].size() ; i++){
+        if ( i <= 50 ){
+            std::cout << avgPrecision[0][i] << std::endl;
+            aucPrecision += avgPrecision[0][i];
+        }
+        aucSuccess += avgPrecision[1][i];
+    }    
+    output_file << aucPrecision * 2 << "," << aucSuccess << std::endl;
+       
     return 0;
 }

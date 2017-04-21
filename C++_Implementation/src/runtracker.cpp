@@ -93,7 +93,7 @@ int main(int argc, char* argv[])
    bool FIXEDWINDOW = false;  // Fixed Window
    bool MULTISCALE = true;    // Scale Space Search Enabled
    bool SILENT = false;	      // Suppress the Outputs
-   bool LAB = false;	      // Enable or Disable Color Features
+   bool LAB = true;	      // Enable or Disable Color Features
    char szDataFile[256];
    char gtDataFile[256];
    char szImageFile[256];
@@ -171,7 +171,8 @@ int main(int argc, char* argv[])
    int seed2 = time(0);
    std::default_random_engine engine2(seed2);
    std::uniform_int_distribution<int> dist2(0,1000);
-
+   float rdThresholds[3] = {4.00,2.50,1.00};
+   int rdIndex = 0, rdTriggerIndex = 0; // Indexes for ReDetection
    // Read the Video
    cv::VideoCapture capt;
    if (strncmp(argv[2],"video",5) == 0){
@@ -185,26 +186,75 @@ int main(int argc, char* argv[])
    cv::resizeWindow("Name", 800,800);
    
    // Read the Ground Truth Text File
+char ch;
+#ifdef _VOT15_DATASET_
+   float g1X, g1Y, g2X, g2Y, g3X, g3Y, g4X, g4Y;
+#endif
+
+#ifdef _UAV123_DATASET_
    int gX, gY, gWidth, gHeight;
+   int fFrame,lFrame,frameID;
+   std::string seqName; 
+   std::string seqNameID;
+   std::string matchString = prDataFile;
+   std::ifstream startFrame("/home/buzkent/Desktop/startFrames_UAV123.txt");
+   // Matched Frame
+   while(startFrame >> fFrame >> lFrame >> seqNameID >> seqName){
+     if (seqNameID.compare(matchString) == 0){
+         frameID = fFrame;
+         break;
+      }	
+   }
+#endif
+
+   // Read the Ground Truth File for the Object of Interest
    std::ifstream groundTruth(gtDataFile);
    std::cout << gtDataFile << std::endl;
-   char ch;
 
    // Declare A Vector for Euclidean Distance
    std::vector<std::vector<float>> Metrics(2);
+   int cfIndex = 0;
+
 #ifdef _USE_VIDEO_INPUT__
    while (1) // Read the Next Frame
    {
 #endif
 
-#ifdef _USE_IMAGE_INPUT_
+#ifdef _UAV123_DATASET_
+   int skipOPE = 0;
    while(groundTruth >> gX >> ch >> gY >> ch >> gWidth >> ch >> gHeight)
    {
+       if(gX < -100){
+          skipOPE = 1;
+       }
+       else{
+          skipOPE = 0;
+       }
+#endif
+      
+#ifdef _VOT15_DATASET_
+   while(groundTruth >> g1X >> ch >> g1Y >> ch >> g2X >> ch >> g2Y >> ch >> g3X >> ch >> g3Y >> ch >> g4X >> ch >> g4Y)
+   {
+      float xVertices[4] = {g1X,g2X,g3X,g4X};
+      float yVertices[4] = {g1Y,g2Y,g3Y,g4Y};
+      cv::Mat xCoord(2,2, CV_32F, xVertices);
+      cv::Mat yCoord(2,2, CV_32F, yVertices);
+      double minValue, maxValue;
+      cv::Point minLoc, maxLoc;
+      cv::Rect boundRect;
+      cv::minMaxLoc(xCoord, &minValue, &maxValue, &minLoc, &maxLoc);
+      boundRect.x = minValue; boundRect.width = maxValue - minValue;
+      cv::minMaxLoc(yCoord, &minValue, &maxValue, &minLoc, &maxLoc);
+      boundRect.y = minValue; boundRect.height = maxValue - minValue;
 #endif
       // Read the Frame to Perform Tracking
       std::stringstream ss;
-      ss << std::setfill('0') << std::setw(6) << nFrames+1;
-      string frame_id = to_string(nFrames); 
+#ifdef _UAV123_DATASET_     
+      ss << std::setfill('0') << std::setw(6) << frameID;
+#endif
+#ifdef _VOT15_DATASET_     
+      ss << std::setfill('0') << std::setw(8) << nFrames+1;
+#endif
       if (strncmp(argv[2],"video",5) == 0){
          capt >> frame;  // Read Next Frame
          cv::resize(frame,frame,cv::Size(1280,720)); // Resize it to Make it Same with H2 Implementation     
@@ -213,7 +263,7 @@ int main(int argc, char* argv[])
 	frame = cv::imread(szDataFile+ss.str()+".jpg");
       }
       using std::default_random_engine; // Initiate the random device at each step
-      using std::uniform_int_distribution;
+      using std::uniform_int_distribution; // Random Number Generator
 
       ///
       /// PERFORM TRACKING
@@ -223,15 +273,20 @@ int main(int argc, char* argv[])
         var1 = 0;
         /// Observation on the first frame given by the user
         // Obs[0] = xMin+width/2; Obs[1] = yMin+height/2; Obs[2] = width; Obs[3] = height;
+#ifdef _UAV123_DATASET_
         Obs[0] = gX; Obs[1] = gY; Obs[2] = gWidth; Obs[3] = gHeight;
+#endif
 
+#ifdef _VOT15_DATASET_
+        Obs[0] = boundRect.x; Obs[1] = boundRect.y; Obs[2] = boundRect.width; Obs[3] = boundRect.height;
+#endif
         ///
         /// Initiate the Kernelized Correlation Filter Trackers - Translation and Scale Filters
         /// \param[in] Rect : Rectangle Object for the Bounding Box
         /// \param[in] frame : The First Frame
         ///
-        tracker.init( Rect(gX, gY, gWidth, gHeight), frame );
-
+        tracker.init( Rect(Obs[0], Obs[1], Obs[2], Obs[3]), frame );
+        cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
         ///
         /// Initiate the Particle of the Particle Filter
         /// \param[in] Obs : Observation given by the user in the first frame
@@ -241,101 +296,141 @@ int main(int argc, char* argv[])
       else {
         /// -------------------- UPDATE STEP --------------------------------------------
         /// Use Translation and Scale Filter Interchangeably
-        tracker.PSR_scale = 10;
-        tracker.PSR_wroi  = 10;
+        tracker.PSR_scale = 20;
+        tracker.PSR_wroi  = 20;
+        tracker.PSR_sroi = 20;
         float PSR;
-        if (nFrames % 5 > 0)
-        {
-            // Apply Homography to the Track Position at Previous Frame
-            // tracker._roi_w = tracker.applyHomography(homography, frame, tracker._roi_w);
-            result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
-            PSR = tracker.PSR_wroi;
-        }/*
-        if ((nFrames % 5 > 1))
-        {
-            // Apply Homography to the Track Position at Previous Frame
-            // tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);
-            result = tracker.update(frame);      // Estimate Translation
-            PSR = tracker.PSR_sroi;
-        }*/
-        if (nFrames % 5 == 0)
-        {
-            // Apply Homography to the Track Position at Previous Frame
-            // tracker._roi_scale = tracker.applyHomography(homography, frame, tracker._roi_scale);
-            result = tracker.updateScale(frame); // Estimate Scale
-            PSR = tracker.PSR_scale;
+        cv::Rect roi_WROI = tracker.extracted_w_roi;
+        if ( (cfIndex == 0) | (cfIndex == 2) | (cfIndex == 3)){
+           // Apply Homography to the Track Position at Previous Frame
+           // tracker._roi_w = tracker.applyHomography(homography, frame, tracker._roi_w);
+           result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
+           PSR = tracker.PSR_wroi;              // Tracker Confidence
         }
-        /// -------------------------------------------------------------------------------
+        if ( (cfIndex == 4) ){
+          // Apply Homography to the Track Position at Previous Frame
+          // tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);
+          result = tracker.updateScale(frame);      // Estimate Translation
+          PSR = tracker.PSR_scale;
+        }
+        if ( cfIndex == 1){
+          result = tracker.updateScale(frame); // Estimate Scale
+          PSR = tracker.PSR_scale;    
+        }
+        std::cout << "Filter Type" << cfIndex << std::endl;
+        cfIndex++;
+        if (cfIndex > 4){
+ 	    cfIndex = 0;
+        }
 
-        /// opencv read image
-        std::vector<cv::Mat> src;
-        cv::split(frame,src);
-        
-        ///
-        /// Fill in the Image Data Structure Parameters
-        ///
-        autel::computer_vision::AuMat image;
-        image.cols_ = frame.cols;
-        image.rows_ = frame.rows;
-        image.depth_ = 0;
-        image.dims_ = 2;
-        image.channels_ = frame.channels();
-        image.step_[1] = image.channels_;
-        image.step_[0] = image.cols_ * image.step_[1];
-        unsigned char* memory_image = (unsigned char*)malloc(frame.cols*frame.rows*frame.channels());
-        image.data_ = memory_image;
-        for (int i = 0; i < frame.rows ; i++){
-            for(int j = 0; j < frame.cols ; j++){
-               image.data_[(i*frame.cols+j) * frame.channels()] = src[0].at<uchar>(i,j);
-               image.data_[(i*frame.cols+j) * frame.channels()+1] = src[1].at<uchar>(i,j);
-               image.data_[(i*frame.cols+j) * frame.channels()+2] = src[2].at<uchar>(i,j);
+        /// -------------------------------------------------------------------------------
+        /// Trigger the Redetection if needed
+	if ((tracker.PSR_wroi < rdThresholds[0]) || (tracker.PSR_sroi < rdThresholds[1]) || (tracker.PSR_scale < rdThresholds[2]) || (isnan(PSR) == 1)){
+         
+	   // Determine the ROI for Re-Detection
+           cv::Mat roiImage = frame.clone();
+           std::vector<cv::Mat> src;
+           cv::split(roiImage,src);
+
+	   // Increament the Number of Times redetection is called			
+	   rdTriggerIndex++;
+
+           /// Fill in the Image Data Structure Parameters1
+           autel::computer_vision::AuMat image;
+           image.cols_ = roiImage.cols;
+           image.rows_ = roiImage.rows;
+           image.depth_ = 0;
+           image.dims_ = 2;
+           image.channels_ = roiImage.channels();
+           image.step_[1] = image.channels_;
+           image.step_[0] = image.cols_ * image.step_[1];
+           unsigned char* memory_image = (unsigned char*)malloc(roiImage.cols*roiImage.rows*roiImage.channels());
+           image.data_ = memory_image;
+           for (int i = 0; i < roiImage.rows ; i++){
+              for(int j = 0; j < roiImage.cols ; j++){
+                 image.data_[(i*roiImage.cols+j) * roiImage.channels()] = src[0].at<uchar>(i,j);
+                 image.data_[(i*roiImage.cols+j) * roiImage.channels()+1] = src[1].at<uchar>(i,j);
+                 image.data_[(i*roiImage.cols+j) * roiImage.channels()+2] = src[2].at<uchar>(i,j);
+             }
            }
-        }
-        
-	if (tracker.PSR_wroi < 4.5){
+
            // Initialize edge box
            InitializedBox(path_model);
            std::vector<cv::Vec4i> BoundingBoxes;
            BoundingBoxes = EdgeBoxInterface(image);
-           // std::cout << BoundingBoxes.size() << std::endl;
 
            // Perform Re-detection - Re-detection Interface
-           std::pair<int,float> MatchedBoxIndex = tracker.target_redetection(BoundingBoxes, frame);
-        
-           // Re-initiate the KCF
+           std::vector<pair<int,float>> boxProposed;
+           tic();
+           std::pair<int,float> MatchedBoxIndex = tracker.target_redetection(BoundingBoxes, frame, result, rdTriggerIndex, boxProposed);
+           toc();
+
+           // Display the Considered Boxes on the Frame
+           for (int i = 0; i < boxProposed.size(); i++){
+               int j = boxProposed[i].first;
+               std::string rdConf = to_string(float(boxProposed[i].second));
+               cv::rectangle(roiImage,cv::Point(BoundingBoxes[j][0],BoundingBoxes[j][1]),
+               cv::Point(BoundingBoxes[j][0]+BoundingBoxes[j][2],BoundingBoxes[j][1]+BoundingBoxes[j][3]),cv::Scalar(0,255,0),4,8);
+               cv::putText(roiImage,rdConf, cv::Point(BoundingBoxes[j][0],(BoundingBoxes[j][1])), fontFace, 4, cv::Scalar::all(255), 2, 4);  
+           }
+ 
+           // Display the ROI Searched by the Large Translation Filter
+           cv::rectangle(roiImage,cv::Point(roi_WROI.x,roi_WROI.y),cv::Point(roi_WROI.x+roi_WROI.width,roi_WROI.y+roi_WROI.height),cv::Scalar(255,0,0),4,8);
+
+           // Crop the Re-detection ROI
+           cv::imshow("RD ROI",roiImage);
+           cv::waitKey(0);
+
+           // Re-initiate the Tracker If the Confidence is High Enough
            Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
-           Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2]; Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3];
-           if (MatchedBoxIndex.second > 0.25){
+           Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2]; Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3]; 
+           if (MatchedBoxIndex.second > 2.00){
               // Re-Initiate the Track
               tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
               result.x = Obs[0]; result.y = Obs[1]; result.width = Obs[2]; result.height = Obs[3];
+              rdTriggerIndex = -1;
            }
-           
+           // if the object is not found, initiate with the object with highest objectness
+           if(MatchedBoxIndex.second < 2.00 && rdTriggerIndex >= 2.0){
+              // Re-Initiate the Track
+              tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
+              result.x = Obs[0]; result.y = Obs[1]; result.width = Obs[2]; result.height = Obs[3];
+              rdTriggerIndex = -1;
+           }
+
            // Draw the Selected Rectangle
            std::string rd_confidence = to_string(float(MatchedBoxIndex.second));
            cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
-           cv::putText(frame,rd_confidence, cv::Point(Obs[0],Obs[1]), fontFace, 4, cv::Scalar::all(255), thickness, 4);
+           cv::putText(frame,rd_confidence, cv::Point(Obs[0],Obs[1]), fontFace, 4, cv::Scalar::all(255), thickness, 4); // Display the Confidence
         }
-        
-        // TRACKING RESULTS
+       
+        // TRACKING RESULTS OVERLAID ON THE FRAME
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
-
-        // Display Text on the Frame - CONFIDENCE from Translation and Scale Filter Interchangeably
         std::string confidence = to_string(int(PSR));
         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
 
-	// Compute the Euclidean Distance
-        float eucDistance = pow(pow((gX + gWidth/2.0) - (result.x + result.width/2),2) + pow((gY + gHeight/2.0) - (result.y + result.height/2.0),2),0.5);
-        Metrics[0].push_back(eucDistance);  
+	// Compute the Euclidean Distance for Precision Metric
+        if (skipOPE != 1){
+#ifdef _UAV123_DATASET_
+           float eucDistance = pow(pow(((float) gX + (float) gWidth/2.0) - ((float) result.x + (float) result.width/2.0),2) + pow(((float) gY + (float) gHeight/2.0) - ((float) result.y + (float) result.height/2.0),2),0.5);
+           cv:Rect gtRect(gX,gY,gWidth,gHeight);
+#endif
+#ifdef _VOT15_DATASET_
+        float eucDistance = pow(pow((boundRect.x + boundRect.width/2.0) - (result.x + result.width/2),2) + pow((boundRect.y+boundRect.height/2.0) - (result.y + result.height/2.0),2),0.5);
+#endif
+        // Store the Euclidean Distance to the Ground Truth
+        Metrics[0].push_back(eucDistance);
 
-        // Compute the Success Overlap
-        cv:Rect gtRect(gX,gY,gX+gWidth,gY+gHeight);
-        cv::Rect tRect(result.x,result.y,result.x+result.width,result.y+result.height);
+#ifdef _VOT15_DATASET_
+        cv:Rect gtRect(g1X,g1Y,g4X,g4Y);
+#endif
+        cv::Rect tRect(result.x,result.y,result.width,result.height);
         cv::Rect Inters = gtRect & tRect;
         cv::Rect Un = gtRect |  tRect;
-        float sucOverlap= 100.00 * Inters.area() / Un.area();
+        float sucOverlap= 100.00 * (float) Inters.area() / (float) Un.area();
         Metrics[1].push_back(sucOverlap);
 
+        }      
       }
       
       /// Save the Frame into the Output Video
@@ -343,11 +438,15 @@ int main(int argc, char* argv[])
          cv::resize(frame,frame,cv::Size(800,800));
       }
       // outvid.write(frame);
-      cv::imshow("Name", frame);
+      // cv::imshow("Name", frame);
       nFrames++;
+      frameID++;
+      if (frameID > lFrame){
+         break;
+      }
       if (!SILENT) {
          cv::imshow("Name", frame);
-         cv::waitKey(2);
+         cv::waitKey(0);
       }
    }
 

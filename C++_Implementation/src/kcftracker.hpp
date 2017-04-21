@@ -18,9 +18,6 @@ public:
     // Initialize tracker 
     virtual void init(const cv::Rect &roi, cv::Mat image);
     
-    // Initialize tracker 
-    virtual void reinit(const cv::Rect &roi, cv::Mat image);
-
     // Update position based on the new frame
     virtual cv::Rect update(cv::Mat image);
 
@@ -37,10 +34,10 @@ public:
     cv::Rect_<float> applyHomography(cv::Mat homography, cv::Mat image, cv::Rect_<float> oldRoi);
     
     // Target Re-detection Module
-    std::pair<int,float> target_redetection(std::vector<cv::Vec4i> BoundingBoxes, cv::Mat frame);
+    std::pair<int,float> target_redetection(std::vector<cv::Vec4i> BoundingBoxes, cv::Mat frame, cv::Rect result, int rdIndex, std::vector<std::pair<int,float>>& boxProposed);
 
     float interp_factor, interp_factor_scale, interp_factor_w_roi; // linear interpolation factor for adaptation
-    float sigma;        // gaussian kernel bandwidth
+    float sigma, sigma_scale;        // gaussian kernel bandwidth
     float lambda;       // regularization
     int cell_size;      // HOG cell size
     int cell_sizeQ;     // cell size^2, to avoid repeated operations
@@ -61,7 +58,10 @@ protected:
     cv::Point2f detectScale(cv::Mat z, cv::Mat x, float &peak_value);
 
     // Detect object in the current frame.
-    void detectScaleRedetection(cv::Mat z, cv::Mat x, float &peak_value);
+    void detectScaleRedetection(cv::Mat z, cv::Mat Model, cv::Mat x, float &peak_value);
+
+    // Detect object in the current frame.
+    void detectRedetection(cv::Mat z, cv::Mat Model, cv::Mat x, float &peak_value);
 
     // train tracker with a single image
     void train(cv::Mat x, float train_interp_factor);
@@ -102,6 +102,9 @@ protected:
     // Obtain sub-window from image, with replication-padding and extract features
     cv::Mat getFeaturesScaleRedetection(const cv::Mat & image, cv::Vec4i box);
 
+    // Obtain sub-window from image, with replication-padding and extract features
+    cv::Mat getFeaturesRedetection(const cv::Mat & image, cv::Vec4i box);
+
     // Initialize Hanning window. Function called only in the first frame.
     void createHanningMats();
 
@@ -111,9 +114,9 @@ protected:
     // Calculate sub-pixel peak for one dimension
     float subPixelPeak(float left, float center, float right);
 
-    cv::Mat _alphaf,_alphafScale,_alphaf_w_roi;
+    cv::Mat _alphaf,_alphafScale, _alphafScaleRD,  _alphaf_w_roi;
     cv::Mat _prob, _prob_scale, _prob_w_roi;
-    cv::Mat _tmpl,_tmplScale,_tmpl_w_roi;
+    cv::Mat _tmpl,_tmplScale,_tmplScaleRD, _tmpl_w_roi;
     cv::Mat _num;
     cv::Mat _den;
     cv::Mat _labCentroids;
