@@ -263,11 +263,15 @@ photometric variations.
 {\it YoungWoo: We'll have to mention why such an online tracker is
   still attractive over any DNN-based counterparts.}
 
-\begin{itemize}
-\item Need lots of manually labelled examples.
-\item Too expensive to deploy a DNN, even a trained one, due to its
-  power consumption. Do we have a reference on this?
-\end{itemize}
+The recent progress on development of convolutional neural networks
+(CNN) is astonishing as since the AlexNet \cite{krizhevsky12} broke
+the record for the ImageNet competition, at every year, new and better
+results are reported. Moreover, there have been many attempts to
+deploy CNN on the mobile devices
+\cite{wu2016quantized,giusti2015}. But the inherent limitation of such
+a supervised learning based object tracking is that an either online
+\cite{nam2016} or offline \cite{held2016} training tracker has to be
+prior to deploy the algorithm.
 
 The first correlation filter tracker proposed by
 \cite{bolme2010visual} focused on learning and detection in the
