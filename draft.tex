@@ -141,11 +141,17 @@ because we need to build a drone for the second part.
 \item Conclusion
 \end{itemize}
 
-A proliferation of unmanned vehicle technologies has ever increased
-interest on deployment of computer vision algorithms on embedded or
-mobile platforms. For example, an unmanned air vehicle (UAV) equipped
-with object or feature following would make it more useful in the
-application of monitoring/surveillance/surveying on private
+A recent proliferation of air/ground/water unmanned vehicle
+technologies has ever increased interest on deployment of intelligent
+algorithms on embedded or mobile platforms. Particularly, computer
+vision algorithms are getting more attention primarily because those
+platforms have limited payload to accommodate various sensors like
+lidars or radars and installing a monocular camera even stereo rigs
+would increase the usefulness of a mobile platform without increasing
+much cost on it. For example, instead of being equipped with a bare
+flight function with video recording, an unmanned air vehicle (UAV)
+equipped with object or feature following would make it more useful in
+the application of monitoring/surveillance/surveying on private
 properties/wild-life/crop, video recording on sports/movies/events,
 many others. In this paper, we propose an object tracking algorithm
 that aims at running on any embedded or mobile platforms. In
@@ -154,6 +160,36 @@ particular,
 {\it We may need to change this introductory sentence based on the
   results.}
 
+For being a turnkey or ready-to-execute mission solution, an online
+learning framework is more attractive. An object-following with a
+self-supervised learning framework would work, but easy to fail to
+serve a long-term solution.
+
+One of the dominant frameworks for online object tracking based on the
+correlation filter is to solve a regression problem in the frequency
+domain. This framework assumes that the target information is given at
+the very first image frame. Given this positive example for the
+regression problem, a set of negative examples is mostly collected
+around the initial, target bounding box and represented as a circulant
+matrix \cite{henriques2015high}. One can optimally solve this
+regression problem using a ridge regression in a closed form. However,
+such a solution involves in expensive matrix operation
+$\mathcal{O}(n^{3})$. The correlation filter provides one with a much
+cheaper solution, $\mathcal{O}(n\log n)$ over element-wise
+multiplication in a frequecny domain
+\cite{bolme2010visual,henriques2015high}. Due to such a reformulation,
+a complete pipeline of an object tracker based on the correlation
+filter can be easily implemented and run in an online fashion with a
+high speed. However, the vanilla form of such an online tracker is
+prone to drift and fails to track a target over a long period of
+time. This is explained well by the dilemma of stability-plasticity in
+updating appearance model in that the appearance model will be
+overfitted to only the images used to train and a compromise on the
+frequency of updating the model is carefully implemented
+\cite{santner2010prost}.
+
+{\it YoungWoo: Need to clean up the following paragraphs until Section
+  2.}
 
 The tracking-by-detection methods have recently used extensively as a
 robust, powerful, and highly discriminative vision-based, object
@@ -227,13 +263,11 @@ photometric variations.
 {\it YoungWoo: We'll have to mention why such an online tracker is
   still attractive over any DNN-based counterparts.}
 
-To the best of our knowledge, the dominant framework of online object
-trackers based on the correlation filter is to solve a regression
-problem in the frequency domain. This framework assumes that the
-target information is given at the very first image frame. Given this
-positive example for the regression problem, a set of negative
-examples is mostly collected around the initial, target bounding box
-and represented as a circulant matrix \cite{henriques2015high}.
+\begin{itemize}
+\item Need lots of manually labelled examples.
+\item Too expensive to deploy a DNN, even a trained one, due to its
+  power consumption. Do we have a reference on this?
+\end{itemize}
 
 The first correlation filter tracker proposed by
 \cite{bolme2010visual} focused on learning and detection in the
@@ -324,6 +358,12 @@ The contributions of this study are as follows.
 %---------------------------------------------------------------------- 
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
 %---------------------------------------------------------------------- 
+
+{\it Burak: We need an overview of EnKCF by doing following.}
+\begin{itemize}
+\item Put a pseudo code here; Need to go over the pseudo code to explain what EnKCF is from the very high-level first.
+\item Briefly explain KCF at the middle of EnKCF description.
+\end{itemize}
 
 % ---------------------------------------------------------
 \subsection{Kernelized Correlation Filter Tracker} \label{KCF}
