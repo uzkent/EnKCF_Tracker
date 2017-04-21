@@ -1,0 +1,22 @@
+04/17/17
+
+YoungWoo:
+1) Need to make a list of videos we'll be using for evaluation.
+1)-1 all of UAV123 videos
+1)-2 VOT2015
+1)-3 OTB
+
+2) Make other tracking algorithms available for producing results on
+the selected videos. As of 17th, LCT, STC, Struck are ready, but DSST
+has an issue of mex compilation.
+
+Burak: 
+1) Clean up the pseudo code on EnKCF and place at the beginning of the
+technical section.
+2) Complete the experiments asap
+
+Try to get a complete draft, writing and experiments done by 21st
+
+Might want to have several graphs where each of them focus on a
+specific feature of an object tracking algorithm, e.g., scale, 
+

@@ -8,7 +8,7 @@
 \usepackage{mathtools} % mathtools builds on and extends amsmath package
 \usepackage{algorithm}		% http://ctan.org/pkg/algorithms
 \usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
-\usepackage{comment}
+\usepackage{comment, url}
 
 % If you comment hyperref and then uncomment it, you should delete
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
@@ -65,8 +65,9 @@ Affiliation\\
 \section{Introduction}
 
 \begin{comment}
-Maybe the goal of this work is to public a journal paper about a
-practical solution for a drone to follow a single target. For this, we need
+Maybe the goal of this work is to publish a journal paper about a
+practical solution for a drone to follow a single target. For this, we
+need some descriptions on
 \begin{itemize}
 \item A vision-based, single target tracking algorithm.
 \item Other components for making a drone follow a target.
@@ -80,7 +81,8 @@ practical solution for a drone to follow a single target. For this, we need
 \end{itemize}
 
 For the BMVC-17 submission, we're going to just focus on the first
-part. This is because we need to build a drone for the second part.
+part -- a vision-based, single target tracking algorithm. This is
+because we need to build a drone for the second part.
 \end{comment}
 
 \begin{itemize}
@@ -110,9 +112,24 @@ part. This is because we need to build a drone for the second part.
 \end{itemize}
 \end{itemize}
 \item Experiment: Detail the data, and experimental setup; results and findings
-\item {\it E}nKCF, Naive{\it E}nKCF, ${\it E}nKCF_{+RD}$, LCT, DSST,
-  vanilla-KCF w/ a fixed scale, KCF w/ three different scales, STC,
-  Struck
+\item Will compare the performance of {\it E}nKCF, Naive{\it E}nKCF,
+  ${\it E}nKCF_{+RD}$ with those of the following tracking methods.
+\begin{itemize}
+\item vanilla-KCF w/ a fixed scale,
+\item vanilla-KCF w/ three different scales,
+\item LCT (Long-term Correlation Tracking) \cite{ma2015long}: Temporal
+  correlation of a target over frames; a pyramid for different scales;
+  re-detection w/ an appearance classifier (i.e., a naive Bayes w/
+  random fern features in combination of sliding window). Temporal
+  context regressor for translation over significant deformation and
+  target regressor for scale variation.
+\item MEEM (Multiple Experts using Entropy Minimization)
+  \cite{zhang2014meem}.
+\item SAMF (Scale Adaptive KCF)
+\item STC (fast tracking via Spatio-Temporal Context learning)
+  \cite{zhang2014fast}: 
+\item Struck (Structured Output Tracking with Kernels)
+\end{itemize}
 \begin{itemize}
 \item Visual tracker benchmark (VTB)
 \item DTB-70: w/ and w/o motion estimation,
@@ -124,17 +141,33 @@ part. This is because we need to build a drone for the second part.
 \item Conclusion
 \end{itemize}
 
+A proliferation of unmanned vehicle technologies has ever increased
+interest on deployment of computer vision algorithms on embedded or
+mobile platforms. For example, an unmanned air vehicle (UAV) equipped
+with object or feature following would make it more useful in the
+application of monitoring/surveillance/surveying on private
+properties/wild-life/crop, video recording on sports/movies/events,
+many others. In this paper, we propose an object tracking algorithm
+that aims at running on any embedded or mobile platforms. In
+particular,
+
+{\it We may need to change this introductory sentence based on the
+  results.}
+
+
 The tracking-by-detection methods have recently used extensively as a
 robust, powerful, and highly discriminative vision-based, object
 tracking method replacing the preceding, generative object tracking
 methods that primarily concerned about learning the appearance of the
-target. The recent examples of the tracking-by-detection algorithms
-include Tracking-Learning-Detection \cite{kalal2012tracking}, Multiple
+target. 
+
+The recent examples of the tracking-by-detection algorithms include
+Tracking-Learning-Detection \cite{kalal2012tracking}, Multiple
 Instance Learning \cite{babenko2009visual}, Correlation Filter based
 trackers \cite{bolme2010visual,henriques2015high}, and Struck
 \cite{hare2012efficient}. These tracking-by-detection methods learn
 the model of the target's appearance on the fly while discriminating
-the target from the background. 
+the target from the background.
 
 {\it Burak: It isn't clear what you're getting at here} Learning
 an object-specific classifier in an online manner can better handle
@@ -245,6 +278,20 @@ track reinilization module is triggered when the target is lost
 The contributions of this study are as follows.
 \begin{itemize}
 
+\item \textbf{Single-Target Tracking in High-Speed} To be practical,
+  the execution time of an object tracking is important. We proposed a
+  new object tracking algorithm that is a collection of kernelized
+  correlation filters (KCF). Each of KCFs is designed to address two
+  challenges of object tracking: scale and translation. We also
+  incorporate a Bayes filter to prevent from being drift.
+
+\item \textbf{Re-Detection} A target loss is inevitable in object
+  tracking. To cope with this, we developed a new target, re-detection
+  that reliably detects when to lose the target and effectively
+  re-detect the lost target. {\it How we can show how good our
+    re-detection method is?}
+
+\begin{comment}
 \item We build a highly efficient ($\geq300$ fps) scale adaptive
   multiple kernelized correlation filter based tracker that
   outperforms the original KCF implementation with fixed scale
@@ -270,12 +317,16 @@ The contributions of this study are as follows.
   aerial moving platforms, we design a new robust target-to-camera
   distance estimation method. This way, a safe distance between the
   target and the camera-platform can be preserved.
+\end{comment}
 
 \end{itemize}
 
+%---------------------------------------------------------------------- 
+\section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
+%---------------------------------------------------------------------- 
+
 % ---------------------------------------------------------
-\section{Kernelized Correlation Filter Tracker}
-\label{KCF}
+\subsection{Kernelized Correlation Filter Tracker} \label{KCF}
 % ---------------------------------------------------------
 The Kernelized Correlation Filter tracker has recently been
 increasingly popular due to its operation at hundreds of frames per
@@ -440,8 +491,7 @@ function gives us the estimated translation of the object from time
 step $t$-$1$ to $t$.
 
 %-------------------------------------------------------------------
-\section{Multiple Kernelized Correlation Filter Based Tracking}
-\label{sc:MKCF}
+\subsection{Multiple Kernelized Correlation Filter Based Tracking} \label{sc:MKCF}
 %------------------------------------------------------------------
 The KCF with Multi-channel features outperforms the other
 state-of-the-art object traking algorithms both in terms of run-time
@@ -616,18 +666,25 @@ POSTERIORS WHEN THE RE-SAMPLING IS SKIPPED.
 \section{Track Re-initilization via Re-detection}
 \label{sc:Re-initialization}
 
-\section{Geometry Estimation between Target and Drone}
-\label{sc:Geometry}
+%\section{Geometry Estimation between Target and Drone}
+%\label{sc:Geometry}
 
-\section{Experiments}
-\label{sc:Experiments}
+%----------------------------------------------------------------------
+\section{Experiments} \label{sc:Experiments}
+%---------------------------------------------------------------------- 
+To verify the usefulness of our algorithm, we ran our algorithm using
+three publicly available dataset:
+VOT2015 \footnote{\url{http://www.votchallenge.net/}},
+OTB100 \footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}},
+UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}.
 
-\section{Conclusion}
-\label{sc:Conclusion}
+%---------------------------------------------------------------------- 
+\section{Conclusion} \label{sc:Conclusion}
+%---------------------------------------------------------------------- 
+
 %--------------
 %\section*{Acknowledgements}
 %put stuff here for the accepted , but not the ICCV version
-
 
 \small
 \bibliographystyle{ieee}
