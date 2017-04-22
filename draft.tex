@@ -205,7 +205,10 @@ trackers \cite{bolme2010visual,henriques2015high}, and Struck
 the model of the target's appearance on the fly while discriminating
 the target from the background.
 
-{\it Burak: It isn't clear what you're getting at here} Learning
+{\it Burak: It isn't clear what you're getting at here} 
+
+{\it YoungWoo : Here, I am making an introduction
+into the tracking-by-detection paradigm. I wanted to explain that they improve tracking as they learn an appearance model representative of the background and object. However, as I want to point out, the tracking-by-detection algorithms can be unfeasible as training a robust classifier can be costly. } Learning
 an object-specific classifier in an online manner can better handle
 challenging scenarios with the cost of increased complexity.
 
@@ -227,6 +230,8 @@ small, but informative negative examples.
 
 {\it Burak: Why do we even mention these issues? Is this somehow
   related to what we did for this paper?}
+  
+{\it YoungWoo : They are not related at all, however, I wanted to give a brief idea about tracking-by-detection challenges. I feel like the text in between line 147 - 187 can precede the paragraph starting at line 122. Do you think it makes sense? This way, we give an introduction on tracking-by-detection.}
 
 \begin{comment}
 However, there can be two issues in this framework. First,
@@ -272,6 +277,8 @@ deploy CNN on the mobile devices
 a supervised learning based object tracking is that an either online
 \cite{nam2016} or offline \cite{held2016} training tracker has to be
 prior to deploy the algorithm.
+
+{\it YoungWoo : I think the following paragraph and paragraph in between line 118-143 give a brief idea about CF and KCF. We can probably combine them in a single paragraph followed by our contributions.}
 
 The first correlation filter tracker proposed by
 \cite{bolme2010visual} focused on learning and detection in the
