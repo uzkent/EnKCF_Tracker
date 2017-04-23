@@ -85,6 +85,7 @@ part -- a vision-based, single target tracking algorithm. This is
 because we need to build a drone for the second part.
 \end{comment}
 
+\begin{comment}
 \begin{itemize}
 \item Introduction: Should talk about, at least, motivation of this
   work, brief review of the literature, and contribution
@@ -140,48 +141,54 @@ because we need to build a drone for the second part.
 \end{itemize}
 \item Conclusion
 \end{itemize}
+\end{comment}
 
 A recent proliferation of air/ground/water unmanned vehicle
-technologies has ever increased interest on deployment of intelligent
-algorithms on embedded or mobile platforms. Particularly, computer
-vision algorithms are getting more attention primarily because those
-platforms have limited payload to accommodate various sensors like
-lidars or radars and installing a monocular camera even stereo rigs
-would increase the usefulness of a mobile platform without increasing
-much cost on it. For example, instead of being equipped with a bare
-flight function with video recording, an unmanned air vehicle (UAV)
-equipped with object or feature following would make it more useful in
-the application of monitoring/surveillance/surveying on private
+technologies has ever increased interests on deployment of intelligent
+algorithms on embedded or mobile platforms. Among those technologies,
+computer vision algorithms are getting more attentions primarily
+because those mobile platforms have limited payload to carry other
+active sensors and, without increasing much cost, installation of a
+monocular camera even stereo rigs would increase the usefulness of a
+mobile platform. For example, instead of just bare flight function
+with video recording, an unmanned air vehicle (UAV) equipped with
+object or feature following would make it more useful in the
+application of monitoring/surveillance/surveying on private
 properties/wild-life/crop, video recording on sports/movies/events,
-many others. In this paper, we propose an object tracking algorithm
-that aims at running on any embedded or mobile platforms. In
-particular,
+many others. 
+
+In this paper, we propose a single-target tracking that aims at
+running on any embedded or mobile platforms that doesn't require an
+offline training, and can run on an embedded system. In particular, we
+would like to make our algorithm 1) learn the appearance model of a
+target on the fly and 2) run as fast on a typical desktop as up to
+300Hz so that it could run up to 30Hz when it is deployed on a
+low-end, embedded system. With these features, our tracking algorithm
+is ready to track an object of interest when it is deployed on an
+embedded system. To this end, an online object tracking is more
+appropriate.
 
 {\it We may need to change this introductory sentence based on the
   results.}
 
-For being a turnkey or ready-to-execute mission solution, an online
-learning framework is more attractive. An object-following with a
-self-supervised learning framework would work, but easy to fail to
-serve a long-term solution.
-
-One of the dominant frameworks for online object tracking based on the
-correlation filter is to solve a regression problem in the frequency
-domain. This framework assumes that the target information is given at
-the very first image frame. Given this positive example for the
-regression problem, a set of negative examples is mostly collected
-around the initial, target bounding box and represented as a circulant
-matrix \cite{henriques2015high}. One can optimally solve this
-regression problem using a ridge regression in a closed form. However,
-such a solution involves in expensive matrix operation
+One of the dominant frameworks for online object tracking is one based
+on the correlation filter that essentially solves a regression problem
+in the frequency domain. This framework assumes that the target
+information is given at the very first image frame like other online
+tracking algorithms. Given this positive example for the regression
+problem, a set of negative examples is collected around the initial,
+target bounding box and represented as a circulant matrix
+\cite{henriques2015high}. One can optimally solve this regression
+problem using a ridge regression in a closed form. However, such a
+solution involves in expensive matrix operations
 $\mathcal{O}(n^{3})$. The correlation filter provides one with a much
 cheaper solution, $\mathcal{O}(n\log n)$ over element-wise
 multiplication in a frequecny domain
 \cite{bolme2010visual,henriques2015high}. Due to such a reformulation,
 a complete pipeline of an object tracker based on the correlation
-filter can be easily implemented and run in an online fashion with a
-high speed. However, the vanilla form of such an online tracker is
-prone to drift and fails to track a target over a long period of
+filter can be easily implemented and run in an online fashion
+efficiently. However, the vanilla form of such an online tracker is
+prone to drift, and fails to track a target over a long period of
 time. This is explained well by the dilemma of stability-plasticity in
 updating appearance model in that the appearance model will be
 overfitted to only the images used to train and a compromise on the
