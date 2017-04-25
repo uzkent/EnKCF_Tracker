@@ -377,15 +377,126 @@ The contributions of this study are as follows.
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
 %---------------------------------------------------------------------- 
 
-{\it Burak: We need an overview of EnKCF by doing following.}
-\begin{itemize}
-\item Put a pseudo code here; Need to go over the pseudo code to explain what EnKCF is from the very high-level first.
-\item Briefly explain KCF at the middle of EnKCF description.
-\end{itemize}
+The KCF with multi-channel features outperform the other
+state-of-the-art object traking algorithms in VOT15 challenge in terms of run-time
+performance and tracking accuracy. However, it lacks scale adaptation
+module or the naive scale adaptation method added into the KCF reduces
+the frames per second from $\geq300$ fps to less than $100$ fps. One
+straightforward method is to run detection on ROIs with different
+sizes determined by pre-defined scale ratios
+\cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. All
+these method increases the computational complexity of tracking by
+running detection on a number of ROIs. Another scale update method in
+Correlation Filter framework was proposed by \cite{zhang2014fast}. It
+uses the MOSSE tracker to estimate translation of an object. The scale
+is updated in a naive way where the confidence map is used to
+determine the scale change between successive frames. For instance,
+their method assumes similar scale in between two consecutive frames
+given similar confidences. With this simple method, we do not need to
+run detection on different ROIs at a given frame and perform tracking
+at $\geq300$ fps. In this study, we propose the use of Ensemble KCFs
+in an intuitive way to perform robust scale-adaptive tracking at more
+than $300$ fps. Our approach is inspired by \cite{ma2015long} where
+two KCFs are employed as translation and scale filters. It first
+estimates translation using the translation filter learned on
+\textit{target}$+$\textit{background} area. Then, the scale filter
+learned on the \textit{target} area is used to estimate new scale of
+the target at the estimated position. Application of translation and
+scale filter at each frame reduces run-time performance ($\leq50 fps$)
+as we need to run detection on each scale candidate and perform training on both filters. Similarly,
+we learn three different correlation filters specializing on different
+aspects of tracking and addresses the weakness of each other,
+resulting in more robust tracking. We name these filters as
+\textit{target}+\textit{small background} translation filter
+($R_{t}^{S}$), \textit{target-only} scale filter ($R_{s}$) and
+\textit{target}+\textit{large background} translation filter
+($R_{t}^{L}$). Unlike \cite{ma2015long}, by running a single filter at
+each frame, we can achieve the targeted operation frame rate. The
+fig.~\ref{fig:Filters} shows the size of the ROIs associated with
+$R_{t}^{S}$, $R_{t}^{L}$, and $R_{s}$ in addition to the hanning
+windows assigned and desired Gaussian responses assigned to each one.
 
-% ---------------------------------------------------------
-\subsection{Kernelized Correlation Filter Tracker} \label{KCF}
-% ---------------------------------------------------------
+\begin{figure}[!t]
+\includegraphics[width=0.5\textwidth]{figures/Filters_Details.pdf}
+\caption{The three filters called as medium ROI translation filter,
+  target ROI scale filter and large ROI translation filter are
+  shown. Also, the hanning window and desired Gaussian response for
+  each filter are displayed.}
+\label{fig:Filters}
+\end{figure}
+
+Our MKCF based tracking framework employs different capabilities and
+tasks to each correlation filter learned temporally. In
+\cite{ma2015long, danelljan2014accurate}, a scale filter is learned on
+\textit{target-only} area whereas \cite{henriques2015high,
+  li2014scale, bibi2015multi, tang2015multi} uses a correlation filter
+learned on \textit{target+background} area to find the optimal scale
+in scale space. To learn the scale filter, $R_{s}$, we follow a
+similar approach to \cite{ma2015long}. We believe that translation
+filter needs to include background information to better discriminate
+target from background, however, the goal of the scale filter is to
+estimate the right size of the target, not to discriminate it from
+background. Also, by using a smaller ROI we can reduce the template size
+ to learn the scale filter, resulting in higher speed scale
+estimation module. Finally, the scale filter help us on the track
+re-initialization module which includes running an object proposals
+algorithm to boxes bounding the objects in the scene. By using the
+scale filter in re-initialization module, we can reduce the
+element-wise operations compared to the translation filters. Also, we can 
+avoid false target re-initialization in the case of rapid background change as $R_{t}^{s}$ and
+$R_{t}^{L}$ learn background in addition to target. The \textit{target+small background} area translation filter, $R_{t}^{S}$,
+is assigned a larger template size than $R_{s}$ and smaller than
+$R_{t}^{L}$. It is employed to estimate translation and scale similar
+to \cite{henriques2015high}. Finally, the \textit{target+large
+  background} area translation filter, $R_{t}^{L}$ , estimates only
+the translation of a target. We propose scale estimation at every $n$ number of frames using the scale filter. In our experiments on $OTB100$ and $UAV123$,
+we observed that $n$ = 5 gives the best results in terms of precision and success overlap rates. The \textit{target+large background} translation filter is run
+in the next frame after the scale filter as we want to avoid drifts. Considering large ROI for $R_{t}^{L}$ can degrade its performance due to low resolution template. For this reason, we employ \textit{Color} and \textit{HoG} features for $R_{t}^{L}$ correlation filter. Finally, $R_{t}^{S}$ is applied after $R_{t}^{L}$ to avoid any target loss due to low resolution template used by $R_{t}^{L}$. Unlike $R_{t}^{L}$, we only employ the \textit{HoG} features for the $R_{t}^{S}$ correlation filter. Fig.~\ref{Workflow_figure} displays the proposed tracking framework using Ensemble of KCFs. Also, the pseudo-code of the proposed $EnKCF$ is shown in alg.~\ref{alg:MKCF}.
+
+\begin{algorithm}
+	\caption{The MKCF Tracking Algorithm.}\label{alg:MKCF}
+	\begin{algorithmic}[1]
+	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n$,
+	\State \textbf{Output} : 
+				\If{$fc\:\%\:n=0$} \Comment{Condition 1}
+						\State Estimated Target State $x_{t} = (x_{t-1},y_{t-1},s_{t})$,
+						Scale filter (\textit{target-only}) model $R_{s}$.
+			     \EndIf
+				\If{$fc\:\%\:n=1$}\Comment{Condition 2}
+						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t_1})$,
+						Large Area Translation Filter model $R_{t}^{L}$.
+				\EndIf
+				\If{$fc\:\%\:n>1$}\Comment{Condition 3}
+						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
+						Small Area Translation Filter model $R_{t}^{S}$.
+				\EndIf
+	\Procedure{track}{$x_{t-1},y_{t-1},s_{t-1}$} 
+				\State // Translation Estimation
+				\State Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $x_{t} = (x_{t},y_{t},s_{t-1})$;
+				\State // Translation Estimation
+				\State Crop the ROI for the $R_{t}^{L}$, or $R_{t}^{S}$ given $x_{t}$
+				and estimate translation ($x_{t}$,$y_{t}$) using $R_{t}^{L}$ (Condition 2) or $R_{t}^{S}$ (Condition 3),
+				\State Skip translation estimation for $R_{s}$ (Condition 1);
+				\State // Scale Estimation
+			    \State Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$, using $R_{s}$ (Condition 1) or $R_{t}^{S}$ (Condition 2), 
+		         \State Skip it for $R_{t}^{L}$ (Condition 1),
+				\State Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$, and for $R_{t}^{S}$ : $\lbrace1.02,1.0,1/1.02\rbrace$;
+				\State // Update Translation
+				\State Perform Importance Re-sampling for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
+			    \State // Model Update
+				\If{$max(y_{R_{s}}) \geq T_{R_{s}}$}
+				\State Update $R_{s}$ (Condition 1);
+				\EndIf							 
+				\If{$max(y_{R_{t}^{L}}) \geq T_{R_{t}^{L}}$} 
+				\State Update $R_{t}^{L}$ (Condition 2);
+				\EndIf	
+			     \If{$max(y_{R_{t}^{S}}) \geq T_{R_{t}^{S}}$}
+				\State Update $R_{t}^{S}$ (Condition 3);
+			     \EndIf		
+	\EndProcedure	
+	\end{algorithmic}
+\end{algorithm}
+
 The Kernelized Correlation Filter tracker has recently been
 increasingly popular due to its operation at hundreds of frames per
 second with state-of-the-art tracking capabilities in challenging
@@ -547,126 +658,6 @@ where $r$ denotes the correlation response at all cylic shifts of the
 first row of the kernel matrix $K$. The peak point of the response
 function gives us the estimated translation of the object from time
 step $t$-$1$ to $t$.
-
-%-------------------------------------------------------------------
-\subsection{Multiple Kernelized Correlation Filter Based Tracking} \label{sc:MKCF}
-%------------------------------------------------------------------
-The KCF with Multi-channel features outperforms the other
-state-of-the-art object traking algorithms both in terms of run-time
-performance and tracking accuracy. However, it lack scale adaptation
-module or the naive scale adaptation method added into the KCF reduces
-the frames per second from $\geq300$ fps to less than $100$ fps. One
-straightforward method is to run detection on ROIs with different
-sizes determined by pre-defined scale ratios
-\cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. All
-these method increases the computational complexity of tracking by
-running detection on a number of ROIs. Another scale update method in
-Correlation Filter framework was proposed by \cite{zhang2014fast}. It
-uses the MOSSE tracker to estimate translation of an object. The scale
-is updated in a naive way where the confidence map is used to
-determine the scale change between successive frames. For instance,
-their method assumes similar scale in between two consecutive frames
-given similar confidences. With this simple method, we do not need to
-run detection on different ROIs at a given frame and perform tracking
-at $\geq300$ fps. In this study, we propose the use of Multiple KCFs
-in an intuitive way to perform robust scale-adaptive tracking at more
-than $300$ fps. Our approach is inspired by \cite{ma2015long} where
-two KCFs are employed as translation and scale filters. It first
-estimates translation using the translation filter learned on
-\textit{target}$+$\textit{background} area. Then, the scale filter
-learned on the \textit{target} area is used to estimate new scale of
-the target at the estimated position. Application of translation and
-scale filter at each frame reduces run-time performance ($\leq50 fps$)
-as we need to run detection and training on both filters. Similarly,
-we learn three different correlation filters specializing on different
-aspects of tracking and addresses the weakness of each other,
-resulting in more robust tracking. We name these filters as
-\textit{target}+\textit{small background} translation filter
-($R_{t}^{S}$), \textit{target-only} scale filter ($R_{s}$) and
-\textit{target}+\textit{large background} translation filter
-($R_{t}^{L}$). Unlike \cite{ma2015long}, by running a single filter at
-each frame, we can achieve the targeted operation frame rate. The
-fig.~\ref{fig:Filters} shows the size of the ROIs associated with
-$R_{t}^{S}$, $R_{t}^{L}$, and $R_{s}$ in addition to the hanning
-windows assigned and desired Gaussian responses assigned to each one.
-
-\begin{figure}[!t]
-\includegraphics[width=0.5\textwidth]{figures/Filters_Details.pdf}
-\caption{The three filters called as medium ROI translation filter,
-  target ROI scale filter and large ROI translation filter are
-  shown. Also, the hanning window and desired Gaussian response for
-  each filter are displayed.}
-\label{fig:Filters}
-\end{figure}
-
-Our MKCF based tracking framework employs different capabilities and
-tasks to each correlation filter learned temporally. In
-\cite{ma2015long, danelljan2014accurate}, a scale filter is learned on
-\textit{target-only} area whereas \cite{henriques2015high,
-  li2014scale, bibi2015multi, tang2015multi} uses a correlation filter
-learned on \textit{target+background} area to find the optimal scale
-in scale space. To learn the scale filter, $R_{s}$, we follow a
-similar approach to \cite{ma2015long}. We believe that translation
-filter needs to include background information to better discriminate
-target from background, however, the goal of the scale filter is to
-estimate the right size of the target, not to discriminate it from
-background. Also, by using a smaller ROI we can reduce the size of the
-template to learn the scale filter, resulting in higher speed scale
-estimation module. Finally, the scale filter help us on the track
-re-initialization module which includes running an object proposals
-algorithm to boxes bounding the objects in the scene. By using the
-scale filter in re-initialization module, we can reduce the
-element-wise operations compared to the translation filters. The
-\textit{target+small background} area translation filter, $R_{t}^{S}$,
-is assigned a larger template size than $R_{s}$ and smaller than
-$R_{t}^{L}$. It is employed to estimate translation and scale similar
-to \cite{henriques2015high}. Finally, the \textit{target+large
-  background} area translation filter, $R_{t}^{L}$ , estimates only
-the translation of a target.
-
-\begin{algorithm}
-	\caption{The MKCF Tracking Algorithm.}\label{alg:MKCF}
-	\begin{algorithmic}[1]
-	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n$,
-	\State \textbf{Output} : 
-				\If{$fc\:\%\:n=0$} \Comment{Condition 1}
-						\State Estimated Target State $x_{t} = (x_{t-1},y_{t-1},s_{t})$,
-						Scale filter (\textit{target-only}) model $R_{s}$.
-			     \EndIf
-				\If{$fc\:\%\:n=1$}\Comment{Condition 2}
-						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t_1})$,
-						Large Area Translation Filter model $R_{t}^{L}$.
-				\EndIf
-				\If{$fc\:\%\:n>1$}\Comment{Condition 3}
-						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
-						Small Area Translation Filter model $R_{t}^{S}$.
-				\EndIf
-	\Procedure{track}{$x_{t-1},y_{t-1},s_{t-1}$} 
-				\State // Translation Estimation
-				\State Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $x_{t} = (x_{t},y_{t},s_{t-1})$;
-				\State // Translation Estimation
-				\State Crop the ROI for the $R_{t}^{L}$, or $R_{t}^{S}$ given $x_{t}$
-				and estimate translation ($x_{t}$,$y_{t}$) using $R_{t}^{L}$ (Condition 2) or $R_{t}^{S}$ (Condition 3),
-				\State Skip translation estimation for $R_{s}$ (Condition 1);
-				\State // Scale Estimation
-			    \State Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$, using $R_{s}$ (Condition 1) or $R_{t}^{S}$ (Condition 2), 
-		         \State Skip it for $R_{t}^{L}$ (Condition 1),
-				\State Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$, and for $R_{t}^{S}$ : $\lbrace1.02,1.0,1/1.02\rbrace$;
-				\State // Update Translation
-				\State Perform Importance Re-sampling for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
-			    \State // Model Update
-				\If{$max(y_{R_{s}}) \geq T_{R_{s}}$}
-				\State Update $R_{s}$ (Condition 1);
-				\EndIf							 
-				\If{$max(y_{R_{t}^{L}}) \geq T_{R_{t}^{L}}$} 
-				\State Update $R_{t}^{L}$ (Condition 2);
-				\EndIf	
-			     \If{$max(y_{R_{t}^{S}}) \geq T_{R_{t}^{S}}$}
-				\State Update $R_{t}^{S}$ (Condition 3);
-			     \EndIf		
-	\EndProcedure	
-	\end{algorithmic}
-\end{algorithm}
 
 \section{Particle Filter}
 \label{sc:PF}
