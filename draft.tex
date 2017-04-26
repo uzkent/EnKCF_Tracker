@@ -59,33 +59,32 @@ Independent Robotics Research\\
 %%%%%%%%% ABSTRACT
 \begin{abstract}
 Computer vision technologies are very attractive for practical
-application of embedded systems in that most of the embedded systems
+applications for embedded systems in that most of the embedded systems
 already includes image acquisition pipeline and a tremendous amount of
-progresses on research has been made. However, to successfully deploy
-a computer vision algorithm on any existing embedded systems, a vision
-algorithm needs to satisfy some criteria: minimal, manual intervention
-after deployment and small footprint of computing resource consumption
-and executable size. This criteria assumes the performance of the
-algorithm is reasonably good. To this end, in this paper, we propose an
-ensemble of the kernelized correlation filters (KCF), aka {\it E}nKCF,
-for a single-target object tracking. In particular, we developed a
-committee of KCFs to specifically address the scale-change and the
-translation over frames. In addition, we devised a Bayes filter to
-minimize the gap of interactions between KCFs. It is well known that
-an online, model-free tracker like ours is prone to drift over
-time. To cope with such drifts, we developed a re-detection module
-that reliably identifies when to lose the target, hand-picks a small
-number of object proposals from existing object proposal methods
-(e.g., ``Edge Box''), and re-initializes the track to track the object
-for a longer period. To verify the usefulness of the proposed method,
-we compared the performance of ours to those of existing online
-tracking methods. Experimental results showed that the performance of
-ours are precision on 20 pixels, 69.53\%, AUC 52.90\% for OTB100 data
-and 54.11\% and 40.21\% for UAV123 data. This confirmed that our
-method outperformed the existing ones over 5\% on precision on 20
-pixels and 3\% on AUC on average. Our implementation ran at 340 fps
-for OTB100 and at 416 fps for UAV123 data that is faster than DCF (292
-fps) for OTB100.
+progresses on research has been made for many areas. However, to
+successfully deploy a computer vision algorithm on any existing
+embedded systems, a vision algorithm needs to satisfy some criteria:
+minimal, manual intervention after deployment and small footprint of
+computing resource consumption and on executable code, with the
+assumption of reasonably good performance. To this end, in this paper,
+we propose an ensemble of the kernelized correlation filters (KCF), we
+call {\it E}nKCF, for a single-target object tracking. In particular,
+we developed a committee of KCFs to specifically address the
+scale-change and dynamic maneuver of the target over frames. In
+addition, we devised a Bayes filter for a smooth transition on
+execution of individual KCFs. To minimize the effect of drifting, we
+developed a re-detection module that detects target-lost, uses an
+existing object proposal method (e.g., ``Edge Box'') to re-detect the
+lost target, and re-initializes the previous tracking for a long-term
+tracking. To verify the usefulness of the proposed method, we compared
+the performance of ours to those of the existing online tracking
+methods. Experimental results showed that the performance of ours are
+69.53\% for precision on 20 pixels and 52.90\% for success rate for
+OTB100 data, and 54.11\% and 40.21\% for UAV123 data. These results
+confirmed that our method outperformed the existing ones over 5\% on
+precision on 20 pixels and 3\% on AUC on average. Our implementation
+ran at 340 fps for OTB100 and at 416 fps for UAV123 data that is
+faster than DCF (292 fps) for OTB100.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
