@@ -90,6 +90,86 @@ DCF (457 fps), and STC (350 fps) for UAV123.
 
 %%%%%%%%% BODY TEXT
 \section{Introduction}
+
+\begin{comment}
+Maybe the goal of this work is to publish a journal paper about a
+practical solution for a drone to follow a single target. For this, we
+need some descriptions on
+\begin{itemize}
+\item A vision-based, single target tracking algorithm.
+\item Other components for making a drone follow a target.
+\begin{itemize}
+\item An architecture diagram
+\item Descriptions of vehicle control, motion planning, behavior
+  generation, estimation of relative geometry between a drone and a
+  target, etc
+\item Experimental results or example videos
+\end{itemize}
+\end{itemize}
+
+For the BMVC-17 submission, we're going to just focus on the first
+part -- a vision-based, single target tracking algorithm. This is
+because we need to build a drone for the second part.
+\end{comment}
+
+\begin{comment}
+\begin{itemize}
+\item Introduction: Should talk about, at least, motivation of this
+  work, brief review of the literature, and contribution
+\item Method: Detail the method w.r.t. a diagram of system
+  architecture or pseudo code
+\begin{itemize}
+\item Kernelized Correlation Filter
+\item A variant of KCF: Multiple KCF w/ PF ({\it E}nKCF, ${\it E}nKCF_{+RD}$
+\item Re-detection for re-initialization: Modules for reliably
+  detecting target-lost, for extensively searching the lost target,
+  and for picking up the same target with a help from an appearance
+  model or other models.
+\begin{itemize}
+\item To filter out unlikely box proposals,
+\begin{itemize}
+\item Use a prior information about box, our outputs, dimensions
+  (e.g., a combination of width and height, aspect ratio, etc.)
+\item Use the information about the trajectory of the target before we
+  lose the target.
+\end{itemize}
+\item MTH: revisited
+\item To make a box tighter, generate our own box proposals based on
+  the locations of top $k$ box proposals from object proposal methods,
+  e.g., Edge Box.
+\end{itemize}
+\end{itemize}
+\item Experiment: Detail the data, and experimental setup; results and findings
+\item Will compare the performance of {\it E}nKCF, Naive{\it E}nKCF,
+  ${\it E}nKCF_{+RD}$ with those of the following tracking methods.
+\begin{itemize}
+\item vanilla-KCF w/ a fixed scale,
+\item vanilla-KCF w/ three different scales,
+\item LCT (Long-term Correlation Tracking) \cite{ma2015long}: Temporal
+  correlation of a target over frames; a pyramid for different scales;
+  re-detection w/ an appearance classifier (i.e., a naive Bayes w/
+  random fern features in combination of sliding window). Temporal
+  context regressor for translation over significant deformation and
+  target regressor for scale variation.
+\item MEEM (Multiple Experts using Entropy Minimization)
+  \cite{zhang2014meem}.
+\item SAMF (Scale Adaptive KCF)
+\item STC (fast tracking via Spatio-Temporal Context learning)
+  \cite{zhang2014fast}: 
+\item Struck (Structured Output Tracking with Kernels)
+\end{itemize}
+\begin{itemize}
+\item Visual tracker benchmark (VTB)
+\item DTB-70: w/ and w/o motion estimation,
+\item UAV123 \footnote{A set of images acquired from an UAV is called
+  ``UAV123'' and publicly available from
+  https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}
+\item VOT
+\end{itemize}
+\item Conclusion
+\end{itemize}
+\end{comment}
+
 A recent proliferation of air/ground/water unmanned vehicle
 technologies has ever increased interests on deployment of intelligent
 algorithms on embedded or mobile platforms. Among those technologies,
@@ -119,29 +199,106 @@ appropriate.
 {\it We may need to change this introductory sentence based on the
   results.}
 
-One of the dominant frameworks for online object tracking is the
-correlation filter that essentially solves a single-target tracking
-problem as a regression problem in the frequency domain. This
-framework assumes that the target location is given at the very first
-image frame like other online tracking algorithms
-\cite{smeulders2014survey}. Given this positive example for the
-regression problem, a set of negative examples is collected around the
-initial, target bounding box and represented as a circulant matrix
+One of the dominant frameworks for online object tracking is one based
+on the correlation filter that essentially solves a regression problem
+in the frequency domain. This framework assumes that the target
+information is given at the very first image frame like other online
+tracking algorithms. Given this positive example for the regression
+problem, a set of negative examples is collected around the initial,
+target bounding box and represented as a circulant matrix
 \cite{henriques2015high}. One can optimally solve this regression
 problem using a ridge regression in a closed form. However, such a
 solution involves in expensive matrix operations
 $\mathcal{O}(n^{3})$. The correlation filter provides one with a much
 cheaper solution, $\mathcal{O}(n\log n)$ over element-wise
 multiplication in a frequecny domain
-\cite{bolme2010visual,henriques2015high}. Thank to this reformulation,
+\cite{bolme2010visual,henriques2015high}. Due to such a reformulation,
 a complete pipeline of an object tracker based on the correlation
-filter can be easily implemented and run very efficiently in an online
-fashion. However, the vanilla form of such an online tracker is prone
-to drift, and fails to track a target over a long period of time
-primarily because of the dilemma of stability-plasticity in updating
-appearance model, where the appearance model will be overfitted to
-only the images used to train and a compromise on the frequency of
-updating the model is carefully implemented \cite{santner2010prost}.
+filter can be easily implemented and run in an online fashion
+efficiently. However, the vanilla form of such an online tracker is
+prone to drift, and fails to track a target over a long period of
+time. This is explained well by the dilemma of stability-plasticity in
+updating appearance model in that the appearance model will be
+overfitted to only the images used to train and a compromise on the
+frequency of updating the model is carefully implemented
+\cite{santner2010prost}.
+
+\begin{comment}
+The tracking-by-detection methods have recently used extensively as a
+robust, powerful, and highly discriminative vision-based, object
+tracking method replacing the preceding, generative object tracking
+methods that primarily concerned about learning the appearance of the
+target. 
+
+The recent examples of the tracking-by-detection algorithms include
+Tracking-Learning-Detection \cite{kalal2012tracking}, Multiple
+Instance Learning \cite{babenko2009visual}, Correlation Filter based
+trackers \cite{bolme2010visual,henriques2015high}, and Struck
+\cite{hare2012efficient}. These tracking-by-detection methods learn
+the model of the target's appearance on the fly while discriminating
+the target from the background.
+
+{\it Burak: It isn't clear what you're getting at here} 
+
+{\it YoungWoo : Here, I am making an introduction
+into the tracking-by-detection paradigm. I wanted to explain that they improve tracking as they learn an appearance model representative of the background and object. However, as I want to point out, the tracking-by-detection algorithms can be unfeasible as training a robust classifier can be costly. } Learning
+an object-specific classifier in an online manner can better handle
+challenging scenarios with the cost of increased complexity.
+
+To train a (binary) classifier to detect the target at every frame,
+the classifier needs positive and negative examples. In a typical set
+up, a positive example is assumed to be given whereas a set of
+negative examples can be randomly collected from the background around
+the given positive example. Such a typical setup for a
+tracking-by-detection method might have two issues related to its
+performance: Firstly, the appearance of the randomly sampled negative
+examples might be highly correlated with that of positive one,
+resulting in ambiguous boundary between positive and negative
+classes. Secondly for a real-time tracking, such a setup would not be
+feasible for the practice because the number of training data
+gradually increases. Due to these issues, most of the
+tracking-by-detection methods focus on efficiently handling
+incremental update of the learned classifier and on collecting a
+small, but informative negative examples.
+
+{\it Burak: Why do we even mention these issues? Is this somehow
+  related to what we did for this paper?}
+  
+{\it YoungWoo : They are not related at all, however, I wanted to give a brief idea about tracking-by-detection challenges. I feel like the text in between line 147 - 187 can precede the paragraph starting at line 122. Do you think it makes sense? This way, we give an introduction on tracking-by-detection.}
+\end{comment}
+
+\begin{comment}
+However, there can be two issues in this framework. First,
+the randomly collected samples can have large correlation resulting in
+a weak classifier. Also, such framework is not feasible for real-time
+tracking as the number of samples gradually increases. Most of the
+tracking-by-detection algorithms focus on efficient incremental update
+of a classifier together with more useful background sampling.
+\end{comment}
+
+\begin{comment}
+{\it Burak: This is not entirely true. If this is the case, people
+  including us don't have to invent their own, other than just using
+  KCF.}
+
+Frequency domain correlation filter based trackers in the
+tracking-by-detection paradigm has recently seen growing popularity
+due to its superior computation and robustness to geometric and
+photometric variations. 
+\end{comment}
+
+{\it YoungWoo: We'll have to mention why such an online tracker is
+  still attractive over any DNN-based counterparts.}
+
+The recent progress on development of convolutional neural networks
+(CNN) is astonishing as since the AlexNet \cite{krizhevsky12} broke
+the record for the ImageNet competition, at every year, new and better
+results are reported. Moreover, there have been many attempts to
+deploy CNN on the mobile devices
+\cite{wu2016quantized,giusti2015}. But the inherent limitation of such
+a supervised learning based object tracking is that an either online
+\cite{nam2016} or offline \cite{held2016} training tracker has to be
+prior to deploy the algorithm.
 
 The KCF with multi-channel features outperform the other
 state-of-the-art object traking algorithms in VOT15 challenge in terms of run-time
@@ -182,27 +339,57 @@ fig.~\ref{fig:Filters} shows the size of the ROIs associated with
 $R_{t}^{S}$, $R_{t}^{L}$, and $R_{s}$ in addition to the hanning
 windows assigned and desired Gaussian responses assigned to each one.
 
-The recent progress on development of convolutional neural networks
-(CNN) is astonishing as since the AlexNet \cite{krizhevsky12} broke
-the record for the ImageNet competition, at every year, new and better
-results are reported. Moreover, there have been many attempts to
-deploy CNN on the mobile devices
-\cite{wu2016quantized,giusti2015}. But the inherent limitation of such
-a supervised learning based object tracking is that an either online
-\cite{nam2016} or offline \cite{held2016} training tracker has to be
-prior to deploy the algorithm.
-
+\begin{comment}
+The first correlation filter tracker proposed by
+\cite{bolme2010visual} focused on learning and detection in the
+frequency domain. The idea was to minimize the sum of squared error in
+the frequency domain. Hence, the convolution in the original domain is
+avoided, instead, element-wise multiplication is needed in the
+frequency domain. This way, it achieved promising performance at 700
+Hz. On the other hand, the MOSSE tracker failed in cases with rapidly
+changing background as it learns the filter using a single template
+and accommodates single channel features. Later on, the MOSSE tracker
+was improved by using the circularly shifted background patches in an
+efficient way by utilizing the theorem that Discrete Fourier Transform
+of a circulant matrix gives us diagonalized circulant matrix
+\cite{henriques2012exploiting,henriques2015high}. In the same work,
+the authors integrated kernelization concept into the detection and
+learning steps to improve tracking
+accuracy. \cite{galoogahi2013multi,henriques2015high} extended the
+correlation filter trackers with single channel features to
+multi-channel features. They employed the color and shape features in
+a simple framework by summing the correlation of the test and learned
+feature channels elements. There a few major drawbacks of the
+correlation filter trackers although they outperformed the other
+discriminative trackers with superior computation. First, due to the
+nature of correlation filters it is limited to a region of interest
+which is typically 2-3 times larger than the target. Considering a
+larger ROI not only increases the computational burden but also leads
+to further spatial information loss with the fixed template size. For
+this reason, its performance degrades in fast motion cases as the ROI
+may not contain the target. Second, the correlation filter lacks scale
+adaptation ability since it only estimates the translation of the
+target. Later studies focused on improving the latter issue by
+proposing scale candidates where each scale is assigned a confidence
+by performing detection on the shrinked or enlarged the ROI
+\cite{li2014scale,tang2015multi,bibi2015multi,ma2015long}. Another
+group of studies employ the part-based correlation filter trackers to
+better adapt to the scale changes
+\cite{liu2015real,akin2016deformable}. The sensitivity to fast motion
+is generally handled in the long-term target tracking framework where
+track reinilization module is triggered when the target is lost
+\cite{ma2015long,de2015board,li2016monocular}.
+\end{comment}
 
 The contributions of this study are as follows.
 \begin{itemize}
 
-\item \textbf{Novel Single-Target Tracking in High-Speed for Long-Term
-  Tracking} To be practical, the execution time of an object tracking
-  is important. We proposed a new object tracking algorithm that is a
-  collection of kernelized correlation filters (KCF). Each of KCFs is
-  designed to address two challenges of object tracking: scale and
-  translation. We also incorporate a Bayes filter to prevent from
-  being drift.
+\item \textbf{Single-Target Tracking in High-Speed} To be practical,
+  the execution time of an object tracking is important. We proposed a
+  new object tracking algorithm that is a collection of kernelized
+  correlation filters (KCF). Each of KCFs is designed to address two
+  challenges of object tracking: scale and translation. We also
+  incorporate a Bayes filter to prevent from being drift.
 
 \item \textbf{Re-Detection} A target loss is inevitable in object
   tracking. To cope with this, we developed a new target, re-detection
