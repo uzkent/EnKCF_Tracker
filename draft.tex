@@ -136,43 +136,50 @@ multiplication in a frequecny domain
 \cite{bolme2010visual,henriques2015high}. Thank to this reformulation,
 a complete pipeline of an object tracker based on the correlation
 filter can be easily implemented and run very efficiently in an online
-fashion. However, the vanilla form of such an online tracker is prone
-to drift, and fails to track a target over a long period of time
-primarily because of the dilemma of stability-plasticity in updating
-appearance model, where the appearance model will be overfitted to
-only the images used to train and a compromise on the frequency of
-updating the model is carefully implemented \cite{santner2010prost}.
+fashion. In fact, a variant of the correlation filter, kernelized
+correlation filter with multi-channel features, outperformed other
+state-of-the-art tracking algorithms in VOT15 challenge, in terms of
+run-time and tracking accuracy. However, the vanilla form of such an
+online tracker is prone to drift, and fails to track a target over a
+long period of time primarily \cite{henriques2015high} because of the
+dilemma of stability-plasticity in updating appearance model, where
+the appearance model will be overfitted to only the images used to
+train and a compromise on the frequency of updating the model is
+carefully implemented \cite{santner2010prost}. For example, a naive
+way of handling a scale change of a target could reduce the run-time
+performance from 300 to 100 fps. A seemingly obvious way of addressing
+the scale change is to scan the region of interest (ROI) with
+templates in different dimensions based on pre-defined scale ratios to
+find the target
+\cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. However,
+because of computational nature of correlation filter, this approach
+would just increase the computational complexity of tracking by
+running detection with multiple possibilities. 
 
-The KCF with multi-channel features outperform the other
-state-of-the-art object traking algorithms in VOT15 challenge in terms of run-time
-performance and tracking accuracy. However, it lacks scale adaptation
-module or the naive scale adaptation method added into the KCF reduces
-the frames per second from $\geq300$ fps to less than $100$ fps. One
-straightforward method is to run detection on ROIs with different
-sizes determined by pre-defined scale ratios
-\cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. All
-these method increases the computational complexity of tracking by
-running detection on a number of ROIs. Another scale update method in
-Correlation Filter framework was proposed by \cite{zhang2014fast}. It
-uses the MOSSE tracker to estimate translation of an object. The scale
-is updated in a naive way where the confidence map is used to
-determine the scale change between successive frames. For instance,
-their method assumes similar scale in between two consecutive frames
-given similar confidences. With this simple method, we do not need to
-run detection on different ROIs at a given frame and perform tracking
-at $\geq300$ fps. In this study, we propose the use of Ensemble KCFs
-in an intuitive way to perform robust scale-adaptive tracking at more
-than $300$ fps. Our approach is inspired by \cite{ma2015long} where
-two KCFs are employed as translation and scale filters. It first
-estimates translation using the translation filter learned on
-\textit{target}$+$\textit{background} area. Then, the scale filter
-learned on the \textit{target} area is used to estimate new scale of
-the target at the estimated position. Application of translation and
-scale filter at each frame reduces run-time performance ($\leq50 fps$)
-as we need to run detection on each scale candidate and perform training on both filters. Similarly,
-we learn three different correlation filters specializing on different
-aspects of tracking and addresses the weakness of each other,
-resulting in more robust tracking. We name these filters as
+Another way of handling the scale change for the correlation filter
+based approach is to find a correct scale at a location where a target
+highly likely appears \cite{zhang2014fast}. In particular, they uses
+the MOSSE tracker to estimate a target's translation. The scale is
+updated in a naive way where the confidence map is used to determine
+the scale change between successive frames. 
+
+For instance, their method assumes similar scale in between two
+consecutive frames given similar confidences. With this simple method,
+we do not need to run detection on different ROIs at a given frame and
+perform tracking at $\geq300$ fps. In this study, we propose the use
+of Ensemble KCFs in an intuitive way to perform robust scale-adaptive
+tracking at more than $300$ fps. Our approach is inspired by
+\cite{ma2015long} where two KCFs are employed as translation and scale
+filters. It first estimates translation using the translation filter
+learned on \textit{target}$+$\textit{background} area. Then, the scale
+filter learned on the \textit{target} area is used to estimate new
+scale of the target at the estimated position. Application of
+translation and scale filter at each frame reduces run-time
+performance ($\leq50 fps$) as we need to run detection on each scale
+candidate and perform training on both filters. Similarly, we learn
+three different correlation filters specializing on different aspects
+of tracking and addresses the weakness of each other, resulting in
+more robust tracking. We name these filters as
 \textit{target}+\textit{small background} translation filter
 ($R_{t}^{S}$), \textit{target-only} scale filter ($R_{s}$) and
 \textit{target}+\textit{large background} translation filter
