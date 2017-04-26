@@ -722,10 +722,13 @@ POSTERIORS WHEN THE RE-SAMPLING IS SKIPPED.
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
 To verify the usefulness of our algorithm, we ran our algorithm using
-three publicly available dataset:
-VOT2015 \footnote{\url{http://www.votchallenge.net/}},
+two publicly available datasets:
+%VOT2015 \footnote{\url{http://www.votchallenge.net/}},
 OTB100 \footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}},
-UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}.
+UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}. OTB100 dataset contains video sequences for 100 objects whereas UAV123 dataset contains aerial footage of 123 objects. The proposed $EnKCF$ method can better handle slow motions. Also, the UAVs use mobiles platforms with limited computational power. We believe that the proposed tracker can better fit for tracking from such platforms as it is highly efficient and scale adaptive. Taking into account these reasons, it is more appropriate to test it on aerial videos captured by UAVs. 
+
+We compare the proposed tracker to other state-of-the-art high speed trackers using the \textit{Precision} and \textit{Success} metrics. Precision is computed as the eucl%
+
 
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
