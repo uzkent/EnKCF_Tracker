@@ -14,7 +14,6 @@
 % egpaper.aux before re-running latex.  (Or just hit 'q' on the first latex
 % run, let it finish, and you should be clear).
 \usepackage[pagebackref=true,breaklinks=true,letterpaper=true,colorlinks,bookmarks=false]{hyperref}
-
 % \cvprfinalcopy % *** Uncomment this line for the final submission
 
 \def\cvprPaperID{****} % *** Enter the CVPR Paper ID here
@@ -58,6 +57,7 @@ Independent Robotics Research\\
 
 %%%%%%%%% ABSTRACT
 \begin{abstract}
+<<<<<<< HEAD
 Computer vision technologies are very attractive for practical
 applications for embedded systems in that most of the embedded systems
 already includes image acquisition pipeline and a tremendous amount of
@@ -294,10 +294,10 @@ windows assigned and desired Gaussian responses assigned to each one.
 
 \begin{figure}[!t]
 \includegraphics[width=0.5\textwidth]{figures/Filters_Details.pdf}
-\caption{The three filters called as medium ROI translation filter,
-  target ROI scale filter and large ROI translation filter are
+\caption{The three filters denoted as \textit{target+small background} translation filter,
+  \textit{target-only} scale filter and \textit{target+large background} translation filters are
   shown. Also, the hanning window and desired Gaussian response for
-  each filter are displayed.}
+  each filter is displayed.}
 \label{fig:Filters}
 \end{figure}
 
@@ -330,19 +330,19 @@ we observed that $n$ = 5 gives the best results in terms of precision and succes
 in the next frame after the scale filter as we want to avoid drifts. Considering large ROI for $R_{t}^{L}$ can degrade its performance due to low resolution template. For this reason, we employ \textit{Color} and \textit{HoG} features for $R_{t}^{L}$ correlation filter. Finally, $R_{t}^{S}$ is applied after $R_{t}^{L}$ to avoid any target loss due to low resolution template used by $R_{t}^{L}$. Unlike $R_{t}^{L}$, we only employ the \textit{HoG} features for the $R_{t}^{S}$ correlation filter. Fig.~\ref{Workflow_figure} displays the proposed tracking framework using Ensemble of KCFs. Also, the pseudo-code of the proposed $EnKCF$ is shown in alg.~\ref{alg:MKCF}.
 
 \begin{algorithm}
-	\caption{The MKCF Tracking Algorithm.}\label{alg:MKCF}
+	\caption{The EnKCF Tracking Algorithm.}\label{alg:MKCF}
 	\begin{algorithmic}[1]
-	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n$,
+	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n = 5$,
 	\State \textbf{Output} : 
 				\If{$fc\:\%\:n=0$} \Comment{Condition 1}
 						\State Estimated Target State $x_{t} = (x_{t-1},y_{t-1},s_{t})$,
 						Scale filter (\textit{target-only}) model $R_{s}$.
 			     \EndIf
-				\If{$fc\:\%\:n=1$}\Comment{Condition 2}
+				\If{$fc\:\%\:n=1\:\:or\:\:fc\:\%\:n=2$}\Comment{Condition 2}
 						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t_1})$,
 						Large Area Translation Filter model $R_{t}^{L}$.
 				\EndIf
-				\If{$fc\:\%\:n>1$}\Comment{Condition 3}
+				\If{$fc\:\%\:n=1\:\:or\:\:fc\:\%\:n=4$}\Comment{Condition 3}
 						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
 						Small Area Translation Filter model $R_{t}^{S}$.
 				\EndIf
@@ -354,24 +354,25 @@ in the next frame after the scale filter as we want to avoid drifts. Considering
 				and estimate translation ($x_{t}$,$y_{t}$) using $R_{t}^{L}$ (Condition 2) or $R_{t}^{S}$ (Condition 3),
 				\State Skip translation estimation for $R_{s}$ (Condition 1);
 				\State // Scale Estimation
-			    \State Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$, using $R_{s}$ (Condition 1) or $R_{t}^{S}$ (Condition 2), 
+			    \State Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$, using $R_{s}$ (Condition 1), 
 		         \State Skip it for $R_{t}^{L}$ (Condition 1),
-				\State Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$, and for $R_{t}^{S}$ : $\lbrace1.02,1.0,1/1.02\rbrace$;
+				\State Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$;
 				\State // Update Translation
 				\State Perform Importance Re-sampling for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
 			    \State // Model Update
-				\If{$max(y_{R_{s}}) \geq T_{R_{s}}$}
+				\If{$PSR(y_{R_{s}}) \geq T_{R_{s}}$}
 				\State Update $R_{s}$ (Condition 1);
 				\EndIf							 
-				\If{$max(y_{R_{t}^{L}}) \geq T_{R_{t}^{L}}$} 
+				\If{$PSR(y_{R_{t}^{L}}) \geq T_{R_{t}^{L}}$} 
 				\State Update $R_{t}^{L}$ (Condition 2);
 				\EndIf	
-			     \If{$max(y_{R_{t}^{S}}) \geq T_{R_{t}^{S}}$}
+			     \If{$PSR(y_{R_{t}^{S}}) \geq T_{R_{t}^{S}}$}
 				\State Update $R_{t}^{S}$ (Condition 3);
 			     \EndIf		
 	\EndProcedure	
 	\end{algorithmic}
 \end{algorithm}
+
 
 The Kernelized Correlation Filter tracker has recently been
 increasingly popular due to its operation at hundreds of frames per
@@ -598,10 +599,13 @@ POSTERIORS WHEN THE RE-SAMPLING IS SKIPPED.
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
 To verify the usefulness of our algorithm, we ran our algorithm using
-three publicly available dataset:
-VOT2015 \footnote{\url{http://www.votchallenge.net/}},
+two publicly available datasets:
+%VOT2015 \footnote{\url{http://www.votchallenge.net/}},
 OTB100 \footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}},
-UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}.
+UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}. OTB100 dataset contains video sequences for 100 objects whereas UAV123 dataset contains aerial footage of 123 objects. The proposed $EnKCF$ method can better handle slow motions. Also, the UAVs use mobiles platforms with limited computational power. We believe that the proposed tracker can better fit for tracking from such platforms as it is highly efficient and scale adaptive. Taking into account these reasons, it is more appropriate to test it on aerial videos captured by UAVs. 
+
+We compare the proposed tracker to other state-of-the-art high speed trackers using the \textit{Precision} and \textit{Success} metrics. Precision is computed as the eucl%
+
 
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
