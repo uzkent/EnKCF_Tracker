@@ -127,15 +127,16 @@ solution involves in expensive matrix operations
 $\mathcal{O}(n^{3})$. The correlation filter offers a less complex
 solution, $\mathcal{O}(n\log n)$ over element-wise multiplication in a
 frequecny domain \cite{bolme2010visual,henriques2015high}. Thank to
-this reformulation, a complete pipeline of an object tracker based on
-the correlation filter can be easily implemented and run very
-efficiently in an online fashion. In fact, a variant of the
-correlation filter, kernelized correlation filter with multi-channel
-features, outperformed other state-of-the-art tracking algorithms in
-VOT15 challenge, in terms of run-time and tracking accuracy. However,
-the vanilla form of such an online tracker is prone to drift, and
-fails to track a target over a long period of time primarily
-\cite{henriques2015high} because of the dilemma of
+this reformulation, an object tracking pipeline based on the
+correlation filter can be easily implemented and run very efficiently
+in an online fashion. In fact, a variant of the correlation filter,
+the kernelized correlation filter with multi-channel features
+\cite{henriques2015high} showed impressive object trackin results and
+outperformed other state-of-the-art tracking algorithms, for example,
+in VOT15 challenge, in terms of run-time and tracking
+accuracy. However, the vanilla form of such an online tracker is prone
+to drift, and fails to track a target over a long period of time
+primarily \cite{henriques2015high} because of the dilemma of
 stability-plasticity in updating appearance model, where the
 appearance model will be overfitted to only the images used to train
 and a compromise on the frequency of updating the model is carefully
@@ -145,10 +146,10 @@ performance from 300 to 100 fps. A seemingly obvious way of addressing
 the scale change is to scan the region of interest (ROI) with
 templates in different dimensions based on pre-defined scale ratios to
 find the target
-\cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. However,
-because of computational nature of correlation filter, this approach
-would merely increase the computational complexity of tracking by
-running detection with multiple templates.
+\cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. Due
+to the computational nature of correlation filter, however, this
+approach would merely increase the computational complexity because it
+has to run the correlation filter multiple times on each frame.
 
 Another way of handling the scale change for the correlation filter
 based approach is to find a correct scale at a location where a target
@@ -190,14 +191,12 @@ prior to deploy the algorithm.
 
 The contributions of this study are as follows.
 \begin{itemize}
-
-\item \textbf{Novel Single-Target Tracking in High-Speed for Long-Term
-  Tracking} To be practical, the execution time of an object tracking
-  is important. We proposed a new object tracking algorithm that is a
-  collection of kernelized correlation filters (KCF). Each of KCFs is
-  designed to address two challenges of object tracking: scale and
-  translation. We also incorporate a Bayes filter to prevent from
-  being drift.
+\item \textbf{Novel Single-Target Tracking in a Very High-Speed} Our
+  algorithm, {\it E}nKCF, deploys an ensemble of KCF in turn to more
+  efficiently address the scale variance and the dynamic maneuver of a
+  target while perserving run-time performance as high as possible. To
+  minimize any potential performance gap from transiting one KCF to
+  another, we use a Bayes filter.
 
 \item \textbf{Re-Detection} A target loss is inevitable in object
   tracking. To cope with this, we developed a new target, re-detection
