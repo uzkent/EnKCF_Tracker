@@ -388,7 +388,6 @@ in the next frame after the scale filter as we want to avoid drifts. Considering
 	\end{algorithmic}
 \end{algorithm}
 
-
 The Kernelized Correlation Filter tracker has recently been
 increasingly popular due to its operation at hundreds of frames per
 second with state-of-the-art tracking capabilities in challenging
@@ -615,31 +614,31 @@ POSTERIORS WHEN THE RE-SAMPLING IS SKIPPED.
 %---------------------------------------------------------------------- 
 To verify the usefulness of our algorithm, we ran our algorithm using
 two publicly available datasets:
-%VOT2015 \footnote{\url{http://www.votchallenge.net/}},
 OTB100 \footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}},
-UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}. OTB100 dataset contains video sequences for 100 objects whereas UAV123 dataset contains aerial footage of 123 objects. The proposed $EnKCF$ method can better handle slow motions. Also, the UAVs use mobiles platforms with limited computational power. We believe that the proposed tracker can better fit for tracking from such platforms as it is highly efficient and scale adaptive. Taking into account these reasons, it is more appropriate to test it on aerial videos captured by UAVs. 
+UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}. OTB100 dataset contains video sequences for 100 objects whereas UAV123 dataset contains aerial footage of 123 objects. The proposed $EnKCF$ method can better handle slow motions. Also, the UAVs use mobiles platforms with limited computational power. We believe that the proposed tracker can better fit to tracking from these platforms as it is highly efficient and scale adaptive. Taking into account these reasons, it is more appropriate to test it on aerial videos captured by UAVs. 
 
-We compare the proposed tracker to other state-of-the-art high speed trackers using the \textit{Precision} and \textit{Success} metrics. Precision is computed as the eucl%
+We compare the proposed tracker to other state-of-the-art high speed trackers using the \textit{Precision} and \textit{Success\:Rate} metrics. Precision is computed by thresholding the average euclidean distance between the ground truth and tracking output over the frames of one sequence. In precision, we rank the trackers based on the precision numbers at 20 pixels. The success rate metric evaluates the overlap between the ground truth and tracking output. The intersection-to-union ratio of two regions over the frames of one sequence. Finally, we count the number of frames with overlap larger than the success rate threshold and divide it by the number of frames. We compare our tracker to some other high-speed ($\geq$300 fps) state-of-the-art trackers including KCF\cite{henriques2015high}, CSK \cite{henriques2012exploiting}, STC\cite{zhang2014fast}, MOSSE\cite{bolme2010visual,henriques2015high}. Also, some relatively lower-speed ($\geq$50) trackers are used to evaluate the robustness of the proposed trackers. These trackers include SAMF\cite{li2014scale}, DSST\cite{danelljan2014accurate}, LCT\cite{ma2015long}, MEEM\cite{zhang2014meem} and Struck\cite{hare2012efficient}.
+Fig.~\ref{fig:UAV123_DATASET} shows the results on the UAV123 dataset. 
 
-\begin{figure}
-        \begin{subfigure}[b]{0.25\textwidth}
+\begin{figure*}
+        \begin{subfigure}[b]{0.5\textwidth}
                 \includegraphics[width=\linewidth]{./figures/Precision_UAV123.pdf}
         \end{subfigure}%
-        \begin{subfigure}[b]{0.25\textwidth}
+        \begin{subfigure}[b]{0.5\textwidth}
                 \includegraphics[width=\linewidth]{./figures/Success_UAV123.pdf}
         \end{subfigure}%
-        \caption{Pictures of animals}\label{fig:animals}
-\end{figure}
+        \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the UAV123 dataset. UAV123 Dataset consists of $123$ video sequences captured from a micro UAV including large camera motion, low resolution objects, partial and full occlusions. Our tracker better fits to tracking from aerial platforms as the scale change in successive frames are not dramatic.}\label{fig:UAV123_DATASET}
+\end{figure*}
 
-\begin{figure}
-        \begin{subfigure}[b]{0.25\textwidth}
+\begin{figure*}
+        \begin{subfigure}[b]{0.5\textwidth}
                 \includegraphics[width=\linewidth]{./figures/Precision_OTB100.pdf}
         \end{subfigure}%
-        \begin{subfigure}[b]{0.25\textwidth}
+        \begin{subfigure}[b]{0.5\textwidth}
                 \includegraphics[width=\linewidth]{./figures/Success_OTB100.pdf}
         \end{subfigure}%
-        \caption{Pictures of animals}\label{fig:animals}
-\end{figure}
+        \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures. }\label{fig:OTB100_DATASET}
+\end{figure*}
 
 
 %---------------------------------------------------------------------- 
