@@ -191,21 +191,26 @@ prior to deploy the algorithm.
 
 The contributions of this study are as follows.
 \begin{itemize}
-\item \textbf{Novel Single-Target Tracking in a Very High-Speed} Our
+\item \textbf{Novel Single-Target Tracking in a Very High-Speed ($\geq300$ fps) } Our
   algorithm, {\it E}nKCF, deploys an ensemble of KCF in turn to more
   efficiently address the scale variance and the dynamic maneuver of a
   target while perserving run-time performance as high as possible. To
   minimize any potential performance gap from transiting one KCF to
   another, we use a Bayes filter. The workflow of the  {\it E}nKCF can
-  be visualized in fig.~\ref{Workflow_figure}. 
+  be visualized in fig.~\ref{Workflow_figure_EnKCF}. 
 
-\item \textbf{Re-Detection} A target loss is inevitable in object
+\item \textbf{More Accurate Single-Target Tracking in a Relatively Lower-Speed ( $\geq 150$ fps)} Our second algorithm, 
+{\it E}nKCF2 leverages the flexibility of the ensemble of KCFs approach we propose. The original {\it E}nKCF is slighlty
+modified to perform more accurate in more challenging scenarios, particularly the ones with large ego-motion and object
+motion. We do not integrate the particle filter in {\it E}nKCF2 as we test it on a dataset (UAV123$\_$10fps) including sequences
+with large ego-motion on the UAV platform. The proposed framework can be seen in fig.~\ref{Workflow_figure_EnKCF2}.
+
+\begin{comment}\item \textbf{Re-Detection} A target loss is inevitable in object
   tracking. To cope with this, we developed a new target, re-detection
   that reliably detects when to lose the target and effectively
   re-detect the lost target. {\it How we can show how good our
     re-detection method is?}
 
-\begin{comment}
 \item We build a highly efficient ($\geq300$ fps) scale adaptive
   multiple kernelized correlation filter based tracker that
   outperforms the original KCF implementation with fixed scale
@@ -242,7 +247,14 @@ The contributions of this study are as follows.
 \begin{figure*}[!t]
 \includegraphics[width=\textwidth]{figures/Workflow_MKCF+PF.pdf}
 \caption{The workflow of our Multiple KCF and Particle Filter based tracking method without the track re-detection module.}
-\label{Workflow_figure}
+\label{Workflow_figure_EnKCF}
+\end{figure*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/Workflow_EnKCF2+PF.pdf}
+\caption{The workflow of our EnKCF2 tracker that is more robust to large camera and fast object motion than our EnKCF tracker.}
+\label{Workflow_figure_EnKCF2}
 \end{figure*}
 
 In this study, we propose application of an ensemble of KCFs
@@ -301,7 +313,7 @@ $R_{t}^{L}$. It estimates only translation similar
 to \cite{henriques2015high}. Finally, the \textit{target+large
   background} area translation filter, $R_{t}^{L}$ , estimates translation of a target as $R_{t}^{S}$. We propose scale estimation at every $n$ number of frames using the scale filter. In our experiments on $OTB100$ and $UAV123$,
 we observed that $n$ = 5 gives the best results in terms of precision and success overlap rates. The \textit{target+large background} translation filter is run
-in the next frame after the scale filter as we want to avoid drifts which is more likely to happen running only $R_{s}$. Considering a large ROI for $R_{t}^{L}$ can degrade its performance due to information loss resulting from ROI resizing. On the other hand, only HoG features are used in $R_{t}^{S}$ as it focuses on a smaller ROI, giving us more discriminative HoG features. In our framework, $R_{t}^{S}$ addresses the absence of scale adaptation module in $R_{t}^{L}$ and $R_{t}^{S}$ whereas $R_{t}^{L}$ focuses on addressing the absence of translation estimation module in $R_{S}$. $R_{t}^{S}$, on the other hand, focuses on the shape features of the target that is not fully exploited in $R_{t}^{L}$ and $R_{t}^{S}$. For this reason, we employ \textit{HoG} features in $R_{t}^{S}$ and \textit{HoG} and \textit{Color} features in $R_{t}^{L}$. Fig.~\ref{Workflow_figure} displays the proposed tracking framework called Ensemble of KCFs {\it E}nKC. Also, the pseudo-code of the proposed {\it E}nKC is shown in alg.~\ref{alg:MKCF}.
+in the next frame after the scale filter as we want to avoid drifts which is more likely to happen running only $R_{s}$. Considering a large ROI for $R_{t}^{L}$ can degrade its performance due to information loss resulting from ROI resizing. On the other hand, only HoG features are used in $R_{t}^{S}$ as it focuses on a smaller ROI, giving us more discriminative HoG features. In our framework, $R_{t}^{S}$ addresses the absence of scale adaptation module in $R_{t}^{L}$ and $R_{t}^{S}$ whereas $R_{t}^{L}$ focuses on addressing the absence of translation estimation module in $R_{S}$. $R_{t}^{S}$, on the other hand, focuses on the shape features of the target that is not fully exploited in $R_{t}^{L}$ and $R_{t}^{S}$. For this reason, we employ \textit{HoG} features in $R_{t}^{S}$ and \textit{HoG} and \textit{Color} features in $R_{t}^{L}$. Fig.~\ref{Workflow_figure_EnKCF} displays the proposed tracking framework called Ensemble of KCFs {\it E}nKC. Also, the pseudo-code of the proposed {\it E}nKC is shown in alg.~\ref{alg:MKCF}.
 
 \begin{algorithm}
 	\caption{The EnKCF Tracking Algorithm.}\label{alg:MKCF}
@@ -565,9 +577,6 @@ outside of the scale filter ROI do not have weight correspondence in
 the confidence map. Also, it is more likely to get noisy translation
 estimation from the scale filter.
 
-\section{Track Re-initilization via Re-detection}
-\label{sc:Re-initialization}
-
 %\section{Geometry Estimation between Target and Drone}
 %\label{sc:Geometry}
 
@@ -577,13 +586,14 @@ estimation from the scale filter.
 To verify the usefulness of our algorithm, we ran our algorithm using
 two publicly available datasets: OTB100 \footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}, UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}. OTB100 dataset contains video sequences for 100 objects whereas UAV123 dataset contains aerial footage of 123 objects. The proposed $EnKCF$ method can better handle slow motions. Also, the UAVs use mobiles platforms with limited computational power. We believe that the proposed tracker can better fit to tracking from these platforms as it is highly efficient and scale adaptive. Taking into account these reasons, it is more appropriate to test it on aerial videos captured by UAVs. 
 
-\textbf{Hyperparameter Selections.} Tuning the hyper-parameters of the committee of the correlation filters are important as the each correlation filter addresses the weakness of another one. For instance, $R_{t}^{L}$'s main task is to recover from the previous frame where only $R_{s}$ and particle filter's prior distribution are used to estimate scale and translation. We set the learning rates ($\beta$) of $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$ as $0.020$, $0.020$ and $0.010$. The desired response and hanning window for each KCF is shown in fig.~\ref{fig:Filters}. Finally, the Gaussian kernel parameter, $\alpha$ is tuned to $0.6$, $0.4$, and $0.4$ for $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$. In our particle filter implementation, we employ $1000$ particles and use the \textit{efficient number of samples} metric shown below to determine whether we need to perform importance re-sampling or not to keep reasonable variance.
+\textbf{Hyperparameter Selections.} Tuning the hyper-parameters of the committee of the correlation filters are important as the each correlation filter addresses the weakness of another one. For instance, $R_{t}^{L}$'s main task is to recover from the previous frame where only $R_{s}$ and particle filter's prior distribution are used to estimate scale and translation. We set the learning rates ($\beta$) of $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$ as $0.020$, $0.020$ and $0.010$. The desired response and hanning window for each KCF is shown in fig.~\ref{fig:Filters}. Finally, the Gaussian kernel parameter, $\alpha$ is tuned to $0.6$, $0.4$, and $0.4$ for $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$. We note that all the hyper-parameters are same for EnKCF and EnKCF2 trackers. We only set the learning rate of $R_{t}^{L}$ to $0.12$. In our particle filter implementation, we employ $1000$ particles and use the \textit{efficient number of samples} metric shown below to determine whether we need to perform importance re-sampling or not to keep reasonable variance.
+
 \begin{equation}
   \hat{N}_{eff} = \dfrac{1}{\sum_{i=1}^{P}(w_{p})^{2}}, 
 \end{equation}
  where $w$ represents the particles' weights and re-sampling is performed only if $\hat{N}_{eff}$ is smaller than three.
 
-\textbf{Features Selections.} We use the fast Histogram of Oriented Gradients (fHoG)\cite{felzenszwalb2010object} and Color-naming\cite{van2009learning} features to learn target and background models. $R_{t}^{L}$ uses both fHoG and color features as it covers a large ROI where fHoG features may not be reliable alone. On the other hand, $R_{t}^{S}$ is assigned only fHoG features as it covers smaller ROI. Finally, $R_{s}$ uses both fHoG and color features as it is assigned lower template size, yielding space to exploit two feature modalities.
+\textbf{Features Selections.} We use the fast Histogram of Oriented Gradients (fHoG)\cite{felzenszwalb2010object} and Color-naming\cite{van2009learning} features to learn target and background models. $R_{t}^{L}$ uses both fHoG and color features as it covers a large ROI where fHoG features may not be reliable alone. On the other hand, $R_{t}^{S}$ is assigned only fHoG features as it covers smaller ROI. Finally, $R_{s}$ uses both fHoG and color features as it is assigned lower template size, yielding space to exploit two feature modalities. We emphasize that same features are applied to the correlations filters in EnKCF and EnKCF2 trackers.
 
 \begin{figure}
 \centering
@@ -604,31 +614,13 @@ two publicly available datasets: OTB100 \footnote{\url{http://cvlab.hanyang.ac.k
 \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures.}
 \label{fig:OTB100_DATASET}
 \end{figure}
-%\begin{figure}
-%        \begin{subfigure}{0.5\textwidth}
-%                \includegraphics[width=\linewidth]{./figures/Precision_UAV123.pdf}
-%        \end{subfigure}%
-%        \begin{subfigure}{0.5\textwidth}
-%                \includegraphics[width=\linewidth]{./figures/Success_UAV123.pdf}
-%        \end{subfigure}%
-%        \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the UAV123 dataset. UAV123 Dataset consists of $123$ video sequences captured from a micro UAV including large camera motion, low resolution objects, partial and full occlusions. Our tracker better fits to tracking from aerial platforms as the scale change in successive frames are not dramatic.}\label{fig:UAV123_DATASET}
-%\end{figure}
-%
-%\begin{figure}
-%        \begin{subfigure}{0.5\textwidth}
-%                \includegraphics[width=\linewidth]{./figures/Precision_OTB100.pdf}
-%        \end{subfigure}%
-%        \begin{subfigure}{0.5\textwidth}
-%                \includegraphics[width=\linewidth]{./figures/Success_OTB100.pdf}
-%        \end{subfigure}%
-%        \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures. }\label{fig:OTB100_DATASET}
-%\end{figure}
 
-\textbf{Overall Performance without Re-detection on UAV123 Dataset.} We compare the proposed tracker to other state-of-the-art high speed trackers using the \textit{Precision} and \textit{Success\:Rate} metrics. Precision is computed by thresholding the average euclidean distance between the ground truth and tracking output over the frames of one sequence. In precision, we rank the trackers based on the precision numbers at 20 pixels. The success rate metric evaluates the overlap between the ground truth and tracking output. The intersection-to-union ratio of two regions over the frames of one sequence. Finally, we count the number of frames with overlap larger than the success rate threshold and divide it by the number of frames. We compare our tracker to some other high-speed ($\geq$300 fps) state-of-the-art trackers including KCF\cite{henriques2015high}, CSK \cite{henriques2012exploiting}, STC\cite{zhang2014fast}, MOSSE\cite{bolme2010visual,henriques2015high}. Also, some relatively lower-speed ($\geq$50) trackers are used to evaluate the robustness of the proposed trackers. These trackers include SAMF\cite{li2014scale}, DSST\cite{danelljan2014accurate}, LCT\cite{ma2015long}, MEEM\cite{zhang2014meem} and Struck\cite{hare2012efficient}.
+\textbf{Overall Performance on UAV123 Dataset.} We compare the proposed tracker to other state-of-the-art high speed trackers using the \textit{Precision} and \textit{Success\:Rate} metrics. Precision is computed by thresholding the average euclidean distance between the ground truth and tracking output over the frames of one sequence. In precision, we rank the trackers based on the precision numbers at 20 pixels. The success rate metric evaluates the overlap between the ground truth and tracking output. The intersection-to-union ratio of two regions over the frames of one sequence. Finally, we count the number of frames with overlap larger than the success rate threshold and divide it by the number of frames. We compare our tracker to some other high-speed ($\geq$300 fps) state-of-the-art trackers including KCF\cite{henriques2015high}, CSK \cite{henriques2012exploiting}, STC\cite{zhang2014fast}, MOSSE\cite{bolme2010visual,henriques2015high}. Also, some relatively lower-speed ($\geq$50) trackers are used to evaluate the robustness of the proposed trackers. These trackers include SAMF\cite{li2014scale}, DSST\cite{danelljan2014accurate}, LCT\cite{ma2015long}, MEEM\cite{zhang2014meem} and Struck\cite{hare2012efficient}.
 Fig.~\ref{fig:UAV123_DATASET} shows the results on the UAV123 dataset. The E$n$KCF tracker outperforms the other methods in high-speed trackers category by $3\%$-$15\%$ at 20 pixels precision accuracy whereas it is only $5\%$ worse than SAMF, DSST and Struck on the same dataset although it is $10$-$20$ times faster than these trackers. On the other hand, the E$n$KCF does a decent job on approximating the scale of the target in highly efficient manner. This is proved by the fact that it ranks third best tracker in terms of \textit{area under curve} (AUC) value for the success rate plot. It outperforms the high speed trackers by about $20\%$-$25\%$ in AUC metric. Interestingly, it performs even better than most of the low speed trackers. For instance, it outperforms Struct and DSST by $5\%$ and $10\%$ while running at more than $30$ and $10$ times larger operation rate. 
 
+\textbf{Overall Performance on UAV123$\_$10fps Dataset.} 
 
-\textbf{Overall Performance without Re-detection on OTB100 Dataset.} In addition to UAV123 dataset, we test the E$n$KCF tracker on the OTB100 dataset to evaluate how good it generalizes to a traditional object tracking dataset. Again, it performs slightly better than the high speed trackers in precision. Interestingly, it outperforms the another correlation filter based tracker, DSST while running only $5\%$ behind of another low-speed scale adaptive SAMF tracker. As in UAV123 dataset, the E$n$KCF performs exceptionally in handling the scale changes. It is ranked as the fifth best tracker while being the second highest speed tracker behind MOSSE. It performs only around $2\%$ worse than SAMF and MEEM trackers in terms of AUC. These numbers prove that E$n$KCF is not only a good candidate for tracking on a UAV-based mobile platform but also mobile platforms on smart phones.
+\textbf{Overall Performance on OTB100 Dataset.} In addition to UAV123 dataset, we test the E$n$KCF tracker on the OTB100 dataset to evaluate how good it generalizes to a traditional object tracking dataset. Again, it performs slightly better than the high speed trackers in precision. Interestingly, it outperforms the another correlation filter based tracker, DSST while running only $5\%$ behind of another low-speed scale adaptive SAMF tracker. As in UAV123 dataset, the E$n$KCF performs exceptionally in handling the scale changes. It is ranked as the fifth best tracker while being the second highest speed tracker behind MOSSE. It performs only around $2\%$ worse than SAMF and MEEM trackers in terms of AUC. These numbers prove that E$n$KCF is not only a good candidate for tracking on a UAV-based mobile platform but also mobile platforms on smart phones.
 
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
