@@ -191,21 +191,26 @@ prior to deploy the algorithm.
 
 The contributions of this study are as follows.
 \begin{itemize}
-\item \textbf{Novel Single-Target Tracking in a Very High-Speed} Our
+\item \textbf{Novel Single-Target Tracking in a Very High-Speed ($\geq300$ fps) } Our
   algorithm, {\it E}nKCF, deploys an ensemble of KCF in turn to more
   efficiently address the scale variance and the dynamic maneuver of a
   target while perserving run-time performance as high as possible. To
   minimize any potential performance gap from transiting one KCF to
   another, we use a Bayes filter. The workflow of the  {\it E}nKCF can
-  be visualized in fig.~\ref{Workflow_figure}. 
+  be visualized in fig.~\ref{Workflow_figure_EnKCF}. 
 
-\item \textbf{Re-Detection} A target loss is inevitable in object
+\item \textbf{More Accurate Single-Target Tracking in a Relatively Lower-Speed ( $\geq 150$ fps)} Our second algorithm, 
+{\it E}nKCF2 leverages the flexibility of the ensemble of KCFs approach we propose. The original {\it E}nKCF is slighlty
+modified to perform more accurate in more challenging scenarios, particularly the ones with large ego-motion and object
+motion. We do not integrate the particle filter in {\it E}nKCF2 as we test it on a dataset (UAV123$\_$10fps) including sequences
+with large ego-motion on the UAV platform. The proposed framework can be seen in fig.~\ref{Workflow_figure_EnKCF2}.
+
+\begin{comment}\item \textbf{Re-Detection} A target loss is inevitable in object
   tracking. To cope with this, we developed a new target, re-detection
   that reliably detects when to lose the target and effectively
   re-detect the lost target. {\it How we can show how good our
     re-detection method is?}
 
-\begin{comment}
 \item We build a highly efficient ($\geq300$ fps) scale adaptive
   multiple kernelized correlation filter based tracker that
   outperforms the original KCF implementation with fixed scale
@@ -242,7 +247,14 @@ The contributions of this study are as follows.
 \begin{figure*}[!t]
 \includegraphics[width=\textwidth]{figures/Workflow_MKCF+PF.pdf}
 \caption{The workflow of the proposed {\it E}nKCF with a particle filter.}
-\label{Workflow_figure}
+\label{Workflow_figure_EnKCF}
+\end{figure*}
+
+\begin{figure*}[!t]
+\centering
+\includegraphics[width=0.75\textwidth]{figures/Workflow_EnKCF2+PF.pdf}
+\caption{The workflow of our EnKCF2 tracker that is more robust to large camera and fast object motion than our EnKCF tracker.}
+\label{Workflow_figure_EnKCF2}
 \end{figure*}
 
 In this paper, we extends the KCF in that multiple KCFs are deployed,
@@ -310,7 +322,6 @@ The \textit{target+large background} translation filter, $R_{t}^{L}$,
 is designed to run in right next frame after the scale filter,
 $R_s$. We deploy these two filters in this way because we want to
 minimize any drifts, which are likely to happen running only $R_{s}$.
-
 
 {\it Burak: Rewrite the following two sentences.}
 
@@ -600,6 +611,7 @@ outside of the scale filter ROI do not have weight correspondence in
 the confidence map. Also, it is more likely to get noisy translation
 estimation from the scale filter.
 
+<<<<<<< HEAD
 %----------------------------------------------------------------------
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
@@ -632,10 +644,6 @@ implementation, we employ $1000$ particles and use the
 \textit{efficient number of samples} metric shown below to determine
 whether we need to perform importance re-sampling or not to keep
 reasonable variance.
-\begin{equation}
-  \hat{N}_{eff} = \dfrac{1}{\sum_{i=1}^{P}(w_{p})^{2}}, 
-\end{equation}
- where $w$ represents the particles' weights and re-sampling is performed only if $\hat{N}_{eff}$ is smaller than three.
 
 \textbf{Features Selections.} We use the fast Histogram of Oriented
 Gradients (fHoG)\cite{felzenszwalb2010object} and
@@ -666,6 +674,7 @@ feature modalities.
 \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures.}
 \label{fig:OTB100_DATASET}
 \end{figure}
+
 %\begin{figure}
 %        \begin{subfigure}{0.5\textwidth}
 %                \includegraphics[width=\linewidth]{./figures/Precision_UAV123.pdf}
