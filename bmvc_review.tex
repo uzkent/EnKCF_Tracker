@@ -197,13 +197,11 @@ The contributions of this study are as follows.
   target while perserving run-time performance as high as possible. To
   minimize any potential performance gap from transiting one KCF to
   another, we use a Bayes filter. The workflow of the  {\it E}nKCF can
-  be visualized in fig.~\ref{Workflow_figure_EnKCF}. 
+  be visualized in fig.~\ref{Workflow_figure_EnKCF}. The proposed tracker is tested on UAV123\footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}} and OTB100\footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
+  datasets. 
 
-\item \textbf{More Accurate Single-Target Tracking in a Relatively Lower-Speed ( $\geq 150$ fps)} Our second algorithm, 
-{\it E}nKCF2 leverages the flexibility of the ensemble of KCFs approach we propose. The original {\it E}nKCF is slighlty
-modified to perform more accurate in more challenging scenarios, particularly the ones with large ego-motion and object
-motion. We do not integrate the particle filter in {\it E}nKCF2 as we test it on a dataset (UAV123$\_$10fps) including sequences
-with large ego-motion on the UAV platform. The proposed framework can be seen in fig.~\ref{Workflow_figure_EnKCF2}.
+\item \textbf{Slight Modification of the proposed EnKCF for Handling Large Motion} Our second algorithm, 
+{\it E}nKCF2 leverages the flexibility of the ensemble of KCFs approach we propose. The original {\it E}nKCF is slighlty modified to track fast motions and handle large ego-motion. We do not integrate the particle filter in {\it E}nKCF2 as we test it on a temporally downsampled UAV123 dataset (UAV123$\_$10fps) including sequences with large ego-motion on the low frame rate UAV platform. Particle Filter can be deployed in case the camera motion is known. The proposed framework can be seen in fig.~\ref{Workflow_figure_EnKCF2}.
 
 \begin{comment}\item \textbf{Re-Detection} A target loss is inevitable in object
   tracking. To cope with this, we developed a new target, re-detection
@@ -243,7 +241,6 @@ with large ego-motion on the UAV platform. The proposed framework can be seen in
 %---------------------------------------------------------------------- 
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
 %---------------------------------------------------------------------- 
-
 \begin{figure*}[!t]
 \includegraphics[width=\textwidth]{figures/Workflow_MKCF+PF.pdf}
 \caption{The workflow of the proposed {\it E}nKCF with a particle filter.}
@@ -253,7 +250,7 @@ with large ego-motion on the UAV platform. The proposed framework can be seen in
 \begin{figure*}[!t]
 \centering
 \includegraphics[width=0.75\textwidth]{figures/Workflow_EnKCF2+PF.pdf}
-\caption{The workflow of our EnKCF2 tracker that is more robust to large camera and fast object motion than our EnKCF tracker.}
+\caption{The workflow of our {\it E}nKCF2 tracker designed to handle large object motion and ego-motion.}
 \label{Workflow_figure_EnKCF2}
 \end{figure*}
 
@@ -284,7 +281,7 @@ filter, $R_{s}$, tighter reduces the size of the template for the
 elementwise multiplication, resulting in a scale estimation in a
 higher speed.
 
-After Heriques and his colleagues' presented impressive tracking
+After Henriques and his colleagues' presented impressive tracking
 results of KCF \cite{henriques2015high}, many variation of KCF were
 investigated. In particular, \cite{ma2015long} and
 \cite{danelljan2014accurate} used a scale filter to learn the target
@@ -316,41 +313,11 @@ detail this at the experimental section later.
 \label{fig:Filters}
 \end{figure}
 
-The order of deploying these three KCFs is {\it Burak: Answer this}
-
-The \textit{target+large background} translation filter, $R_{t}^{L}$,
-is designed to run in right next frame after the scale filter,
-$R_s$. We deploy these two filters in this way because we want to
-minimize any drifts, which are likely to happen running only $R_{s}$.
-
-{\it Burak: Rewrite the following two sentences.}
-
-Considering a large ROI for $R_{t}^{L}$ can degrade its performance
-due to information loss resulting from ROI resizing.
-
-On the other hand, only HoG features are used in $R_{t}^{S}$ as it
-focuses on a smaller ROI, giving us more discriminative HoG
-features. 
-
-The reason why our {\it E}nKCF comes with two KCF for translation {\it
-  Burak: Answer this.}
-
-In our framework, $R_{t}^{S}$ addresses the absence of scale
-adaptation module in $R_{t}^{L}$ and $R_{t}^{S}$ whereas $R_{t}^{L}$
-focuses on addressing the absence of translation estimation module in
-$R_{S}$. 
-
-
-$R_{t}^{S}$, on the other hand, focuses on the shape features
-of the target that is not fully exploited in $R_{t}^{L}$ and
-$R_{t}^{S}$. For this reason, we employ \textit{HoG} features in
-$R_{t}^{S}$ and \textit{HoG} and \textit{Color} features in
-$R_{t}^{L}$. Fig.~\ref{Workflow_figure} displays the proposed tracking
-framework called Ensemble of KCFs {\it E}nKC. Also, the pseudo-code of
+The order of deploying these three KCFs is critical as they need to run with full coherency to perfom robust tracking. The \textit{target+large background} translation filter, $R_{t}^{L}$, is designed to run in right next frame after the scale filter, $R_s$, which is applied at every $n=5$ frames. We deploy these two filters in this way because we want to minimize any drifts, which are likely to happen running only $R_{s}$. Finally, $R_{t}^{S}$ is applied in two consecutive frames before $R_{S}$ and right after two consecutive frames implementation of $R_{t}^{L}$. This way, we can integrate more discriminative shape features that can not be fully learned by $R_{t}^{L}$ as it contains contribution of large background in the learned model. On the other hand, $R_{t}^{L}$ uses shape and color information together to do a better job in recovering from any drifts due to application of $R_{s}$ in previous frame. In this framework, $R_{t}^{S}$ addresses the absence of scale adaptation module in $R_{t}^{L}$ and $R_{t}^{S}$ whereas $R_{t}^{L}$ focuses on addressing the absence of translation estimation module in $R_{S}$ and $R_{t}^{S}$ addresses the weakness of $R_{t}^{L}$ that it can not learn very useful shape features alone. Fig.~\ref{Workflow_figure_EnKCF} displays the proposed high-speed tracking framework called Ensemble of KCFs {\it E}nKC. Also, the pseudo-code of
 the proposed {\it E}nKC is shown in alg.~\ref{alg:MKCF}.
 
 \begin{algorithm}
-	\caption{The EnKCF Tracking Algorithm.}\label{alg:MKCF}
+	\caption{The {\it E}nKCF Tracking Algorithm.}\label{alg:MKCF}
 	\begin{algorithmic}[1]
 	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n = 5$,
 	\State \textbf{Output} : 
@@ -562,56 +529,40 @@ function gives us the estimated translation of the object from time
 step $t$-$1$ to $t$.
 
 \subsection{Particle Filter} \label{sc:PF}
-The proposed MKCF algorithm can cause undesired drift and noise in
-tracking due to independent application of the correlation filters. To
-mitigate the drift effect and reduce the noise, a Bayes Filter
-representing the evolution of target's motion can be added into the
-MKCF tracking framework. In this study, we consider a variant of a
+The proposed {\it E}nKCF algorithm can cause undesired drift and noise in
+tracking due to independent and less frequent application of the correlation filters. To
+mitigate the drift effect further and reduce the noise, a Bayes Filter
+representing the evolution of target's motion can be added into our
+{\it E}nKCF tracking framework. To achieve this, we consider a variant of a
 Bayes Filter, \textit{Particle Filter}. The Particle Filter is a
-Sequential Monte Carlo method that can approximate posterior
-probability density functions (pdf) of a target motion. The
-approximation becomes optimal with the infinite number of particles,
+Sequential Monte Carlo method that uses a number of sample points to represent
+the posterior probability density functions (pdf) of the target motion. 
+The approximation becomes optimal with the infinite number of particles,
 however, its run-time complexity grows exponentially with the number
 of elements in the state space matrix, $X_{t}$. As the focus of this
 study is to design a high speed tracker, we keep the number of state
-space elements low and implement computationally cheap \textit{Weight
+space elements low and implement computationally efficient \textit{Weight
   Function} and \textit{Importance-Resampling} modules. We represent
 the state space matrix as $X_{t} = \lbrace x,y,V_{x},V_{y}\rbrace$
 where $x$ and $y$ are the centroid of the target and $V$ represents
-the velocity components. We transit the particles with the well-known
-first order Constant Velocity model. The centroid components are
-applied Gaussian Noise whereas the velocity components are assigned
-uniform noise representative of most of the objects. The observation
-likelihood is modeled based on the confidence map of
-$R_{t}^{L}$,$R_{t}^{S}$, and $R_{s}$. It can also be modeled based on
-the euclidean distance between particle's centroid to the peak of the
-confidence maps, however, we believe that the former approach could
-result in further drifts in the case of multi-modal distributions. The
-weights for the particles are computed with the bilinear interpolation
-method.
+the velocity components. We transit the particles with the first order Constant Velocity model. The centroid components are applied Gaussian Noise whereas the velocity components are assigned
+uniform noise representative of most of the objects in our tests. The observation
+likelihood is formulated based on the confidence map of $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$. 
+The weights for the particles are computed as
 \begin{equation}
-	w_{p_{t}}(x_{t},y_{t}) = \dfrac{y_{R}(x_{t}-1,y_{t}-1)+y_{R}(x_{t}+1,y_{t}+1){y_{R}(x_{t}+1,y_{t}-1)+y_{R}(x_{t}-1,y_{t}+1)}}{4}
+	w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{N} y_{R}(x_{t}-i,y_{t}-j)
 \end{equation}
-where $w_{p}$ denotes the weight of the particle. The importance
-re-sampling module is triggered when the number of effective particles
-is smaller than a pre-defined threshold [Cite - Effective Number
-  Samples Metric] to avoid variance getting too small. Re-sampling is
-implemented with highly efficient low-variance ratio method
-[cite]. Finally, the expected mean of the approximated posterior pdf
-is computed as
+where $w_{p}$ denotes the weight of the particle $p$ at time $t$ and $N$ denotes the size of the window in consideration. We can also use the spatial distance of particles to the peak of the confidence map, however, we believe that this approach could result in further drifts in the case of multi-modal distributions. 
+ 
+The importance re-sampling module is triggered when the number of effective particles
+is smaller than a pre-defined threshold to avoid variance getting too small \cite{thrun2005probabilistic}. Re-sampling is implemented with efficient low-variance ratio method \cite{thrun2005probabilistic}. Finally, the expected mean of the approximated posterior pdf is computed as
 \begin{equation}
-	\hat{X}_{t} = \sum_{p=1}^{P}w_{p_{t}} X_{t}
+	\hat{X}_{t} = \sum_{p=1}^{P}w_{p_{t}} X_{t}.
 \end{equation}
+The particles are assigned equal weight after the importance re-sampling step in approximating the posterior pdf. It should be emphasized that we skip importance re-sampling step in the scale filter 
+operation as the scale filter contains \textit{target-only} area. In this case, the particles
+outside of the scale filter ROI do not have correspondence in the confidence map. Additionally, it is more likely to get noisy confidence map from $R_{s}$. Finally, at every iteration we check the variance in the velocity components of the particles to re-assign velocities from uniform initial distribution to keep variance high enough.
 
-The particles are assigned equal weight ($\dfrac{1}{P}$) after the
-importance re-sampling step. It should be emphasized that we skip
-importance re-sampling step in the scale filter operation as the scale
-filter contains \textit{target-only} area. In this case, the particles
-outside of the scale filter ROI do not have weight correspondence in
-the confidence map. Also, it is more likely to get noisy translation
-estimation from the scale filter.
-
-<<<<<<< HEAD
 %----------------------------------------------------------------------
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
@@ -661,7 +612,7 @@ feature modalities.
 \bmvaHangBox{\includegraphics[width=4.00cm]{./figures/Precision_UAV123.pdf}}
 \bmvaHangBox{\includegraphics[width=4.0cm]{./figures/Success_UAV123.pdf}}\\
 \end{tabular}
-\caption{Evaluation and comparison of the proposed E$n$KCF tracker on the UAV123 dataset. UAV123 Dataset consists of $123$ video sequences captured from a micro UAV including large camera motion, low resolution objects, partial and full occlusions. Our tracker better fits to tracking from aerial platforms as the scale change in successive frames are not dramatic.}
+\caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the UAV123 dataset. UAV123 Dataset consists of $123$ video sequences captured from a micro UAV including large camera motion, low resolution objects, partial and full occlusions. Our tracker better fits to tracking from aerial platforms as the scale change in successive frames are not dramatic.}
 \label{fig:UAV123_DATASET}
 \end{figure}
 
@@ -671,7 +622,7 @@ feature modalities.
 \bmvaHangBox{\includegraphics[width=4.00cm]{./figures/Precision_OTB100.pdf}}
 \bmvaHangBox{\includegraphics[width=4.0cm]{./figures/Success_OTB100.pdf}}\\
 \end{tabular}
-\caption{Evaluation and comparison of the proposed E$n$KCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures.}
+\caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures.}
 \label{fig:OTB100_DATASET}
 \end{figure}
 
@@ -695,7 +646,7 @@ feature modalities.
 %        \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures. }\label{fig:OTB100_DATASET}
 %\end{figure}
 
-\textbf{Overall Performance without Re-detection on UAV123 Dataset.}
+\textbf{Overall Performance on UAV123 Dataset.}
 We compare the proposed tracker to other state-of-the-art high speed
 trackers using the \textit{Precision} and \textit{Success\:Rate}
 metrics. Precision is computed by thresholding the average euclidean
@@ -715,11 +666,11 @@ the proposed trackers. These trackers include SAMF\cite{li2014scale},
 DSST\cite{danelljan2014accurate}, LCT\cite{ma2015long},
 MEEM\cite{zhang2014meem} and Struck\cite{hare2012efficient}.
 Fig.~\ref{fig:UAV123_DATASET} shows the results on the UAV123
-dataset. The E$n$KCF tracker outperforms the other methods in
+dataset. The {\it E}nKCF tracker outperforms the other methods in
 high-speed trackers category by $3\%$-$15\%$ at 20 pixels precision
 accuracy whereas it is only $5\%$ worse than SAMF, DSST and Struck on
 the same dataset although it is $10$-$20$ times faster than these
-trackers. On the other hand, the E$n$KCF does a decent job on
+trackers. On the other hand, the {\it E}nKCF does a decent job on
 approximating the scale of the target in highly efficient manner. This
 is proved by the fact that it ranks third best tracker in terms of
 \textit{area under curve} (AUC) value for the success rate plot. It
@@ -729,18 +680,20 @@ speed trackers. For instance, it outperforms Struct and DSST by $5\%$
 and $10\%$ while running at more than $30$ and $10$ times larger
 operation rate.
 
-\textbf{Overall Performance without Re-detection on OTB100 Dataset.}
-In addition to UAV123 dataset, we test the E$n$KCF tracker on the
+\textbf{Overall Performance on UAV123$\_$10fps Dataset.}
+
+\textbf{Overall Performance on OTB100 Dataset.}
+In addition to UAV123 dataset, we test the {\it E}nKCF tracker on the
 OTB100 dataset to evaluate how good it generalizes to a traditional
 object tracking dataset. Again, it performs slightly better than the
 high speed trackers in precision. Interestingly, it outperforms the
 another correlation filter based tracker, DSST while running only
 $5\%$ behind of another low-speed scale adaptive SAMF tracker. As in
-UAV123 dataset, the E$n$KCF performs exceptionally in handling the
+UAV123 dataset, the {\it E}nKCF performs exceptionally in handling the
 scale changes. It is ranked as the fifth best tracker while being the
 second highest speed tracker behind MOSSE. It performs only around
 $2\%$ worse than SAMF and MEEM trackers in terms of AUC. These numbers
-prove that E$n$KCF is not only a good candidate for tracking on a
+prove that {\it E}nKCF is not only a good candidate for tracking on a
 UAV-based mobile platform but also mobile platforms on smart phones.
 
 %---------------------------------------------------------------------- 
