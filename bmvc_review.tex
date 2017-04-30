@@ -626,26 +626,6 @@ feature modalities.
 \label{fig:OTB100_DATASET}
 \end{figure}
 
-%\begin{figure}
-%        \begin{subfigure}{0.5\textwidth}
-%                \includegraphics[width=\linewidth]{./figures/Precision_UAV123.pdf}
-%        \end{subfigure}%
-%        \begin{subfigure}{0.5\textwidth}
-%                \includegraphics[width=\linewidth]{./figures/Success_UAV123.pdf}
-%        \end{subfigure}%
-%        \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the UAV123 dataset. UAV123 Dataset consists of $123$ video sequences captured from a micro UAV including large camera motion, low resolution objects, partial and full occlusions. Our tracker better fits to tracking from aerial platforms as the scale change in successive frames are not dramatic.}\label{fig:UAV123_DATASET}
-%\end{figure}
-%
-%\begin{figure}
-%        \begin{subfigure}{0.5\textwidth}
-%                \includegraphics[width=\linewidth]{./figures/Precision_OTB100.pdf}
-%        \end{subfigure}%
-%        \begin{subfigure}{0.5\textwidth}
-%                \includegraphics[width=\linewidth]{./figures/Success_OTB100.pdf}
-%        \end{subfigure}%
-%        \caption{Evaluation and comparison of the proposed E$n$KCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures. }\label{fig:OTB100_DATASET}
-%\end{figure}
-
 \textbf{Overall Performance on UAV123 Dataset.}
 We compare the proposed tracker to other state-of-the-art high speed
 trackers using the \textit{Precision} and \textit{Success\:Rate}
@@ -680,7 +660,23 @@ speed trackers. For instance, it outperforms Struct and DSST by $5\%$
 and $10\%$ while running at more than $30$ and $10$ times larger
 operation rate.
 
-\textbf{Overall Performance on UAV123$\_$10fps Dataset.}
+\textbf{Overall Performance on UAV123$\_$10fps Dataset.} We test our slightly modified version of the 
+{\it E}nKCF, {\it E}nKCF2, on the UAV123$\_$10fps dataset. This dataset is downsampled at $10$ fps version 
+of the UAV123 dataset. The original dataset is already dominated by fast object motion and large ego-motion. With downsampling, 
+it becomes very challenging with object and ego-motion getting drastically larger. The performance of the proposed {\it E}nKCF2 tracker
+and other already mentioned trackers can be seen in fig.~\ref{fig:UAV123_10fpsDATASET}. Our tracker outperforms other high-speed correlation filter based 
+trackers including KCF, DSST by about $15\%$-$20\%$ whereas having similar precision rate to SAMF. On the other hand, it does decent job in scale estimation. It ranks as $4$th
+in AUC. However, it is $20$-$30$ faster than the ones with higher AUC. 
+
+\begin{figure}
+\centering
+\begin{tabular}{cc}
+\bmvaHangBox{\includegraphics[width=4.00cm]{./figures/Precision_UAV123_10fps.pdf}}
+\bmvaHangBox{\includegraphics[width=4.0cm]{./figures/Success_UAV123_10fps.pdf}}\\
+\end{tabular}
+\caption{Evaluation and comparison of the proposed {\it E}nKCF2 tracker on the UAV123$\_$ dataset in terms of the precision and success rates. This dataset consists of temporally downsampled $123$ video sequences captured from a micro UAV.}
+\label{fig:UAV123_10fpsDATASET}
+\end{figure}
 
 \textbf{Overall Performance on OTB100 Dataset.}
 In addition to UAV123 dataset, we test the {\it E}nKCF tracker on the
