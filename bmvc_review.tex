@@ -217,10 +217,10 @@ The contributions of this study are as follows.
 \item \textbf{Slight Modification of the proposed {\it E}nKCF for
   Handling Large Motion} Our second algorithm, {\it E}nKCF2 leverages
   the flexibility of the ensemble of KCFs approach we propose. The
-  original {\it E}nKCF is slighlty modified to track in low frame rate
+  original {\it E}nKCF is slightly modified to track in low frame rate
   videos ($10$fps) dominated by large ego-motion. We do not integrate
   the particle filter in {\it E}nKCF2 as we test it on a temporally
-  downsampled UAV123 dataset (UAV123$\_$10fps) including sequences
+  down-sampled UAV123 dataset (UAV123$\_$10fps) including sequences
   with large ego-motion on a UAV platform. Particle Filter can be
   deployed in case the camera motion is known. The run-time
   performance decreases to $150$ fps, however, ratio of the video
@@ -298,7 +298,7 @@ of the region of interest (ROI) covered by each of three filters. We
 believe that a filter for learning a target's translation should
 include its background. In addition, making the ROI for the scale
 filter, $R_{s}$, tighter reduces the size of the template for the
-elementwise multiplication, resulting in a scale estimation in a
+element-wise multiplication, resulting in a scale estimation in a
 higher speed.
 \begin{figure}[!h]
 \centering
@@ -344,7 +344,7 @@ Filters updated every five frame and every frame display very large correlation.
 \end{figure}
 
 The order of running these three KCFs is important as each of these
-filters aims at addressing different chanllenges while perserving
+filters aims at addressing different challenges while preserving
 run-time performance as fast as possible. The \textit{target+large
   background} translation filter, $R_{t}^{L}$, is intended to run
 right after the scale filter, $R_s$, runs which is applied at every
@@ -367,9 +367,9 @@ estimate the target's translation and recover from any potential
 drifts. Another translation filter, $R_{t}^{S}$, on the other hand, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
 noisy shape features due to its large search area. Figure
-\ref{Workflows} illustrates the workflow of the proposed
+\ref{Workflows} illustrates the work-flow of the proposed
 algorithm and alg.\ref{alg:MKCF} shows the pseudo-code of {\it
-  E}nKCF. We do not have a seperate pseudeo-code for {\it E}nKCF2 as there are only two differences between 
+  E}nKCF. We do not have a separate pseudo-code for {\it E}nKCF2 as there are only two differences between 
   {\it E}nKCF and {\it E}nKCF2. First, the {\it E}nKCF2 runs $R_{t}^{L}$ every frame
 to better tackle large ego-motion at low video frame rates. Second, we remove the particle filter in the {\it E}nKCF2 
 tracker due to large ego-motion. In the following section, we will briefly mention the theory
@@ -426,17 +426,17 @@ The Kernelized Correlation Filter tracker has recently been
 increasingly popular due to its operation at hundreds of frames per
 second with state-of-the-art tracking capabilities even in challenging
 cases \cite{henriques2012exploiting,henriques2015high}. Its computational efficiency arises from its use of the
-discrete fourier transform of the circulant matrix and frequency
+discrete Fourier transform of the circulant matrix and frequency
 domain. The KCF tracker minimizes the regularized ridge regression function shown below.
 \begin{equation}
 E(h) = \frac{1}{2}||y-\sum_{c=1}^{C}h_{c}*x_{c}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||h_{c}||^{2}
 \label{eq:Closedform_RidgeReg}
 \end{equation}
-where $y$ represents the desired continous response whereas $h$ and
+where $y$ represents the desired continuous response whereas $h$ and
 $x_{c}$ represents the learned correlation filter and training
 template for the given channel. The $c$ parameter included in
 \cite{henriques2015high,galoogahi2013multi} makes it possible to
-integrate multi-channel features such as HoG and colour into the ridge
+integrate multi-channel features such as HoG and color into the ridge
 regression function. The closed-form solution for the
 eq.~\ref{eq:Closedform_RidgeReg} can be obtained by setting the
 derivative of $E$ w.r.t $w$ to $0$. 
@@ -452,14 +452,14 @@ w = (X^{H}X+\lambda I)^{-1}X^{T}y
 \end{equation}
 where $X^{H}$ and $\lambda$represent the complex-conjugate of training
 samples and regularization term. More documentation on the spatial and
-fourier domain solutions can be found in \cite{henriques2015high}. The
-MOSSE tracker uses one training sample centred at estimated position
+Fourier domain solutions can be found in \cite{henriques2015high}. The
+MOSSE tracker uses one training sample centered at estimated position
 of the target. This framework does not include enough background
 information into the learned model,$w$. The application of the
 circulant matrix theorem into the eq.~\ref{eq:Closedform_RidgeReg}
 makes it possible to include many background patches at a similar
 computational complexity. A circulant matrix includes the circularly
-shifted patches of the positive training sample $x$ by a cylic shift
+shifted patches of the positive training sample $x$ by a cyclic shift
 operator.
 
 %By applying shifting operation to the base sample, we can generate the circulant
@@ -555,11 +555,11 @@ Finally, detection step in multi-channel KCF framework is performed as
 \begin{equation}
 r(z) = F^{-1}(\hat{k}^{xz} \odot \hat{\alpha})
 \end{equation}
-where $r$ denotes the correlation response at all cylic shifts of the
+where $r$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
 
 \subsection{Particle Filter for Smoothing Transition of KCFs} \label{sc:PF}
-As explained earlier, the {\it E}nKCF upates a target's translation at
+As explained earlier, the {\it E}nKCF updates a target's translation at
 every other $k$ frames, particularly for estimating the target's
 scale. Although the strategy of updating every other $k$th frames will
 result in an optimal run-time performance, this may lead any potential
@@ -585,7 +585,7 @@ w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{N} y_{R}(x_{t}-i,y_{t}-j)
 \end{equation}
 where $w_{p}$ denotes the weight of the particle $p$ at time $t$ and
 $N$ denotes the size of the window as that of a confidence
-map. Alternatively one can also use the euclidean distance of
+map. Alternatively one can also use the Euclidean distance of
 particles to the location of maximum response of the confidence
 map. This alternative, however, would result in drifts. 
 
@@ -709,10 +709,10 @@ scale adaptive SAMF tracker.
 
 \textbf{Performance on UAV123$\_$10fps Dataset.} We test our
 slightly modified version of the {\it E}nKCF, {\it E}nKCF2, on the
-UAV123$\_$10fps dataset. This dataset is downsampled at $10$ fps
+UAV123$\_$10fps dataset. This dataset is down-sampled at $10$ fps
 version of the UAV123 dataset. The original dataset is already
 dominated by fast object motion and large ego-motion. With
-downsampling, it becomes very challenging with object and ego-motion
+down-sampling, it becomes very challenging with object and ego-motion
 getting drastically larger. The performance of the proposed {\it
   E}nKCF2 tracker and other already mentioned trackers can be seen in
 fig.~\ref{fig:UAV123_10fpsDATASET}. Our tracker outperforms other
@@ -742,28 +742,30 @@ second in AUC while running about $150$ faster than the MUSTER tracker.
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
 %---------------------------------------------------------------------- 
-Running a computer vision algorithm would be very attractive for any
-mobile, unmanned robotic solutions on real-world applications. To make
-such applications practical, those algorithms should run faster with
-small footprint of computation resouce consumption. To this end, we
-proposed an extension of KCF that deploys three KCFs in turn to
-address the scale change and dynamic maneuvers of a target. The way we
-ran three KCFs in a harmonious way optimal in a sense that efficiently
-handled the scale change and effectively learned the translation of
-the target. However, by doing so, our algorithm may introduce any
-potential drifts. To prevent this from happening, we developed a Bayes
-filter, particle filter, to smooth the transition between three
-KCFs. In particular, the particle filter estimated the target's pixel
-coordinates using information about the target's motion observed over
-frames. Experimental results showed that the performance of ours are
-70.10\% for precision on 20 pixels and 53.00\% for success rate for
-OTB100 data, and 54.50\% and 40.2\% for UAV123 data. These results
-confirmed that our method outperformed the existing ones over 5\% on
-precision on 20 pixels and 10-20\% on AUC on average. Our
-implementation ran at 340 fps for OTB100 and at 416 fps for UAV123
-data that is faster than DCF (292 fps) for OTB100 and KCF (292 fps),
-DCF (457 fps) for UAV123.
-
+Running a computer vision algorithm would be economically and
+practically, very attractive for any mobile, unmanned robotic
+solutions on real-world applications. To make such pipelines more
+realistic, however, those algorithms should run faster with small
+footprint of computation resource consumption. To make an object
+tracking algorithm with these practical requirements available, we
+proposed an extension of KCF that essentially deploys three KCFs, in
+turn, to address the scale change and dynamic maneuvers of a
+target. The way we ran three KCFs in a harmonious way optimal in a
+sense that efficiently handled the scale change and effectively
+learned the translation of the target. However, by doing so, our
+algorithm may introduce any potential drifts. To prevent this from
+happening, we developed a Bayes filter, particle filter, to smooth the
+transition between three KCFs. In particular, the particle filter
+estimated the target's pixel coordinates using information about the
+target's motion observed over frames. We used two publicly available
+dataset to evaluate the performance of the proposed algorithm and
+found that the performance of ours are 70.10\% for precision on 20
+pixels and 53.00\% for success rate for OTB100 data, and 54.50\% and
+40.2\% for UAV123 data. On average our method outperformed the
+existing ones over 5\% on precision on 20 pixels and 10-20\% on AUC on
+average. Our implementation ran at 340 fps for OTB100 and at 416 fps
+for UAV123 data that is faster than DCF (292 fps) for OTB100 and KCF
+(292 fps), DCF (457 fps) for UAV123. 
 %--------------
 %\section*{Acknowledgements}
 %put stuff here for the accepted , but not the ICCV version
