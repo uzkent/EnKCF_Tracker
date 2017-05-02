@@ -684,18 +684,23 @@ slow, but a bit better in precision. For example, for AUC, {\it E}nKCF
 outperformed Struct and DSST by $5\%$ and $10\%$ while running at more
 than $10$ and $30$ times faster.
 
-\textbf{Performance on OTB100 Dataset.}
-In addition to UAV123 dataset, we test the {\it E}nKCF tracker on the
-OTB100 dataset to evaluate how good it generalizes to a traditional
-object tracking dataset. Again, it performs slightly better than the
-high speed trackers in precision. Interestingly, it outperforms the
-another correlation filter based tracker, DSST while running only
-$5\%$ behind of another low-speed scale adaptive SAMF tracker as shown in fig.~\ref{fig:UAV123_OTB100_DATASET}. As in
-UAV123 dataset, the {\it E}nKCF performs exceptionally in handling the
-scale changes. It is ranked as the third best tracker while being the
-second highest speed tracker behind MOSSE. These numbers
-prove that {\it E}nKCF is not only a good candidate for tracking on a
-UAV-based mobile platform but also mobile platforms on smart phones.
+\textbf{Performance on OTB100 Dataset.}  We evaluated the performance
+of the {\it E}nKCF tracker on the OTB100 dataset, and observed a
+performance similar to that of UAV123 data. Figure
+\ref{fig:UAV123_OTB100_DATASET} shows the results on the OTB100
+dataset. For the precision metric, {\it E}nKCF performed slightly
+better than most of tracking algorithms in high-speed
+trackers. Interestingly, it outperformed another correlation filter
+based tracker, DSST, but performing $5\%$ behind of another low-speed
+scale adaptive SAMF tracker. 
+
+
+As in UAV123 dataset, the {\it E}nKCF
+performs exceptionally in handling the scale changes. It is ranked as
+the third best tracker while being the second highest speed tracker
+behind MOSSE. These numbers prove that {\it E}nKCF is not only a good
+candidate for tracking on a UAV-based mobile platform but also mobile
+platforms on smart phones.
 \begin{figure}[!h]
 \centering
 \begin{tabular}{ccc}
