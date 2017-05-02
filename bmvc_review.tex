@@ -370,9 +370,12 @@ estimate the target's translation and recover from any potential
 drifts. Another translation filter, $R_{t}^{S}$, on the other hand, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
 noisy shape features due to its large search area. Figure
-\ref{Workflow_figure_EnKCF} illustrates the workflow of the proposed
+\ref{Workflows} illustrates the workflow of the proposed
 algorithm and alg.\ref{alg:MKCF} shows the pseudo-code of {\it
-  E}nKCF. In the following section, we will briefly mention the theory
+  E}nKCF. We do not have a seperate pseudeo-code for {\it E}nKCF2 as there are only two differences between 
+  {\it E}nKCF and {\it E}nKCF2. First, the {\it E}nKCF2 runs $R_{t}^{L}$ every frame
+to better tackle large ego-motion at low video frame rates. Second, we remove the particle filter in the {\it E}nKCF2 
+tracker due to large ego-motion. In the following section, we will briefly mention the theory
 behind the KCF.
 
 \begin{algorithm}
@@ -637,10 +640,8 @@ developing an algorithm for mobile, embedded robotic applications, it
 is important to compare the performance of the proposed algorithm with
 those of the state-of-the-art in nominal dataset for comparison. To
 this end, we chose the OTB100 data that contains the videos recorded
-from smart phones and typical cameras in perspective view.
-
-{\it Burak: What does this mean?}  Finally, the {\it E}nKCF2 is tested
-on temporally downsampled version of UAV123 dataset.
+from smart phones and typical cameras in perspective view. Finally, the {\it E}nKCF2 is tested
+on temporally down-sampled version of the UAV123 dataset which is named UAV123$\_$10fps dataset.
 
 \textbf{Finding Optimal Hyperparameters} Each of three KCFs in {\it
   E}nKCF is designed for addressing a specific challenge of a single,
@@ -652,30 +653,19 @@ the estimated state of the particle filter are primarily used to
 estimate the scale and translation. Because of this, we set the
 learning rates ($\beta$) of individual filters, $R_{t}^{L}$,
 $R_{t}^{S}$, and $R_{s}$ differently as $0.020$, $0.020$ and
-$0.010$. 
-
-{\it Burak: This is a dangling sentence.} The desired response and
-hanning window for each KCF is shown in fig.~\ref{fig:Filters}.
-
-
+$0.010$. The desired template response and hanning window for each KCF is shown in fig.~\ref{fig:Filters}.
 For the kernel of the Gaussian neighboring function, we empirically
 found the optimal values of $\alpha$ as $0.6$, $0.4$, and $0.4$ for
 $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$, and the learning rate as $0.12$
 for $R_{t}^{L}$. 
 
-{\it Burak: Did we even mention whether $R_{t}^{L}$ runs on every
-  frame? This might confuse others because all I remembered is we use
-  each of KCFs at every other $k$ or $n$ frames.}
-
-
-For the particle filter implementation, we found $1000$ is the optimal
-number of particles, 
-
-
-{\it Burak: ?}
-and use the \textit{efficient number of samples}
-metric shown below to determine whether we need to perform importance
-re-sampling or not to keep reasonable variance.
+We tuned the number of particles in the particle filter to $1000$ after carrying out experiments, 
+The re-sampling is only performed when the \textit{efficient number of samples} (eq.~\ref{eq:Neff_PF}) is lower than a
+pre-defined threshold. This way, we can continuously keep reasonable variance among particles.
+\begin{equation}
+	\hat{N}_{eff} \approx \dfrac{1}{\sum_{p=1}^{P}w_{p}^{2}}
+	\label{eq:Neff_PF}
+\end{equation}
 
 \textbf{Features Selections.} As each of three KCFs in the {\it E}nKCF
 has different goals to accomplish, we used different features for each
@@ -720,6 +710,11 @@ truth and that of an tracking algorithm output.
   about precision, but I don't see any tables or anything else to rank
   the algorithms based on the precision at 20 pixels.}
 
+{\it YoungWoo : Trackers are ranked in the legend in the graphs - the numbers next 
+to each tracker is precision at 20 px and AUC for the success rate. It is how people rank
+trackers in precision and success plots. I agree with you that we can have an additional table. Let me know what
+you think about it now.} 
+
 In precision, we rank the trackers based on the precision numbers at
 20 pixels. 
 
@@ -729,20 +724,24 @@ than a given threshold. The overlap is specifically computed by the
 Intersection-Over-Union (IoU) between a tracking output and that of
 the ground truth. Given the number of the correct frames based an IoU
 threshod, the success rate is the ratio of the correct frames to the
-number of the total frames for testing. 
+number of the total frames for testing.  In the success rate plots, trackers are
+ranked based on AUC scores.
 
 {\it Burak: After you remove some of the trackers, replace that number
   with ``some'' at the below as well as removing their names from the
   following paragraph.}
 
-We compare our tracker to some other high-speed ($\geq$300 fps)
+{\it YoungWoo :  I thought we were going to do that tomorrow. I have generated figures and 
+I can easily remove any ones. SRDCF and MEEM are the top two as of now. I am working on removing them as of now. Please 
+consider that we do not have SRDCF and MEEM while you are editing the results section.}
+
+We compare our tracker to other high-speed ($\geq$300 fps)
 state-of-the-art trackers including KCF\cite{henriques2015high}, CSK
 \cite{henriques2012exploiting}, STC\cite{zhang2014fast},
 MOSSE\cite{bolme2010visual,henriques2015high}. Also, some relatively
 lower-speed ($\geq$50) trackers are used to evaluate the robustness of
 the proposed trackers. These trackers include SAMF\cite{li2014scale},
-DSST\cite{danelljan2014accurate}, LCT\cite{ma2015long},
-MEEM\cite{zhang2014meem} and Struck\cite{hare2012efficient}.
+DSST\cite{danelljan2014accurate}, MEEM\cite{zhang2014meem}, Struck\cite{hare2012efficient}, and SRDCF\cite{danelljan2015learning}.
 Fig.~\ref{fig:UAV123_DATASET} shows the results on the UAV123
 dataset. 
 
