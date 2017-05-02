@@ -329,11 +329,7 @@ consecutive images does not change drastically. Although it varies
 based on the scene, learning a correlation filter a frame would not be
 much different from the one learned using the image few or $k$ frames
 later. By alternating three KCFs in turn, our algorithm runs as fast
-as or faster than the original KCF. From our experiments, we
-empirically found that five is the optimal for $k$ in terms of
-precision and success rates. We'll detail this at the experimental
-section later.
-
+as or faster than the original KCF. 
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.75\textwidth]{figures/LearnedFilterComparison.pdf}
@@ -651,6 +647,7 @@ scale adaptive SAMF tracker.
 \bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Success_UAV123.pdf}}
 \bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Precision_OTB100.pdf}}
 \bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Success_OTB100.pdf}}\\
+\centering \footnotesize (a) Precision and Success rates for UAV123 \quad \quad \quad \quad \quad (b) Precision and Success rates for OTB100
 \end{tabular}
 \caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the UAV123 (a) and OTB100 (b) datasets.}
 \label{fig:UAV123_OTB100_DATASET}
