@@ -440,18 +440,18 @@ $x_{c}$ represents the learned correlation filter and training
 template for the given channel. The parameter $c$ enabled one to
 integrate features in multiple channels, such as HoG and color, in
 this setup \cite{henriques2015high,galoogahi2013multi}. A closed-form
-solution for Equaiton \ref{eq:Closedform_RidgeReg} is available by
-taking the derivative of $E$ w.r.t $w$ to $0$. To make this
-closed-form solution with
-
-Then, the Circulant-matrix based solution vector in the Fourier domain
-$\hat{w}$ is formulated as
+solution for Equaiton \ref{eq:Closedform_RidgeReg} can be computed by
+taking the derivative of $E$ w.r.t $w$ to $0$. To make this,
+$\mathcal{0}(n^{3})$ solution more tractable, an element-wise,
+multiplication in frequency domain was proposed as a sub-linear
+solution for $\hat{w}$:
 \begin{equation}
 \hat{w} = \hat{x}^{*}*\hat{y}(\hat{x}^{*}*\hat{x}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
 \end{equation}
-To further improve the robustness to geometric and photographic variations, one can exploit non-linear
-regression function in the Correlation Filter framework \cite{henriques2015high}. 
+To make the above, closed-form solution more robust to any geometric
+and photometric variations, a non-linear version is also proposed
+\cite{henriques2015high}.
 %\begin{equation}
 %\alpha = y(K+\lambda I)^{-1}
 %\end{equation}
