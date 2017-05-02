@@ -449,27 +449,10 @@ solution for $\hat{w}$:
 \hat{w} = \hat{x}^{*}*\hat{y}(\hat{x}^{*}*\hat{x}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
 \end{equation}
-To make the above, closed-form solution more robust to any geometric
-and photometric variations, a non-linear version is also proposed
-\cite{henriques2015high}.
-%\begin{equation}
-%\alpha = y(K+\lambda I)^{-1}
-%\end{equation}
-%where $K$ and $\alpha$ represent the kernel matrix and corresponding
-%dual space solution. 
-%\cite{henriques2015high} states that kernel
-%matrices is circulant for datasets of circular cylic satisfying the
-%following theorem.
-%\begin{equation}
-%k(x,x^{'}) = k(Mx,Mx^{'}),
-%\label{eq:KernelCirculantTheorem}
-%\end{equation}
-%where $M$ represents the permutation matrix. Some kernels satisfying
-%the eq.~\ref{eq:KernelCirculantTheorem} are \textit{Gaussian},
-%\textit{Polynomial}, \textit{Intersection} and \textit{Hellinger}
-%kernels. 
-The diagonalized Fourier domain dual form solution can be
-expressed as
+In fact, a non-linear version of this closed-form solution is proposed
+to make it more robust to any geometric and photometric variations
+\cite{henriques2015high}. In particular, the diagonalized Fourier
+domain dual form solution is expressed as
 \begin{equation}
 \hat{\alpha} = \hat{y}(\hat{k}^{xx}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
@@ -480,27 +463,12 @@ known as \textit{gram matrix} and it is expressed as
 k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\hat{x}_{c}^{*}\odot \hat{x}_{c}^{'}))).
 \label{eq:GaussianCorrelationSingleChannel}
 \end{equation}
-%\begin{equation}
-%k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\hat{x}^{*}\odot \hat{x}^{'})))
-%\label{eq:GaussianCorrelationSingleChannel}
-%\end{equation}
-The first correlation filter based trackers used grayscale feature ($C=1$) to
-learn the solution vector $w$, however, multi-channel features
-such as HoG and Color were later exploited to improve tracking
-accuracy \cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. 
-\begin{comment}The multi-channel feature integration into the Gaussian Kernelization
-function in eq.~\ref{eq:GaussianCorrelationSingleChannel} is achieved
-in a very straight-forward way by summing the correlation result over the channels.
-
-Training shown in eq.~\ref{eq:FourierDualDomainSolution}
-gives us $\hat{a}$ learned in time step $t$. We can accumulate
-$\hat{a}$ over time to integrate more temporal information. This can
-be expressed as
-\begin{equation}
-\hat{a}_{t} = (1-\beta)\hat{a}_{t-1} + \beta\hat{a}_{t}. 
-\end{equation}
-\end{comment}
-Finally, detection step in multi-channel KCF framework is performed as
+An early version based on this formulation used grayscale feature
+($C=1$) to learn the solution vector $w$ and multi-channel features
+such as HoG and Color showed improved accuracy
+\cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. Specifically,
+one can execute an object detection using this kernelized correlation
+filter with multi-channel features as 
 \begin{equation}
 r(z) = F^{-1}(\hat{k}^{xz} \odot \hat{\alpha})
 \end{equation}
