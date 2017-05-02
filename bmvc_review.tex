@@ -65,17 +65,14 @@ of KCFs to specifically address the scale-change and dynamic maneuver
 of the target over frames. In addition, we devised a Bayes filter for
 a smooth transition between individual KCFs' executions. Also, we
 slightly modify the {\it E}nKCF to perform tracking in low frame rate
-videos dominated by large ego-motion.  large ego-motion.  To verify
-the usefulness of the proposed method, we compared the performance of
-ours to those of the existing online tracking methods. Experimental
-results showed that the performance of ours are 72.53\% for precision
-on 20 pixels and 52.90\% for success rate for OTB100 data, and 55.71\%
-and 41.71\% for UAV123 data. These results confirmed that our method
+videos dominated by large ego-motion.  large ego-motion. Experimental
+results showed that the performance of ours are 70.10\% for precision
+on 20 pixels and 53.00\% for success rate for OTB100 data, and 54.50\%
+and 40.2\% for UAV123 data. These results confirmed that our method
 outperformed the existing ones over 5\% on precision on 20 pixels and
 10-20\% on AUC on average. Our implementation ran at 340 fps for
 OTB100 and at 416 fps for UAV123 data that is faster than DCF (292
-fps) for OTB100 and KCF (292 fps), DCF (457 fps), and STC (350 fps)
-for UAV123.
+fps) for OTB100 and KCF (292 fps), DCF (457 fps) for UAV123.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
@@ -305,7 +302,7 @@ elementwise multiplication, resulting in a scale estimation in a
 higher speed.
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.5\textwidth]{figures/Filters_Details.pdf}
+\includegraphics[width=0.4\textwidth]{figures/Filters_Details.pdf}
 \caption{The three filters denoted as \textit{target+small background} translation filter,
   \textit{target-only} scale filter and \textit{target+large background} translation filters are
   shown. Also, the hanning window and desired Gaussian response for
@@ -377,8 +374,8 @@ algorithm and alg.\ref{alg:MKCF} shows the pseudo-code of {\it
 to better tackle large ego-motion at low video frame rates. Second, we remove the particle filter in the {\it E}nKCF2 
 tracker due to large ego-motion. In the following section, we will briefly mention the theory
 behind the KCF.
-
-\begin{algorithm}
+\begin{algorithm}[h]
+\small
 	\caption{The {\it E}nKCF Tracking Algorithm.}\label{alg:MKCF}
 	\begin{algorithmic}[1]
 	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n = 5$,
@@ -409,19 +406,14 @@ behind the KCF.
 				\State // Update Translation
 				\State Perform Importance Re-sampling (if necessary) for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
 			    \State // Model Update
-				\If{$PSR(y_{R_{s}}) \geq T_{R_{s}}$}
-				\State Update $R_{s}$ (Condition 1);
-				\EndIf							 
-				\If{$PSR(y_{R_{t}^{L}}) \geq T_{R_{t}^{L}}$} 
-				\State Update $R_{t}^{L}$ (Condition 2);
-				\EndIf	
+			    \State Update $R_{s}$ (Condition 1);
+			    \State Update $R_{t}^{L}$ (Condition 2);
 			     \If{$PSR(y_{R_{t}^{S}}) \geq T_{R_{t}^{S}}$}
 				\State Update $R_{t}^{S}$ (Condition 3);
 			     \EndIf		
 	\EndProcedure	
 	\end{algorithmic}
 \end{algorithm}
-
 \begin{comment}
 {\it Burak: The KCF section doesn't fit the section before and
   after. In addition, it's still too long.}
@@ -433,14 +425,9 @@ behind the KCF.
 The Kernelized Correlation Filter tracker has recently been
 increasingly popular due to its operation at hundreds of frames per
 second with state-of-the-art tracking capabilities even in challenging
-cases. Its computational efficiency arises from its use of the
+cases \cite{henriques2012exploiting,henriques2015high}. Its computational efficiency arises from its use of the
 discrete fourier transform of the circulant matrix and frequency
-domain element-wise operations known as hadamard product and
-division. The first example of frequency domain trackers is the MOSSE
-tracker running at $700$fps \cite{bolme2010visual}. It minimizes the
-ridge regression function in the frequency domain using a single
-template and intensity features. The KCF tracker, on the other hand,
-minimizes the regularized ridge regression function shown below.
+domain. The KCF tracker minimizes the regularized ridge regression function shown below.
 \begin{equation}
 E(h) = \frac{1}{2}||y-\sum_{c=1}^{C}h_{c}*x_{c}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||h_{c}||^{2}
 \label{eq:Closedform_RidgeReg}
@@ -452,7 +439,8 @@ template for the given channel. The $c$ parameter included in
 integrate multi-channel features such as HoG and colour into the ridge
 regression function. The closed-form solution for the
 eq.~\ref{eq:Closedform_RidgeReg} can be obtained by setting the
-derivative of $E$ w.r.t $w$ to $0$. The primal solution in the
+derivative of $E$ w.r.t $w$ to $0$. 
+\begin{comment}The primal solution in the
 frequency domain is formulated as
 %\begin{equation}
 %w = (X^{T}X+\lambda)^{-1}y
@@ -507,7 +495,8 @@ regardless of the base sample $x$.
 %X^{H}X = Fdiag(\hat{x}^{*}\odot \hat{x})F^{H}.
 %\label{eq:SimplificationX} 
 %\end{equation}
-Then, the optimized solution vector in the Fourier domain $\hat{w}$ is formulated as
+\end{comment}
+Then, the Circulant-matrix based solution vector in the Fourier domain $\hat{w}$ is formulated as
 \begin{equation}
 \hat{w} = \hat{x}^{*}*\hat{y}(\hat{x}^{*}*\hat{x}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
@@ -530,22 +519,14 @@ regression function in the Correlation Filter framework \cite{henriques2015high}
 %the eq.~\ref{eq:KernelCirculantTheorem} are \textit{Gaussian},
 %\textit{Polynomial}, \textit{Intersection} and \textit{Hellinger}
 %kernels. 
-Similar to the diagonalization in the linear ridge regression
-solution in eq.~\ref{eq:DiagonalizedPrimalSolution}, the kernelized
-ridge regression can be made diagonal using the same circulant matrix
-theorem.  The diagonalized Fourier domain dual form solution can be
+The diagonalized Fourier domain dual form solution can be
 expressed as
 \begin{equation}
 \hat{\alpha} = \hat{y}(\hat{k}^{xx}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
 \end{equation}
 where $\hat{k}^{xx}$ represents the first row of the Kernel matrix $K$
-known as \textit{gram matrix}. In this study, we will only focus on
-application of the Gaussian Kernel to the Correlation Filters. We
-refer the readers to \cite{henriques2015high} for the detailed
-documentation of the application of other kernels to the Correlation
-Filters. The Gaussian kernelization is
-expressed as
+known as \textit{gram matrix} and it is expressed as
 \begin{equation}
 k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\hat{x}_{c}^{*}\odot \hat{x}_{c}^{'}))).
 \label{eq:GaussianCorrelationSingleChannel}
@@ -557,8 +538,8 @@ k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}
 The first correlation filter based trackers used grayscale feature ($C=1$) to
 learn the solution vector $w$, however, multi-channel features
 such as HoG and Color were later exploited to improve tracking
-accuracy \cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. The
-multi-channel feature integration into the Gaussian Kernelization
+accuracy \cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. 
+\begin{comment}The multi-channel feature integration into the Gaussian Kernelization
 function in eq.~\ref{eq:GaussianCorrelationSingleChannel} is achieved
 in a very straight-forward way by summing the correlation result over the channels.
 
@@ -569,15 +550,13 @@ be expressed as
 \begin{equation}
 \hat{a}_{t} = (1-\beta)\hat{a}_{t-1} + \beta\hat{a}_{t}. 
 \end{equation}
-
+\end{comment}
 Finally, detection step in multi-channel KCF framework is performed as
 \begin{equation}
 r(z) = F^{-1}(\hat{k}^{xz} \odot \hat{\alpha})
 \end{equation}
 where $r$ denotes the correlation response at all cylic shifts of the
-first row of the kernel matrix $K$. The peak point of the response
-function gives us the estimated translation of the object from time
-step $t$-$1$ to $t$.
+first row of the kernel matrix.
 
 \subsection{Particle Filter for Smoothing Transition of KCFs} \label{sc:PF}
 As explained earlier, the {\it E}nKCF upates a target's translation at
@@ -653,17 +632,15 @@ the estimated state of the particle filter are primarily used to
 estimate the scale and translation. Because of this, we set the
 learning rates ($\beta$) of individual filters, $R_{t}^{L}$,
 $R_{t}^{S}$, and $R_{s}$ differently as $0.020$, $0.020$ and
-$0.010$. The desired template response and hanning window for each KCF is shown in fig.~\ref{fig:Filters}.
-For the kernel of the Gaussian neighboring function, we empirically
+$0.010$. For the kernel of the Gaussian neighboring function, we empirically
 found the optimal values of $\alpha$ as $0.6$, $0.4$, and $0.4$ for
 $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$, and the learning rate as $0.12$
 for $R_{t}^{L}$. 
 
 We tuned the number of particles in the particle filter to $1000$ after carrying out experiments, 
-The re-sampling is only performed when the \textit{efficient number of samples} (eq.~\ref{eq:Neff_PF}) is lower than a
-pre-defined threshold. This way, we can continuously keep reasonable variance among particles.
+The re-sampling is only performed when the \textit{efficient number of samples} ($	\hat{N}_{eff} \approx (\sum_{p=1}^{P}w_{p}^{2})^{-1}
+$) is lower than a pre-defined threshold. This way, we can continuously keep reasonable variance among particles.
 \begin{equation}
-	\hat{N}_{eff} \approx \dfrac{1}{\sum_{p=1}^{P}w_{p}^{2}}
 	\label{eq:Neff_PF}
 \end{equation}
 
@@ -679,33 +656,14 @@ filter, $R_{t}^{S}$, used fHoG features only. The scale filter,
 $R_{s}$ used both fHoG and color features to learn the scale change
 more accurately.
 
-\begin{figure}
-\centering
-\begin{tabular}{cc}
-\bmvaHangBox{\includegraphics[width=4.00cm]{./figures/Precision_UAV123.pdf}}
-\bmvaHangBox{\includegraphics[width=4.0cm]{./figures/Success_UAV123.pdf}}\\
-\end{tabular}
-\caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the UAV123 dataset. UAV123 Dataset consists of $123$ video sequences captured from a micro UAV including large camera motion, low resolution objects, partial and full occlusions. Our tracker better fits to tracking from aerial platforms as the scale change in successive frames are not dramatic.}
-\label{fig:UAV123_DATASET}
-\end{figure}
-
-\begin{figure}
-\centering
-\begin{tabular}{cc}
-\bmvaHangBox{\includegraphics[width=4.00cm]{./figures/Precision_OTB100.pdf}}
-\bmvaHangBox{\includegraphics[width=4.0cm]{./figures/Success_OTB100.pdf}}\\
-\end{tabular}
-\caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures.}
-\label{fig:OTB100_DATASET}
-\end{figure}
-
 \textbf{Performance on UAV123 Dataset.}  We compared the performance
 of the proposed tracking algorithm with those of the state-of-the-art
 high speed tracking algorithms in the \textit{Precision} and
-\textit{Success\:Rate} metrics. Precision is computed by thresholding
-the average euclidean distance between the centroid of the ground
-truth and that of an tracking algorithm output. 
+\textit{Success\:Rate} metrics. In precision, we rank the trackers based on the precision numbers at
+20 pixels whereas in the success rate plots, trackers are
+ranked based on area under curve (AUC) scores.
 
+\begin{comment}
 {\it Burak: What do mean by the following sentence? We had graphs
   about precision, but I don't see any tables or anything else to rank
   the algorithms based on the precision at 20 pixels.}
@@ -714,19 +672,9 @@ truth and that of an tracking algorithm output.
 to each tracker is precision at 20 px and AUC for the success rate. It is how people rank
 trackers in precision and success plots. I agree with you that we can have an additional table. Let me know what
 you think about it now.} 
+\end{comment}
 
-In precision, we rank the trackers based on the precision numbers at
-20 pixels. 
-
-The success rate metric counts how many outputs from a tracking
-algorithm successfully overlap with those of the ground truth greater
-than a given threshold. The overlap is specifically computed by the
-Intersection-Over-Union (IoU) between a tracking output and that of
-the ground truth. Given the number of the correct frames based an IoU
-threshod, the success rate is the ratio of the correct frames to the
-number of the total frames for testing.  In the success rate plots, trackers are
-ranked based on AUC scores.
-
+\begin{comment}
 {\it Burak: After you remove some of the trackers, replace that number
   with ``some'' at the below as well as removing their names from the
   following paragraph.}
@@ -734,15 +682,14 @@ ranked based on AUC scores.
 {\it YoungWoo :  I thought we were going to do that tomorrow. I have generated figures and 
 I can easily remove any ones. SRDCF and MEEM are the top two as of now. I am working on removing them as of now. Please 
 consider that we do not have SRDCF and MEEM while you are editing the results section.}
-
+\end{comment}
 We compare our tracker to other high-speed ($\geq$300 fps)
 state-of-the-art trackers including KCF\cite{henriques2015high}, CSK
-\cite{henriques2012exploiting}, STC\cite{zhang2014fast},
-MOSSE\cite{bolme2010visual,henriques2015high}. Also, some relatively
+\cite{henriques2012exploiting}, DCF\cite{henriques2015high}, and MOSSE\cite{bolme2010visual,henriques2015high}. Also, five relatively
 lower-speed ($\geq$50) trackers are used to evaluate the robustness of
 the proposed trackers. These trackers include SAMF\cite{li2014scale},
-DSST\cite{danelljan2014accurate}, MEEM\cite{zhang2014meem}, Struck\cite{hare2012efficient}, and SRDCF\cite{danelljan2015learning}.
-Fig.~\ref{fig:UAV123_DATASET} shows the results on the UAV123
+DSST\cite{danelljan2014accurate}, Struck\cite{hare2012efficient}, MUSTER \cite{hong2015multi}. TLD \cite{kalal2012tracking}, and
+OAB \cite{zhang2012robust}. Fig.~\ref{fig:UAV123_OTB100_DATASET} shows the results on the UAV123
 dataset. 
 
 {\it Burak: I will re-write the text at below after you clean up the graphs.}
@@ -753,12 +700,36 @@ worse than SAMF, DSST and Struck on the same dataset although it is
 $10$-$20$ times faster than these trackers. On the other hand, the
 {\it E}nKCF does a decent job on approximating the scale of the target
 in highly efficient manner. This is proved by the fact that it ranks
-third best tracker in terms of \textit{area under curve} (AUC) value
+second best tracker in terms of \textit{area under curve} (AUC) value
 for the success rate plot. It outperforms the high speed trackers by
 about $20\%$-$25\%$ in AUC metric. Interestingly, it performs even
 better than most of the low speed trackers. For instance, it
 outperforms Struct and DSST by $5\%$ and $10\%$ while running at more
 than $30$ and $10$ times larger operation rate.
+
+\textbf{Performance on OTB100 Dataset.}
+In addition to UAV123 dataset, we test the {\it E}nKCF tracker on the
+OTB100 dataset to evaluate how good it generalizes to a traditional
+object tracking dataset. Again, it performs slightly better than the
+high speed trackers in precision. Interestingly, it outperforms the
+another correlation filter based tracker, DSST while running only
+$5\%$ behind of another low-speed scale adaptive SAMF tracker as shown in fig.~\ref{fig:UAV123_OTB100_DATASET}. As in
+UAV123 dataset, the {\it E}nKCF performs exceptionally in handling the
+scale changes. It is ranked as the third best tracker while being the
+second highest speed tracker behind MOSSE. These numbers
+prove that {\it E}nKCF is not only a good candidate for tracking on a
+UAV-based mobile platform but also mobile platforms on smart phones.
+\begin{figure}[!h]
+\centering
+\begin{tabular}{ccc}
+\bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Precision_UAV123.pdf}}
+\bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Success_UAV123.pdf}}
+\bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Precision_OTB100.pdf}}
+\bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Success_OTB100.pdf}}\\
+\end{tabular}
+\caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the UAV123 (a) and OTB100 (b) datasets.}
+\label{fig:UAV123_OTB100_DATASET}
+\end{figure}
 
 \textbf{Performance on UAV123$\_$10fps Dataset.} We test our
 slightly modified version of the {\it E}nKCF, {\it E}nKCF2, on the
@@ -772,33 +743,26 @@ fig.~\ref{fig:UAV123_10fpsDATASET}. Our tracker outperforms other
 high-speed correlation filter based trackers including KCF, DSST by
 about $15\%$-$20\%$ whereas having similar precision rate to SAMF. On
 the other hand, it does decent job in scale estimation. It ranks as
-$4$th in AUC and it is $20$-$30$ faster than the ones with
-higher AUC.
-
-\begin{figure}
+second in AUC while running about $150$ faster than the MUSTER tracker.
+\begin{figure}[!h]
 \centering
 \begin{tabular}{cc}
-\bmvaHangBox{\includegraphics[width=4.00cm]{./figures/Precision_UAV123_10fps.pdf}}
-\bmvaHangBox{\includegraphics[width=4.0cm]{./figures/Success_UAV123_10fps.pdf}}\\
+\bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Precision_UAV123_10fps.pdf}}
+\bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Success_UAV123_10fps.pdf}}\\
 \end{tabular}
 \caption{Evaluation and comparison of the proposed {\it E}nKCF2 tracker on the UAV123$\_$ dataset in terms of the precision and success rates. This dataset consists of temporally downsampled $123$ video sequences captured from a micro UAV.}
 \label{fig:UAV123_10fpsDATASET}
 \end{figure}
 
-\textbf{Performance on OTB100 Dataset.}
-In addition to UAV123 dataset, we test the {\it E}nKCF tracker on the
-OTB100 dataset to evaluate how good it generalizes to a traditional
-object tracking dataset. Again, it performs slightly better than the
-high speed trackers in precision. Interestingly, it outperforms the
-another correlation filter based tracker, DSST while running only
-$5\%$ behind of another low-speed scale adaptive SAMF tracker. As in
-UAV123 dataset, the {\it E}nKCF performs exceptionally in handling the
-scale changes. It is ranked as the fifth best tracker while being the
-second highest speed tracker behind MOSSE. It performs only around
-$2\%$ worse than SAMF and MEEM trackers in terms of AUC. These numbers
-prove that {\it E}nKCF is not only a good candidate for tracking on a
-UAV-based mobile platform but also mobile platforms on smart phones.
-
+%\begin{figure}[!h]
+%\centering
+%\begin{tabular}{cc}
+%\bmvaHangBox{\includegraphics[width=2.50cm]{./figures/Precision_OTB100.pdf}}
+%\bmvaHangBox{\includegraphics[width=2.50cm]{./figures/Success_OTB100.pdf}}\\
+%\end{tabular}
+%\caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures.}
+%\label{fig:OTB100_DATASET}
+%\end{figure}
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
 %---------------------------------------------------------------------- 
