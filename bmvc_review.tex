@@ -677,16 +677,17 @@ and use the \textit{efficient number of samples}
 metric shown below to determine whether we need to perform importance
 re-sampling or not to keep reasonable variance.
 
-\textbf{Features Selections.} We used the fast Histogram of Oriented
-Gradients (fHoG)\cite{felzenszwalb2010object} and
-color-naming\cite{van2009learning} features to learn target and
-background models. $R_{t}^{L}$ uses both fHoG and color features as it
-covers a large ROI where fHoG features may not be reliable alone. On
-the other hand, $R_{t}^{S}$ is assigned only fHoG features as it
-covers smaller ROI. Finally, $R_{s}$ uses both fHoG and color features
-as it is assigned lower template size, yielding space to exploit two
-feature modalities. We note that we use the same features for the {\it
-  E}nKCF2 tracker.
+\textbf{Features Selections.} As each of three KCFs in the {\it E}nKCF
+has different goals to accomplish, we used different features for each
+of them. In particular, the translation filter, $R_{t}^{L}$, uses both
+the fast Histograms of Oriented Gradients
+(fHoG)\cite{felzenszwalb2010object} and
+color-naming\cite{van2009learning} features to learn the background
+around the target more effectively. In fact we empirically found fHoG
+only didn't work well to cover the larger ROI. Another translation
+filter, $R_{t}^{S}$, used fHoG features only. The scale filter,
+$R_{s}$ used both fHoG and color features to learn the scale change
+more accurately.
 
 \begin{figure}
 \centering
@@ -715,37 +716,50 @@ high speed tracking algorithms in the \textit{Precision} and
 the average euclidean distance between the centroid of the ground
 truth and that of an tracking algorithm output. 
 
-{\it YoungWoo: End of 04/30/17}
-
+{\it Burak: What do mean by the following sentence? We had graphs
+  about precision, but I don't see any tables or anything else to rank
+  the algorithms based on the precision at 20 pixels.}
 
 In precision, we rank the trackers based on the precision numbers at
-20 pixels. The success rate metric evaluates the overlap between the
-ground truth and tracking output. The intersection-to-union ratio of
-two regions over the frames of one sequence. Finally, we count the
-number of frames with overlap larger than the success rate threshold
-and divide it by the number of frames. We compare our tracker to some
-other high-speed ($\geq$300 fps) state-of-the-art trackers including
-KCF\cite{henriques2015high}, CSK \cite{henriques2012exploiting},
-STC\cite{zhang2014fast},
+20 pixels. 
+
+The success rate metric counts how many outputs from a tracking
+algorithm successfully overlap with those of the ground truth greater
+than a given threshold. The overlap is specifically computed by the
+Intersection-Over-Union (IoU) between a tracking output and that of
+the ground truth. Given the number of the correct frames based an IoU
+threshod, the success rate is the ratio of the correct frames to the
+number of the total frames for testing. 
+
+{\it Burak: After you remove some of the trackers, replace that number
+  with ``some'' at the below as well as removing their names from the
+  following paragraph.}
+
+We compare our tracker to some other high-speed ($\geq$300 fps)
+state-of-the-art trackers including KCF\cite{henriques2015high}, CSK
+\cite{henriques2012exploiting}, STC\cite{zhang2014fast},
 MOSSE\cite{bolme2010visual,henriques2015high}. Also, some relatively
 lower-speed ($\geq$50) trackers are used to evaluate the robustness of
 the proposed trackers. These trackers include SAMF\cite{li2014scale},
 DSST\cite{danelljan2014accurate}, LCT\cite{ma2015long},
 MEEM\cite{zhang2014meem} and Struck\cite{hare2012efficient}.
 Fig.~\ref{fig:UAV123_DATASET} shows the results on the UAV123
-dataset. The {\it E}nKCF tracker outperforms the other methods in
-high-speed trackers category by $3\%$-$15\%$ at 20 pixels precision
-accuracy whereas it is only $5\%$ worse than SAMF, DSST and Struck on
-the same dataset although it is $10$-$20$ times faster than these
-trackers. On the other hand, the {\it E}nKCF does a decent job on
-approximating the scale of the target in highly efficient manner. This
-is proved by the fact that it ranks third best tracker in terms of
-\textit{area under curve} (AUC) value for the success rate plot. It
-outperforms the high speed trackers by about $20\%$-$25\%$ in AUC
-metric. Interestingly, it performs even better than most of the low
-speed trackers. For instance, it outperforms Struct and DSST by $5\%$
-and $10\%$ while running at more than $30$ and $10$ times larger
-operation rate.
+dataset. 
+
+{\it Burak: I will re-write the text at below after you clean up the graphs.}
+
+{\it E}nKCF outperformed other, high-speed tracking methods by
+$3\%$-$15\%$ at 20 pixels precision metric whereas it is only $5\%$
+worse than SAMF, DSST and Struck on the same dataset although it is
+$10$-$20$ times faster than these trackers. On the other hand, the
+{\it E}nKCF does a decent job on approximating the scale of the target
+in highly efficient manner. This is proved by the fact that it ranks
+third best tracker in terms of \textit{area under curve} (AUC) value
+for the success rate plot. It outperforms the high speed trackers by
+about $20\%$-$25\%$ in AUC metric. Interestingly, it performs even
+better than most of the low speed trackers. For instance, it
+outperforms Struct and DSST by $5\%$ and $10\%$ while running at more
+than $30$ and $10$ times larger operation rate.
 
 \textbf{Performance on UAV123$\_$10fps Dataset.} We test our
 slightly modified version of the {\it E}nKCF, {\it E}nKCF2, on the
