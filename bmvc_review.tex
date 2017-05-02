@@ -685,22 +685,16 @@ outperformed Struct and DSST by $5\%$ and $10\%$ while running at more
 than $10$ and $30$ times faster.
 
 \textbf{Performance on OTB100 Dataset.}  We evaluated the performance
-of the {\it E}nKCF tracker on the OTB100 dataset, and observed a
-performance similar to that of UAV123 data. Figure
+of the {\it E}nKCF tracker on the OTB100 dataset. Figure
 \ref{fig:UAV123_OTB100_DATASET} shows the results on the OTB100
-dataset. For the precision metric, {\it E}nKCF performed slightly
+dataset. Like in UAV123 dataset, we observed a similar performance. In
+particular, {\it E}nKCF showed a good performance for handling the
+scale changes. It was the third best and the second fastest tracking
+algorithm. For the precision metric, {\it E}nKCF performed slightly
 better than most of tracking algorithms in high-speed
 trackers. Interestingly, it outperformed another correlation filter
 based tracker, DSST, but performing $5\%$ behind of another low-speed
 scale adaptive SAMF tracker. 
-
-
-As in UAV123 dataset, the {\it E}nKCF
-performs exceptionally in handling the scale changes. It is ranked as
-the third best tracker while being the second highest speed tracker
-behind MOSSE. These numbers prove that {\it E}nKCF is not only a good
-candidate for tracking on a UAV-based mobile platform but also mobile
-platforms on smart phones.
 \begin{figure}[!h]
 \centering
 \begin{tabular}{ccc}
