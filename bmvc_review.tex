@@ -422,81 +422,30 @@ behind the KCF.
 \end{comment}
 
 \subsection{Kernelized Correlation Filter} \label{sec:kcf}
-The Kernelized Correlation Filter tracker has recently been
-increasingly popular due to its operation at hundreds of frames per
-second with state-of-the-art tracking capabilities even in challenging
-cases \cite{henriques2012exploiting,henriques2015high}. Its computational efficiency arises from its use of the
-discrete Fourier transform of the circulant matrix and frequency
-domain. The KCF tracker minimizes the regularized ridge regression function shown below.
+The Kernelized Correlation Filter is a well, known single target
+tracking method and thetheory and its workflowhas been detailed in
+other papers already
+\cite{henriques2012exploiting,henriques2015high}. This section briefly
+goes over the parts of the KCF relevantto thisstudy. Its
+computational efficiency arises from its use of the discrete Fourier
+transform of the circulant matrix and frequency domain. The KCF
+essentially solves the problem of a regression in the form of the
+regularized ridge regression as:
 \begin{equation}
 E(h) = \frac{1}{2}||y-\sum_{c=1}^{C}h_{c}*x_{c}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||h_{c}||^{2}
 \label{eq:Closedform_RidgeReg}
 \end{equation}
 where $y$ represents the desired continuous response whereas $h$ and
 $x_{c}$ represents the learned correlation filter and training
-template for the given channel. The $c$ parameter included in
-\cite{henriques2015high,galoogahi2013multi} makes it possible to
-integrate multi-channel features such as HoG and color into the ridge
-regression function. The closed-form solution for the
-eq.~\ref{eq:Closedform_RidgeReg} can be obtained by setting the
-derivative of $E$ w.r.t $w$ to $0$. 
-\begin{comment}The primal solution in the
-frequency domain is formulated as
-%\begin{equation}
-%w = (X^{T}X+\lambda)^{-1}y
-%\label{eq:SpatialSolution}
-%\end{equation}
-\begin{equation}
-w = (X^{H}X+\lambda I)^{-1}X^{T}y
-\label{eq:FourierSolution}
-\end{equation}
-where $X^{H}$ and $\lambda$represent the complex-conjugate of training
-samples and regularization term. More documentation on the spatial and
-Fourier domain solutions can be found in \cite{henriques2015high}. The
-MOSSE tracker uses one training sample centered at estimated position
-of the target. This framework does not include enough background
-information into the learned model,$w$. The application of the
-circulant matrix theorem into the eq.~\ref{eq:Closedform_RidgeReg}
-makes it possible to include many background patches at a similar
-computational complexity. A circulant matrix includes the circularly
-shifted patches of the positive training sample $x$ by a cyclic shift
-operator.
+template for the given channel. The parameter $c$ enabled one to
+integrate features in multiple channels, such as HoG and color, in
+this setup \cite{henriques2015high,galoogahi2013multi}. A closed-form
+solution for Equaiton \ref{eq:Closedform_RidgeReg} is available by
+taking the derivative of $E$ w.r.t $w$ to $0$. To make this
+closed-form solution with
 
-%By applying shifting operation to the base sample, we can generate the circulant
-%matrix as
-%\begin{equation}
-%C = Px.
-%\label{eq:CirculantMatrixGeneration}
-%\end{equation}
-%The circulant matrix of a base sample $x$ can be interpreted as the
-%rows of a training matrix $X$ where each row represents features of a
-%training sample. Mathematically, this can be written as
-%\begin{equation}
-%X = C(x)
-%\label{eq:CIrculantMatrixTrainingData}
-%\end{equation}
-
-In this form, the equation \ref{eq:FourierSolution} could prohibit us
-from implementing a high speed object tracking as we need to perform
-large number of element-wise division and multiplication
-operations. However, we know from \cite{gray2006toeplitz} that all
-circulant matrices are represented diagonally by the Fourier Transform
-regardless of the base sample $x$.
-%\begin{equation}
-%X = Fdiag(\hat{x})F^{H},
-%\label{eq:CirculantMatrixDFT}
-%\end{equation}
-%where $F$ denotes a constant Fourier Transform matrix and $x$ is the
-%Discrete Fourier Transform of the base sample $x$. 
-%To simplify the
-%cost function formulation in eq.~\ref{eq:FourierSolution} we multiply
-%$X$ in eq.~\ref{eq:CirculantMatrixDFT} with $X^{H}$ yielding
-%\begin{equation}
-%X^{H}X = Fdiag(\hat{x}^{*}\odot \hat{x})F^{H}.
-%\label{eq:SimplificationX} 
-%\end{equation}
-\end{comment}
-Then, the Circulant-matrix based solution vector in the Fourier domain $\hat{w}$ is formulated as
+Then, the Circulant-matrix based solution vector in the Fourier domain
+$\hat{w}$ is formulated as
 \begin{equation}
 \hat{w} = \hat{x}^{*}*\hat{y}(\hat{x}^{*}*\hat{x}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
