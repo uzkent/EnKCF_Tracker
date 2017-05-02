@@ -742,6 +742,27 @@ second in AUC while running about $150$ faster than the MUSTER tracker.
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
 %---------------------------------------------------------------------- 
+Running a computer vision algorithm would be very attractive for any
+mobile, unmanned robotic solutions on real-world applications. To make
+such applications practical, those algorithms should run faster with
+small footprint of computation resouce consumption. To this end, we
+proposed an extension of KCF that deploys three KCFs in turn to
+address the scale change and dynamic maneuvers of a target. The way we
+ran three KCFs in a harmonious way optimal in a sense that efficiently
+handled the scale change and effectively learned the translation of
+the target. However, by doing so, our algorithm may introduce any
+potential drifts. To prevent this from happening, we developed a Bayes
+filter, particle filter, to smooth the transition between three
+KCFs. In particular, the particle filter estimated the target's pixel
+coordinates using information about the target's motion observed over
+frames. Experimental results showed that the performance of ours are
+70.10\% for precision on 20 pixels and 53.00\% for success rate for
+OTB100 data, and 54.50\% and 40.2\% for UAV123 data. These results
+confirmed that our method outperformed the existing ones over 5\% on
+precision on 20 pixels and 10-20\% on AUC on average. Our
+implementation ran at 340 fps for OTB100 and at 416 fps for UAV123
+data that is faster than DCF (292 fps) for OTB100 and KCF (292 fps),
+DCF (457 fps) for UAV123.
 
 %--------------
 %\section*{Acknowledgements}
