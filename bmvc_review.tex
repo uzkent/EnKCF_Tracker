@@ -619,8 +619,9 @@ developing an algorithm for mobile, embedded robotic applications, it
 is important to compare the performance of the proposed algorithm with
 those of the state-of-the-art in nominal dataset for comparison. To
 this end, we chose the OTB100 data that contains the videos recorded
-from smart phones and typical cameras in perspective view. Finally, the {\it E}nKCF2 is tested
-on temporally down-sampled version of the UAV123 dataset which is named UAV123$\_$10fps dataset.
+from smart phones and typical cameras in perspective view. Finally,
+the {\it E}nKCF2 is tested on temporally down-sampled version of the
+UAV123 dataset which is named UAV123$\_$10fps dataset.
 
 \textbf{Finding Optimal Hyperparameters} Each of three KCFs in {\it
   E}nKCF is designed for addressing a specific challenge of a single,
@@ -632,17 +633,16 @@ the estimated state of the particle filter are primarily used to
 estimate the scale and translation. Because of this, we set the
 learning rates ($\beta$) of individual filters, $R_{t}^{L}$,
 $R_{t}^{S}$, and $R_{s}$ differently as $0.020$, $0.020$ and
-$0.010$. For the kernel of the Gaussian neighboring function, we empirically
-found the optimal values of $\alpha$ as $0.6$, $0.4$, and $0.4$ for
-$R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$, and the learning rate as $0.12$
-for $R_{t}^{L}$. 
-
-We tuned the number of particles in the particle filter to $1000$ after carrying out experiments, 
-The re-sampling is only performed when the \textit{efficient number of samples} ($	\hat{N}_{eff} \approx (\sum_{p=1}^{P}w_{p}^{2})^{-1}
-$) is lower than a pre-defined threshold. This way, we can continuously keep reasonable variance among particles.
-\begin{equation}
-	\label{eq:Neff_PF}
-\end{equation}
+$0.010$. For the kernel of the Gaussian neighboring function, we
+empirically found the optimal values of $\alpha$ as $0.6$, $0.4$, and
+$0.4$ for $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$, and the learning rate
+as $0.12$ for $R_{t}^{L}$. For the particle filter, we empirically set
+the number of particles to $1000$ to balance the run-time performance
+and accuracy. To keep the level of variance among the particles
+reasonable, we performed the re-sampling only when the
+\textit{efficient number of samples} ($ \hat{N}_{eff} \approx
+(\sum_{p=1}^{P}w_{p}^{2})^{-1} $) is lower than a pre-defined
+threshold. 
 
 \textbf{Features Selections.} As each of three KCFs in the {\it E}nKCF
 has different goals to accomplish, we used different features for each
@@ -659,53 +659,30 @@ more accurately.
 \textbf{Performance on UAV123 Dataset.}  We compared the performance
 of the proposed tracking algorithm with those of the state-of-the-art
 high speed tracking algorithms in the \textit{Precision} and
-\textit{Success\:Rate} metrics. In precision, we rank the trackers based on the precision numbers at
-20 pixels whereas in the success rate plots, trackers are
-ranked based on area under curve (AUC) scores.
+\textit{Success\:Rate} metrics. In precision, we rank the trackers
+based on the precision numbers at 20 pixels whereas in the success
+rate plots, trackers are ranked based on area under curve (AUC)
+scores. The tracking algorithms used for the comparison include ones
+in high-speed ($\geq$300 fps), i.e., KCF\cite{henriques2015high}, CSK
+\cite{henriques2012exploiting}, DCF\cite{henriques2015high}, and
+MOSSE\cite{bolme2010visual,henriques2015high} and ones in relatively
+lower-speed ($\geq$50), i.e., SAMF\cite{li2014scale},
+DSST\cite{danelljan2014accurate}, Struck\cite{hare2012efficient},
+MUSTER \cite{hong2015multi}. TLD \cite{kalal2012tracking}, and OAB
+\cite{zhang2012robust}. 
 
-\begin{comment}
-{\it Burak: What do mean by the following sentence? We had graphs
-  about precision, but I don't see any tables or anything else to rank
-  the algorithms based on the precision at 20 pixels.}
-
-{\it YoungWoo : Trackers are ranked in the legend in the graphs - the numbers next 
-to each tracker is precision at 20 px and AUC for the success rate. It is how people rank
-trackers in precision and success plots. I agree with you that we can have an additional table. Let me know what
-you think about it now.} 
-\end{comment}
-
-\begin{comment}
-{\it Burak: After you remove some of the trackers, replace that number
-  with ``some'' at the below as well as removing their names from the
-  following paragraph.}
-
-{\it YoungWoo :  I thought we were going to do that tomorrow. I have generated figures and 
-I can easily remove any ones. SRDCF and MEEM are the top two as of now. I am working on removing them as of now. Please 
-consider that we do not have SRDCF and MEEM while you are editing the results section.}
-\end{comment}
-We compare our tracker to other high-speed ($\geq$300 fps)
-state-of-the-art trackers including KCF\cite{henriques2015high}, CSK
-\cite{henriques2012exploiting}, DCF\cite{henriques2015high}, and MOSSE\cite{bolme2010visual,henriques2015high}. Also, five relatively
-lower-speed ($\geq$50) trackers are used to evaluate the robustness of
-the proposed trackers. These trackers include SAMF\cite{li2014scale},
-DSST\cite{danelljan2014accurate}, Struck\cite{hare2012efficient}, MUSTER \cite{hong2015multi}. TLD \cite{kalal2012tracking}, and
-OAB \cite{zhang2012robust}. Fig.~\ref{fig:UAV123_OTB100_DATASET} shows the results on the UAV123
-dataset. 
-
-{\it Burak: I will re-write the text at below after you clean up the graphs.}
-
-{\it E}nKCF outperformed other, high-speed tracking methods by
-$3\%$-$15\%$ at 20 pixels precision metric whereas it is only $5\%$
-worse than SAMF, DSST and Struck on the same dataset although it is
-$10$-$20$ times faster than these trackers. On the other hand, the
-{\it E}nKCF does a decent job on approximating the scale of the target
-in highly efficient manner. This is proved by the fact that it ranks
-second best tracker in terms of \textit{area under curve} (AUC) value
-for the success rate plot. It outperforms the high speed trackers by
-about $20\%$-$25\%$ in AUC metric. Interestingly, it performs even
-better than most of the low speed trackers. For instance, it
-outperforms Struct and DSST by $5\%$ and $10\%$ while running at more
-than $30$ and $10$ times larger operation rate.
+Figure \ref{fig:UAV123_OTB100_DATASET} shows the results on the UAV123
+dataset. {\it E}nKCF outperformed most of the high-speed tracking
+methods by $3\%$-$15\%$ at 20 pixels precision metric. Three
+algorithms, SAMF, DSST, and Struck did about 5\% better than ours in
+accuracy, but 10-20\% slower than ours. For the scale adaptation, {\it
+  E}nKCF did second best in terms of \textit{area under curve} (AUC)
+value for the success rate plot. It outperformed other tracking
+methods in high-speed by about $20\%$-$25\%$ in AUC metric. In
+addition, it performed even better than those algorithms that are
+slow, but a bit better in precision. For example, for AUC, {\it E}nKCF
+outperformed Struct and DSST by $5\%$ and $10\%$ while running at more
+than $10$ and $30$ times faster.
 
 \textbf{Performance on OTB100 Dataset.}
 In addition to UAV123 dataset, we test the {\it E}nKCF tracker on the
