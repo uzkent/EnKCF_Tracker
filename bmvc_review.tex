@@ -181,9 +181,8 @@ ROIs associated with $R_{t}^{S}$, $R_{t}^{L}$, and $R_{s}$. Figure
 \centering
 \begin{tabular}{cc}
 \bmvaHangBox{\includegraphics[width=12.00cm]{./figures//Workflow_MKCF+PF.pdf}}\\
-
 \end{tabular}
-\caption{The workflow of the proposed $\geq300$fps {\it E}nKCF tracker.}
+\caption{The workflow of {\it E}nKCF tracking algorithm.}
 \label{Workflows}
 \end{figure}
 
@@ -229,7 +228,7 @@ higher speed.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.4\textwidth]{figures/Filters_Details.pdf}
+\includegraphics[width=0.6\textwidth]{figures/Filters_Details.pdf}
 \caption{Examples of three filters; the translation filter,
   \textit{target+small background}, the scale filter,
   \textit{target-only} and another translation filter,
@@ -381,7 +380,7 @@ domain dual form solution is expressed as
 where $\hat{k}^{xx}$ represents the first row of the Kernel matrix $K$
 known as \textit{gram matrix} and it is expressed as
 \begin{equation}
-k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\hat{x}_{c}^{*}\odot \hat{x}_{c}^{'}))).
+k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\hat{x}_{c}^{*}\odot \hat{x}_{c}^{'})))
 \label{eq:GaussianCorrelationSingleChannel}
 \end{equation}
 An early version based on this formulation used grayscale feature
@@ -482,7 +481,7 @@ reasonable, we performed the re-sampling only when the
 (\sum_{p=1}^{P}w_{p}^{2})^{-1} $) is lower than a pre-defined
 threshold. 
 
-\textbf{Features Selections.} As each of three KCFs in the {\it E}nKCF
+\textbf{Features Selections} As each of three KCFs in the {\it E}nKCF
 has different goals to accomplish, we used different features for each
 of them. In particular, the translation filter, $R_{t}^{L}$, uses both
 the fast Histograms of Oriented Gradients
@@ -494,7 +493,7 @@ filter, $R_{t}^{S}$, used fHoG features only. The scale filter,
 $R_{s}$ used both fHoG and color features to learn the scale change
 more accurately.
 
-\textbf{Performance on UAV123 Dataset.}  We compared the performance
+\textbf{Performance on UAV123 Dataset} We compared the performance
 of the proposed tracking algorithm with those of the state-of-the-art
 high speed tracking algorithms in the \textit{Precision} and
 \textit{Success\:Rate} metrics. In precision, we rank the trackers
@@ -522,8 +521,8 @@ slow, but a bit better in precision. For example, for AUC, {\it E}nKCF
 outperformed Struct and DSST by $5\%$ and $10\%$ while running at more
 than $10$ and $30$ times faster.
 
-\textbf{Performance on OTB100 Dataset.}  We evaluated the performance
-of the {\it E}nKCF tracker on the OTB100 dataset. Figure
+\textbf{Performance on OTB100 Dataset} We evaluated the performance of
+the {\it E}nKCF tracker on the OTB100 dataset. Figure
 \ref{fig:UAV123_OTB100_DATASET} shows the results on the OTB100
 dataset. Like in UAV123 dataset, we observed a similar performance. In
 particular, {\it E}nKCF showed a good performance for handling the
@@ -532,7 +531,7 @@ algorithm. For the precision metric, {\it E}nKCF performed slightly
 better than most of tracking algorithms in high-speed
 trackers. Interestingly, it outperformed another correlation filter
 based tracker, DSST, but performing $5\%$ behind of another low-speed
-scale adaptive SAMF tracker. 
+scale adaptive SAMF tracker.
 \begin{figure}[!h]
 \centering
 \begin{tabular}{ccc}
@@ -546,24 +545,32 @@ scale adaptive SAMF tracker.
 \label{fig:UAV123_OTB100_DATASET}
 \end{figure}
 
-\textbf{Performance on UAV123$\_$10fps Dataset.} We test our
-slightly modified version of the {\it E}nKCF, {\it E}nKCF2, on the
-UAV123$\_$10fps dataset. This dataset is down-sampled at $10$ fps
-version of the UAV123 dataset. The original dataset is already
-dominated by fast object motion and large ego-motion. With
-down-sampling, it becomes very challenging with object and ego-motion
-getting drastically larger. The performance of the proposed {\it
-  E}nKCF2 tracker and other already mentioned trackers can be seen in
-fig.~\ref{fig:UAV123_10fpsDATASET}. Our tracker outperforms other
-high-speed correlation filter based trackers including KCF, DSST by
-about $15\%$-$20\%$ whereas having similar precision rate to SAMF. On
+\textbf{Performance on UAV123$\_$10fps Dataset.} It maybe a slight
+digression from the main idea -- the idea of deploying multiple KCFs
+to make a very fast and effective, single target tracking
+available. We found that, with a slight modification, the proposed
+method can effectively handle tracking of object in fast motion and in
+large camera motion. 
+
+{\it Burak: What modification we made to change {\it E}nKCF to {\it E}nKCF2?}
+
+In particular, the UAV123 data has another version where the original
+dataset was temporally down-sampled at $10$ fps and makes the
+challenging original dataset, because of objects in fast motion and
+large ego-motion, more challenging. This is because the magnitude of
+those motions is even bigger. Figure \ref{fig:UAV123_10fpsDATASET}
+compares the performance of the modified version of {\it E}nKCF and
+other tracking methods. Our tracker outperforms other high-speed
+correlation filter based trackers including KCF, DSST by about
+$15\%$-$20\%$ and showed a precision rate similar to that of SAMF. On
 the other hand, it does decent job in scale estimation. It ranks as
-second in AUC while running about $150$ faster than the MUSTER tracker.
+second in AUC while running about $150$ faster than the MUSTER
+tracker.
 \begin{figure}[!h]
 \centering
 \begin{tabular}{cc}
-\bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Precision_UAV123_10fps.pdf}}
-\bmvaHangBox{\includegraphics[width=3.0cm]{./figures/Success_UAV123_10fps.pdf}}\\
+\bmvaHangBox{\includegraphics[width=4.0cm]{./figures/Precision_UAV123_10fps.pdf}}
+\bmvaHangBox{\includegraphics[width=4.0cm]{./figures/Success_UAV123_10fps.pdf}}\\
 \end{tabular}
 \caption{Evaluation and comparison of the proposed {\it E}nKCF2 tracker on the UAV123$\_$ dataset in terms of the precision and success rates. This dataset consists of temporally downsampled $123$ video sequences captured from a micro UAV.}
 \label{fig:UAV123_10fpsDATASET}
