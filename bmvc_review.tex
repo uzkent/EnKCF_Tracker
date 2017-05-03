@@ -96,8 +96,9 @@ would like to make our algorithm 1) learn the appearance model of a
 target on the fly and 2) run as fast on a typical desktop as up to
 $300$-$400$Hz so that it could run, at least, faster than 30Hz when it
 is deployed on a low-end, embedded system.\footnote{We empirically
-  come up with this computation about an 1/10th scale down of
-  computational resources from a typical PC to an embedded system.}
+  found this computation reasonable -- the computation about an 1/10th
+  scale down of computational resources from a typical PC to an
+  embedded system.}
 
 One of the dominant frameworks for online object tracking is the
 correlation filter that essentially solves a single-target tracking
@@ -140,10 +141,10 @@ has to run the correlation filter multiple times on each frame.
 
 \begin{figure*}[!t]
 \includegraphics[width=\textwidth]{figures/ResultsIntroduction.pdf}
-\caption{Examples of tracking results by the proposed method on the
-  ``UAV123'' dataset. This ``UAV123'' dataset is challenging for
-  object tracking as a target's scale is changed drastically with a
-  few frames.}
+\caption{Examples of tracking results (yellow rectangles) by the
+  proposed method on the ``UAV123'' dataset. This ``UAV123'' dataset
+  is challenging for object tracking as a target's scale is changed
+  drastically in a few frames.}
 \label{ResultsIntroduction}
 \end{figure*}
 
@@ -173,7 +174,8 @@ translation filter ($R_{t}^{S}$), \textit{target-only} scale filter
 filter ($R_{t}^{L}$). By doing so, we could still address the scale
 change and estimate target's motion efficiently while increasing
 run-time performance. Figure \ref{fig:Filters} shows examples of the
-ROIs associated with $R_{t}^{S}$, $R_{t}^{L}$, and $R_{s}$.
+ROIs associated with $R_{t}^{S}$, $R_{t}^{L}$, and $R_{s}$. Figure
+\ref{Workflows} illustrates the work-flow of the {\it E}nKCF.
 
 \begin{figure}[!t]
 \centering
@@ -183,34 +185,19 @@ ROIs associated with $R_{t}^{S}$, $R_{t}^{L}$, and $R_{s}$.
 \bmvaHangBox{\includegraphics[width=10.0cm]{./figures/Workflow_EnKCF2+PF.pdf}}\\
 (b)
 \end{tabular}
-\caption{The workflow of the proposed $\geq300$fps {\it E}nKCF tracker (a). It is slightly modified to handle extreme ego-motion
-and we call it the {\it E}nKCF2 tracker (b) running at $\geq100$fps.}
+\caption{The workflow of the proposed $\geq300$fps {\it E}nKCF tracker
+  (a). It is slightly modified to handle extreme ego-motion and we
+  call it the {\it E}nKCF2 tracker (b) running at $\geq100$fps.}
 \label{Workflows}
 \end{figure}
-The contributions of this study are as follows.
-\begin{itemize}
-\item \textbf{Novel Single-Target Tracking in a Very High-Speed ($\geq300$ fps) } Our
-  algorithm, {\it E}nKCF, deploys an ensemble of KCF in turn to more
-  efficiently address the scale variance and the dynamic maneuver of a
-  target while preserving run-time performance as high as possible. To
-  minimize any potential performance gap from transiting one KCF to
-  another, we use a Bayes filter. The workflow of the  {\it E}nKCF can
-  be visualized in fig.~\ref{Workflows}. The proposed tracker is tested on UAV123\footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}} and OTB100\footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
-  datasets. 
 
-\item \textbf{Slight Modification of the proposed {\it E}nKCF for
-  Handling Large Motion} Our second algorithm, {\it E}nKCF2 leverages
-  the flexibility of the ensemble of KCFs approach we propose. The
-  original {\it E}nKCF is slightly modified to track in low frame rate
-  videos ($10$fps) dominated by large ego-motion. We do not integrate
-  the particle filter in {\it E}nKCF2 as we test it on a temporally
-  down-sampled UAV123 dataset (UAV123$\_$10fps) including sequences
-  with large ego-motion on a UAV platform. Particle Filter can be
-  deployed in case the camera motion is known. The run-time
-  performance decreases to $150$ fps, however, ratio of the video
-  frame rate and run-time performance is similar to {\it E}nKCF. The
-  proposed framework can be seen in fig.~\ref{Workflows}.
-\end{itemize}
+The contribution of this study is a novel, single-target tracking
+algorithm running a very high-speed, $\geq 300$ fps. In particular,
+the proposed algorithm, {\it E}nKCF, deploys an ensemble of KCF, in
+turn, to more effectively address the scale variance and the dynamic
+maneuver of a target while preserving run-time performance as high as
+possible. To minimize any potential performance gap from transiting
+one KCF to another, we use a Bayes filter. 
 
 %---------------------------------------------------------------------- 
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
@@ -236,20 +223,22 @@ this way because we believe a correlation filter for learning a
 target's translation should include its background to better
 discriminate the target from its background and another correlation
 filter is prepared to focus on the target itself to estimate the right
-size or scale of the target. Fig.~\ref{fig:Filters} shows examples
+size or scale of the target. Figkure \ref{fig:Filters} shows examples
 of the region of interest (ROI) covered by each of three filters. We
 believe that a filter for learning a target's translation should
 include its background. In addition, making the ROI for the scale
 filter, $R_{s}$, tighter reduces the size of the template for the
 element-wise multiplication, resulting in a scale estimation in a
 higher speed.
+
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.4\textwidth]{figures/Filters_Details.pdf}
-\caption{The three filters denoted as \textit{target+small background} translation filter,
-  \textit{target-only} scale filter and \textit{target+large background} translation filters are
-  shown. Also, the hanning window and desired Gaussian response for
-  each filter is displayed.}
+\caption{Examples of three filters; the translation filter,
+  \textit{target+small background}, the scale filter,
+  \textit{target-only} and another translation filter,
+  \textit{target+large background}, and their Hanning window and
+  expected Gaussian response.}
 \label{fig:Filters}
 \end{figure}
 
@@ -276,9 +265,11 @@ as or faster than the original KCF.
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.75\textwidth]{figures/LearnedFilterComparison.pdf}
-\caption{The video frame and the learned scale correlation filters are shown next to it. 
-The models in the top row correspond to the scale filter trained every frame whereas the bottom row shows the scale filter updated every $5$ frames. 
-Filters updated every five frame and every frame display very large correlation.}
+\caption{This figure shows that there is marginal difference among the
+  scale filters learned either at every frame or at every 5
+  frames. The sub-figures at the top row show the scale filters
+  trained from every frame and those at the bottom row show the scale
+  filters estimated every 5 frames.}
 \label{fig:Filters_Comparison}
 \end{figure}
 
@@ -306,16 +297,17 @@ estimate the target's translation and recover from any potential
 drifts. Another translation filter, $R_{t}^{S}$, on the other hand, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
 noisy shape features due to its large search area. Figure
-\ref{Workflows} illustrates the work-flow of the proposed
-algorithm and alg.\ref{alg:MKCF} shows the pseudo-code of {\it
-  E}nKCF. We do not have a separate pseudo-code for {\it E}nKCF2 as there are only two differences between 
-  {\it E}nKCF and {\it E}nKCF2. First, the {\it E}nKCF2 runs $R_{t}^{L}$ every frame
-to better tackle large ego-motion at low video frame rates. Second, we remove the particle filter in the {\it E}nKCF2 
-tracker due to large ego-motion. In the following section, we will briefly mention the theory
-behind the KCF.
+\ref{Workflows} illustrates the work-flow of the proposed algorithm
+and alg.\ref{alg:MKCF} shows the pseudo-code of {\it E}nKCF. We do not
+have a separate pseudo-code for {\it E}nKCF2 as there are only two
+differences between {\it E}nKCF and {\it E}nKCF2. First, the {\it
+  E}nKCF2 runs $R_{t}^{L}$ every frame to better tackle large
+ego-motion at low video frame rates. Second, we remove the particle
+filter in the {\it E}nKCF2 tracker due to large ego-motion. In the
+following section, we will briefly mention the theory behind the KCF.
 \begin{algorithm}[h]
 \small
-	\caption{The {\it E}nKCF Tracking Algorithm.}\label{alg:MKCF}
+	\caption{{\it E}nKCF Tracking Algorithm.}\label{alg:MKCF}
 	\begin{algorithmic}[1]
 	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n = 5$,
 	\State \textbf{Output} : 
@@ -353,12 +345,6 @@ behind the KCF.
 	\EndProcedure	
 	\end{algorithmic}
 \end{algorithm}
-\begin{comment}
-{\it Burak: The KCF section doesn't fit the section before and
-  after. In addition, it's still too long.}
-  
-{\it YoungWoo : What do you mean by this? Should we move it up before the EnKCF introduction? or Should we include more EnKCF-related text in it? I trimmed it further. I wanted to keep some equations because they include hyper-paramaters that is important for EnKCF.}
-\end{comment}
 
 \subsection{Kernelized Correlation Filter} \label{sec:kcf}
 The Kernelized Correlation Filter is a well, known single target
@@ -414,7 +400,7 @@ r(z) = F^{-1}(\hat{k}^{xz} \odot \hat{\alpha})
 where $r$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
 
-\subsection{Particle Filter for Smoothing Transition of KCFs} \label{sc:PF}
+\subsection{Particle Filter for Smoothing Transition among KCFs} \label{sc:PF}
 As explained earlier, the {\it E}nKCF updates a target's translation at
 every other $k$ frames, particularly for estimating the target's
 scale. Although the strategy of updating every other $k$th frames will
