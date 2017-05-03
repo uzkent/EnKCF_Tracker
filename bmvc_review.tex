@@ -266,28 +266,25 @@ observation.
 \label{fig:Filters_Comparison}
 \end{figure}
 
-{\it Burak: What we wrote here didn't match what you told me. Go over
-  the following paragraph and change the numbers correctly.}
-
 The order of running these three KCFs is important because each of
 these filters aims at addressing different challenges; The
 \textit{target+large background} translation filter, $R_{t}^{L}$, is
-applied to the $i$th and $i+1$th image frame, another translation filter,
-$R_{t}^{S}$ is applied to the $i+2$th and $i+3$th image frame, and then the scale
-filter, $R_{s}$ is applied to the $i+4$the image. This order repeats
-until the end of the image frames. The translation filter,
-$R_{t}^{L}$, is intended to run right after the scale filter, $R_s$,
-runs which is applied at every other $i+2$ frames. We run these two
-filters this way because we want to minimize any drifts that are
-likely to happen running only $R_{s}$. In addition, the filter,
-$R_{t}^{S}$, is applied to every other frames before $R_{s}$ and right
-after two consecutive frames running $R_{t}^{L}$. By iterating this
-order of learning KCFs, we can integrate more discriminative shape
-features that can not be fully learned by $R_{t}^{L}$ as it contains
-contribution of large background in the learned model. The filter,
-$R_{t}^{L}$, uses shape and color information together to recover from
-any potential drifts -- drifts could happen only looking the target's
-scale by the filter, $R_{s}$.
+applied to the $i$th and $i+1$th image frame, another translation
+filter, $R_{t}^{S}$ is applied to the $i+2$th and $i+3$th image frame,
+and then the scale filter, $R_{s}$ is applied to the $i+4$the
+image. This order repeats until the end of the image frames. The
+translation filter, $R_{t}^{L}$, is intended to run right after the
+scale filter, $R_s$, runs which is applied at every other $i+4$
+frames. We run these filters in this way because we want to minimize
+any drifts that are likely to happen running only $R_{s}$. In
+addition, the filter, $R_{t}^{S}$, is applied to every other two
+frames before $R_{s}$ and right after two consecutive frames running
+$R_{t}^{L}$. By repeating this order of learning KCFs, we can
+integrate more discriminative shape features that cannot be learned by
+$R_{t}^{L}$ because it incorporates a large area about background in
+the learned model. The filter, $R_{t}^{L}$, uses shape and color
+information together to recover from any potential drifts -- drifts
+could happen only looking the target's scale by the filter, $R_{s}$.
 
 In summary, the scale filter, $R_{s}$, is designed to directly handle
 the scale change of a target and provides $R_{t}^{L}$ and $R_{t}^{S}$
