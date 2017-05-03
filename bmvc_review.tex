@@ -594,30 +594,30 @@ tracker.
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
 %---------------------------------------------------------------------- 
-Running a computer vision algorithm would be economically and
-practically, very attractive for any mobile, unmanned robotic
-solutions on real-world applications. To make such pipelines more
-realistic, however, those algorithms should run faster with small
-footprint of computation resource consumption. To make an object
-tracking algorithm with these practical requirements available, we
-proposed an extension of KCF that essentially deploys three KCFs, in
-turn, to address the scale change and dynamic maneuvers of a
-target. The way we ran three KCFs in a harmonious way optimal in a
-sense that efficiently handled the scale change and effectively
-learned the translation of the target. However, by doing so, our
-algorithm may introduce any potential drifts. To prevent this from
-happening, we developed a Bayes filter, particle filter, to smooth the
-transition between three KCFs. In particular, the particle filter
-estimated the target's pixel coordinates using information about the
-target's motion observed over frames. We used two publicly available
-dataset to evaluate the performance of the proposed algorithm and
-found that the performance of ours are 70.10\% for precision on 20
-pixels and 53.00\% for success rate for OTB100 data, and 54.50\% and
-40.2\% for UAV123 data. On average our method outperformed the
-existing ones over 5\% on precision on 20 pixels and 10-20\% on AUC on
+Running a computer vision algorithm on any existing embedded systems
+for real-world applications is economically and practically very
+attractive. To make such pipelines more plausible, however, those
+algorithms should run faster with small footprint of computation
+resource consumption. To make an object tracking algorithm with these
+practical requirements available, we proposed an extension of KCF that
+essentially deploys three KCFs, in turn, to address the scale change
+and dynamic maneuvers of a target. The way we ran three KCFs is
+optimal in a sense that efficiently handled the scale change and
+effectively learned the translation of the target. We also developed a
+Bayes filter, particle filter, to smooth the transition between three
+KCFs. In particular, the particle filter estimated the target's pixel
+coordinates using information about the target's motion observed over
+frames. We used two publicly available dataset to evaluate the
+performance of the proposed algorithm and found, on average, the
+performance of the proposed algorithm is better than those of the
+existing ones over 5\% on precision at 20 pixels and 10-20\% on AUC on
 average. Our implementation ran at 340 fps for OTB100 and at 416 fps
 for UAV123 data that is faster than DCF (292 fps) for OTB100 and KCF
-(292 fps), DCF (457 fps) for UAV123. 
+(292 fps), DCF (457 fps) for UAV123.
+
+As future work, we investigates a way of re-initializing a target when
+the target is lost, due to occlusion, illumination change, drastic
+camera motion, etc.
 %--------------
 %\section*{Acknowledgements}
 %put stuff here for the accepted , but not the ICCV version
