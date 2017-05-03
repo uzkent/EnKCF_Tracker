@@ -272,9 +272,9 @@ observation.
 The order of running these three KCFs is important because each of
 these filters aims at addressing different challenges; The
 \textit{target+large background} translation filter, $R_{t}^{L}$, is
-applied to the $i$th image frame, another translation filter,
-$R_{t}^{S}$ is applied to the $i+1$th image frame, and then the scale
-filter, $R_{s}$ is applied to the $i+2$the image. This order repeats
+applied to the $i$th and $i+1$th image frame, another translation filter,
+$R_{t}^{S}$ is applied to the $i+2$th and $i+3$th image frame, and then the scale
+filter, $R_{s}$ is applied to the $i+4$the image. This order repeats
 until the end of the image frames. The translation filter,
 $R_{t}^{L}$, is intended to run right after the scale filter, $R_s$,
 runs which is applied at every other $i+2$ frames. We run these two
@@ -298,15 +298,7 @@ drifts. Another translation filter, $R_{t}^{S}$, on the other hand, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
 noisy shape features due to its large search area. Figure
 \ref{Workflows} illustrates the work-flow of the proposed algorithm
-and alg.\ref{alg:MKCF} shows the pseudo-code of {\it E}nKCF.
-
-{\it Burak: Remove this EnKCF2 part from the text and from the pseudo code.}
-
-We do not have a separate pseudo-code for {\it E}nKCF2 as there are
-only two differences between {\it E}nKCF and {\it E}nKCF2. First, the
-{\it E}nKCF2 runs $R_{t}^{L}$ every frame to better tackle large
-ego-motion at low video frame rates. Second, we remove the particle
-filter in the {\it E}nKCF2 tracker due to large ego-motion. In the
+and alg.\ref{alg:MKCF} shows the pseudo-code of {\it E}nKCF. In the
 following section, we will briefly mention the theory behind the KCF.
 \begin{algorithm}[h]
 \small
