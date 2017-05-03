@@ -252,12 +252,14 @@ way our algorithm is alternating multiple KCFs in different goals
 intuitively makes sense in that the appearance of consecutive images
 does not change drastically. Although it varies based on the scene,
 learning a correlation filter a frame would not be much different from
-the one learned using the image few or $k$ frames later. Figure
+the one learned using the image few or $k$ frames later. 
+\begin{comment}
+Figure
 \ref{fig:Filters_Comparison} shows examples supporting this
 observation.
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/LearnedFilterComparison.pdf}
+\includegraphics[width=0.5\textwidth]{figures/LearnedFilterComparison.pdf}
 \caption{This figure shows that there is marginal difference among the
   scale filters learned either at every frame or at every 5
   frames. The sub-figures at the top row show the scale filters
@@ -265,7 +267,7 @@ observation.
   filters estimated every 5 frames.}
 \label{fig:Filters_Comparison}
 \end{figure}
-
+\end{comment}
 The order of running these three KCFs is important because each of
 these filters aims at addressing different challenges; The
 \textit{target+large background} translation filter, $R_{t}^{L}$, is
@@ -285,7 +287,7 @@ $R_{t}^{L}$ because it incorporates a large area about background in
 the learned model. The filter, $R_{t}^{L}$, uses shape and color
 information together to recover from any potential drifts -- drifts
 could happen only looking the target's scale by the filter, $R_{s}$.
-
+\begin{comment}
 In summary, the scale filter, $R_{s}$, is designed to directly handle
 the scale change of a target and provides $R_{t}^{L}$ and $R_{t}^{S}$
 with more focused ROIs about the target's translation. A translation
@@ -293,10 +295,12 @@ filter, $R_{t}^{L}$, is intended to look at a larger search area to
 estimate the target's translation and recover from any potential
 drifts. Another translation filter, $R_{t}^{S}$, on the other hand, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
-noisy shape features due to its large search area. Figure
-\ref{Workflows} illustrates the work-flow of the proposed algorithm
-and alg.\ref{alg:MKCF} shows the pseudo-code of {\it E}nKCF. In the
-following section, we will briefly mention the theory behind the KCF.
+noisy shape features due to its large search area.
+\end{comment}
+Figure \ref{Workflows} illustrates the work-flow of the proposed
+ algorithm and alg.\ref{alg:MKCF} shows the pseudo-code of {\it
+   E}nKCF. In the following section, we will briefly mention the
+ theory behind the KCF.
 \begin{algorithm}[h]
 \small
 	\caption{{\it E}nKCF Tracking Algorithm.}\label{alg:MKCF}
@@ -393,8 +397,8 @@ where $r$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
 
 \subsection{Particle Filter for Smoothing Transition among KCFs} \label{sc:PF}
-As explained earlier, the {\it E}nKCF updates a target's translation at
-every other $k$ frames, particularly for estimating the target's
+As explained earlier, the {\it E}nKCF updates a target's translation
+at every other $k$ frames, particularly for estimating the target's
 scale. Although the strategy of updating every other $k$th frames will
 result in an optimal run-time performance, this may lead any potential
 drifts at the later frames. To prevent such potential mishaps from
@@ -413,16 +417,14 @@ the $x$-axis and $y$-axis. The particle filter predicts, using a
 constant velocity motion model, a target's state by generating a
 predefined number of particles. And then the particle filter uses the
 confidence maps of {\it E}nKCF as observation to update the state. The
-weight of a particle is computed as:
-\begin{equation}
-w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{N} y_{R}(x_{t}-i,y_{t}-j)
-\end{equation}
-where $w_{p}$ denotes the weight of the particle $p$ at time $t$ and
-$N$ denotes the size of the window as that of a confidence
-map. Alternatively one can also use the Euclidean distance of
-particles to the location of maximum response of the confidence
-map. This alternative, however, would result in drifts. 
-
+weight of a particle is computed as, $w_{p_{t}}(x_{t},y_{t}) =
+\sum_{i=1}^{N}\sum_{j=1}^{N} y_{R}(x_{t}-i,y_{t}-j)$,  where $w_{p}$
+denotes the weight of the particle $p$ at time $t$ and $N$ denotes the
+size of the window as that of a confidence map. Alternatively one can
+also use the Euclidean distance of particles to the location of
+maximum response of the confidence map. This alternative, however,
+would result in drifts.
+\begin{comment}
 We chooses some particles based on their importance to estimate the
 target's next state, i.e., its pixel coordinates as $\hat{X}_{t} =
 \sum_{p=1}^{P}w_{p_{t}} X_{t}.$ Note that, unlike a typical operation
@@ -432,7 +434,7 @@ because we observe the confidence map from the scale filter, $R_s$ is
 sometime noisy. In addition, at every iteration, we check the variance
 in the velocity components of the particles to re-assign velocities
 from uniform initial distribution to keep variance high enough.
-
+\end{comment}
 %----------------------------------------------------------------------
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
@@ -490,8 +492,8 @@ filter, $R_{t}^{S}$, used fHoG features only. The scale filter,
 $R_{s}$ used both fHoG and color features to learn the scale change
 more accurately.
 
-\textbf{Performance on UAV123 Dataset} We compared the performance
-of the proposed tracking algorithm with those of the state-of-the-art
+\textbf{Performance on UAV123 Dataset} We compared the performance of
+the proposed tracking algorithm with those of the state-of-the-art
 high speed tracking algorithms in the \textit{Precision} and
 \textit{Success\:Rate} metrics. In precision, we rank the trackers
 based on the precision numbers at 20 pixels whereas in the success
@@ -503,20 +505,18 @@ MOSSE\cite{bolme2010visual,henriques2015high} and ones in relatively
 lower-speed ($\geq$50), i.e., SAMF\cite{li2014scale},
 DSST\cite{danelljan2014accurate}, Struck\cite{hare2012efficient},
 MUSTER \cite{hong2015multi}. TLD \cite{kalal2012tracking}, and OAB
-\cite{zhang2012robust}. 
-
-Figure \ref{fig:UAV123_OTB100_DATASET} shows the results on the UAV123
-dataset. {\it E}nKCF outperformed most of the high-speed tracking
-methods by $3\%$-$15\%$ at 20 pixels precision metric. Three
-algorithms, SAMF, DSST, and Struck did about 5\% better than ours in
-accuracy, but 10-20\% slower than ours. For the scale adaptation, {\it
-  E}nKCF did second best in terms of \textit{area under curve} (AUC)
-value for the success rate plot. It outperformed other tracking
-methods in high-speed by about $20\%$-$25\%$ in AUC metric. In
-addition, it performed even better than those algorithms that are
-slow, but a bit better in precision. For example, for AUC, {\it E}nKCF
-outperformed Struct and DSST by $5\%$ and $10\%$ while running at more
-than $10$ and $30$ times faster.
+\cite{zhang2012robust}. Figure \ref{fig:UAV123_OTB100_DATASET} shows
+the results on the UAV123 dataset. {\it E}nKCF outperformed most of
+the high-speed tracking methods by $3\%$-$15\%$ at 20 pixels precision
+metric. Three algorithms, SAMF, DSST, and Struck did about 5\% better
+than ours in accuracy, but 10-20\% slower than ours. For the scale
+adaptation, {\it E}nKCF did second best in terms of \textit{area under
+  curve} (AUC) value for the success rate plot. It outperformed other
+tracking methods in high-speed by about $20\%$-$25\%$ in AUC
+metric. In addition, it performed even better than those algorithms
+that are slow, but a bit better in precision. For example, for AUC,
+{\it E}nKCF outperformed Struct and DSST by $5\%$ and $10\%$ while
+running at more than $10$ and $30$ times faster.
 
 \textbf{Performance on OTB100 Dataset} We evaluated the performance of
 the {\it E}nKCF tracker on the OTB100 dataset. Figure
@@ -538,7 +538,8 @@ scale adaptive SAMF tracker.
 \bmvaHangBox{\includegraphics[width=3.30cm]{./figures/Success_OTB100.eps}}\\
 \centering \footnotesize (a) Precision and Success rates for UAV123 \quad \quad \quad \quad \quad (b) Precision and Success rates for OTB100
 \end{tabular}
-\caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the UAV123 (a) and OTB100 (b) datasets.}
+\caption{Comparison of the slightly, modified version of {\it E}nKCF
+  for the UAV123 (a) and OTB100 (b) datasets.}
 \label{fig:UAV123_OTB100_DATASET}
 \end{figure}
 
