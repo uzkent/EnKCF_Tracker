@@ -550,9 +550,8 @@ digression from the main idea -- the idea of deploying multiple KCFs
 to make a very fast and effective, single target tracking
 available. We found that, with a slight modification, the proposed
 method can effectively handle tracking of object in fast motion and in
-large camera motion. 
-
-{\it Burak: What modification we made to change {\it E}nKCF to {\it E}nKCF2?}
+large camera motion. To do so, we slightly modify {\it E}nKCF by running $R_{t}^{L}$ every frame and remove the particle
+filter due to large ego-motion. 
 
 In particular, the UAV123 data has another version where the original
 dataset was temporally down-sampled at $10$ fps and makes the
