@@ -333,10 +333,10 @@ Figure \ref{Workflows} illustrates the work-flow of the proposed
 				\State // Update Translation
 				\State Perform Importance Re-sampling (if necessary) for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
 			    \State // Model Update
-			    \State Update $R_{s}$ (Condition 1);
+			    \State Update $R_{t}^{S}$ (Condition 3);
 			    \State Update $R_{t}^{L}$ (Condition 2);
-			     \If{$PSR(y_{R_{t}^{S}}) \geq T_{R_{t}^{S}}$}
-				\State Update $R_{t}^{S}$ (Condition 3);
+			     \If{$PSR(y_{R_{s}}) \geq T_{R_{s}}$}
+				\State Update $R_{s}$ (Condition 1);
 			     \EndIf		
 	\EndProcedure	
 	\end{algorithmic}
