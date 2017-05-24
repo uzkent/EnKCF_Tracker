@@ -1,4 +1,23 @@
 05/23/17
+The plan of publishing this work is 
+
+1) YoungWoo will continue to work on making a target-following
+pipeline available. This pipeline includes a tracker, EnKCF, and
+flight control module w/ a drone. This work will be submitted to any
+of robotics conference at Fall 2017.
+
+2) For BMVC submission, 
+
+2)-1 If it gets accepted, we'll be working on a journal submission and
+not working on submitting what YoungWoo is working on to any robotics
+conference. The journal submission will include EnKCF and a
+target-following pipeline.
+
+2)-2 Otherwise, we'll be looking for other conferences to submit the
+BMVC submission. Hopefully the time we're submitting the BMVC
+submission to another conference, the contents of the paper are more
+clear and better.
+
 YoungWoo:
 1) Go over the text and revise it asap,
 
