@@ -195,14 +195,15 @@ one KCF to another, we use a Bayes filter.
 %---------------------------------------------------------------------- 
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
 %---------------------------------------------------------------------- 
-In this paper, we extend the KCF in that three KCFs are deployed, in
-turn, to address a target's scale change and dynamic maneuvers while
-preserving the overall execution time very fast, i.e., $\ge$ 300
-fps. The efficient nature of the KCF computation results in a
-small-footprint, executable. Our design principle is, if we could
-deploy these KCFs in an efficient way, that the proposed algorithm
-could achieve a high, run-time performance while effectively
-addressing the scale variation and dynamic maneuvers of a target.
+In this paper, we propose a novel way of utilizing multiple of the KCF
+\cite{henriques2015high} to effectively handle scale variations and
+dynamic maneuvers of a target. To maintain or improve the run-time
+performance of the original KCF (e.g., $\ge$ 300), we deploy three
+KCFs in turn, not on the same image frame together. Each of these KCFs
+is designed to address specific challenges, i.e., scale and
+translation. By alternating their deployments, our algorithm will
+improve the performance of the original KCF while preserving the
+efficient nature and small-footprint of the KCF computation. 
 
 The proposed algorithm, {\it E}nKCF, learns three KCFs in turn: The
 first filter, $R_{t}^{S}$, focuses on learning the target area and its
@@ -210,18 +211,14 @@ background, \textit{target}+\textit{small background} for addressing a
 marginal translation by a target, the second filter, $R_{s}$, focuses
 entirely on learning the target's scale, \textit{target-only}, and the
 last filter, $R_{t}^{L}$, focuses on the target area and its
-background twice bigger than that of the first filter, $R_{t}^{S}$,
-\textit{target}+\textit{large background}. We set up {\it E}nKCF in
-this way because we believe a correlation filter for learning a
-target's translation should include its background to better
-discriminate the target from its background and another correlation
-filter is prepared to focus on the target itself to estimate the right
-size or scale of the target. Figkure \ref{fig:Filters} shows examples
-of the ROI covered by each of three filters. We believe that a filter
-for learning a target's translation should include its background. In
-addition, making the ROI for the scale filter, $R_{s}$, tighter
-reduces the size of the template for the element-wise multiplication,
-resulting in a scale estimation in a higher speed.
+background, at least twice, bigger than that of the first filter,
+$R_{t}^{S}$, \textit{target}+\textit{large background}. We set up {\it
+  E}nKCF in this way because, we believe, a correlation filter for
+learning a target's translation should include its background to
+better discriminate the target from its background, and another
+correlation filter should focus on the target itself to estimate the
+right size or scale of the target. Figkure \ref{fig:Filters} shows
+examples of the ROI covered by each of three filters. 
 
 \begin{figure}[!h]
 \centering
@@ -230,32 +227,34 @@ resulting in a scale estimation in a higher speed.
   \textit{target+small background}, the scale filter,
   \textit{target-only} and another translation filter,
   \textit{target+large background}, and their Hanning window and
-  expected Gaussian response.}
+  expected Gaussian response. Instead of using a single, correlation
+  filter for estimating change of a target's scale and translation, it
+  would be better to use more than one correlation filter for better
+  estimating change of scale and translation individually.}
 \label{fig:Filters}
 \end{figure}
 
-After Henriques and his colleagues' presented impressive tracking
+Since Henriques and his colleagues' presented impressive tracking
 results of KCF \cite{henriques2015high} on VOT15
 challenge \footnote{\url{http://www.votchallenge.net/vot2015/}}, many
-variation of KCF were investigated. In particular, \cite{ma2015long}
-and \cite{danelljan2014accurate} used a scale filter to learn the
-target area only whereas \cite{li2014scale, bibi2015multi,
-  tang2015multi} used a correlation filter learned on the target area
-and its surrounding background in different size to learn the optimal
-scale of the target. Our approach is particularly similar to that of
-\cite{ma2015long} in that more than one KCF is used to address the
-challenges of single target tracking. But ours is different from that
-of \cite{ma2015long} in that we do not use those multiple KCFs
-together at every frame, but alternatively at every three frame. The
-way our algorithm is alternating multiple KCFs in different goals
-intuitively makes sense in that the appearance of consecutive images
-does not change drastically. Although it varies based on the scene,
-learning a correlation filter a frame would not be much different from
-the one learned using the image few or $k$ frames later. 
-\begin{comment}
-Figure
-\ref{fig:Filters_Comparison} shows examples supporting this
-observation.
+variation of KCF were investigated. For example, \cite{ma2015long} and
+\cite{danelljan2014accurate} used a scale filter to learn the target
+area only whereas \cite{li2014scale, bibi2015multi, tang2015multi}
+used a correlation filter learned on the target area and its
+surrounding background in different size to learn the optimal scale of
+the target. Our approach is similar to that of \cite{ma2015long} in
+that more than one KCF is used to address the challenges of single
+target tracking. But ours is different from their approach because we
+do not use those multiple KCFs together at every frame, but
+alternatively at every $k$ frame (e.g., $k=3$). It intuitively makes
+sense to alternatively use multiple KCFs with different purposes
+because the appearance of a target does not change drastically over
+consecutive image frames. For most case, even it looks the appearance
+changes, learning a correlation filter over consecutive frames would
+not be much different from the one learned using the image few or $k$
+frames later. Figure \ref{fig:Filters_Comparison} shows examples
+supporting this observation.
+
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.5\textwidth]{figures/LearnedFilterComparison.pdf}
@@ -266,7 +265,7 @@ observation.
   filters estimated every 5 frames.}
 \label{fig:Filters_Comparison}
 \end{figure}
-\end{comment}
+
 The order of running these three KCFs is important because each of
 these filters aims at addressing different challenges; The
 \textit{target+large background} translation filter, $R_{t}^{L}$, is
@@ -282,11 +281,12 @@ addition, the filter, $R_{t}^{S}$, is applied to every other two
 frames before $R_{s}$ and right after two consecutive frames running
 $R_{t}^{L}$. By repeating this order of learning KCFs, we can
 integrate more discriminative shape features that cannot be learned by
-$R_{t}^{L}$ because it incorporates a large area about background in
-the learned model. The filter, $R_{t}^{L}$, uses shape and color
-information together to recover from any potential drifts -- drifts
-could happen only looking the target's scale by the filter, $R_{s}$.
-\begin{comment}
+$R_{t}^{L}$. This is because it incorporates a large area about
+background in the learned model. The filter, $R_{t}^{L}$, uses shape
+and color information together to recover from any potential drifts --
+drifts could happen only looking the target's scale by the filter,
+$R_{s}$.
+
 In summary, the scale filter, $R_{s}$, is designed to directly handle
 the scale change of a target and provides $R_{t}^{L}$ and $R_{t}^{S}$
 with more focused ROIs about the target's translation. A translation
@@ -294,12 +294,11 @@ filter, $R_{t}^{L}$, is intended to look at a larger search area to
 estimate the target's translation and recover from any potential
 drifts. Another translation filter, $R_{t}^{S}$, on the other hand, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
-noisy shape features due to its large search area.
-\end{comment}
-Figure \ref{Workflows} illustrates the work-flow of the proposed
- algorithm and alg.\ref{alg:MKCF} shows the pseudo-code of {\it
-   E}nKCF. In the following section, we will briefly mention the
- theory behind the KCF.
+noisy shape features due to its large search area. Figure
+\ref{Workflows} illustrates the work-flow of the proposed algorithm
+and alg.\ref{alg:MKCF} shows the pseudo-code of {\it E}nKCF. In the
+following section, we will briefly mention the theory behind the KCF.
+
 \begin{algorithm}[h]
 \small
 	\caption{{\it E}nKCF Tracking Algorithm.}\label{alg:MKCF}
