@@ -96,10 +96,16 @@ offline training, and can run on an embedded system. Specifically, we
 would like to make our algorithm 1) learn the appearance model of a
 target on the fly and 2) run as fast on a typical desktop as up to
 $300$-$400$ fps so that it could run, at least, faster than 30 fps
-when it is deployed on a low-end, embedded system.\footnote{We
-  empirically found this computation useful and reasonable -- the
-  computation about an 1/10th scale down of computational resources
-  from a typical PC to an embedded system.}
+when it is deployed on a low-end, embedded system.\footnote{In
+  general, it would be very hard to compare an Intel or AMD processor
+  running on a desktop or a laptop with that, e.g., ARM, of a
+  single-board, embedded system in terms of run-time performance of a
+  computer vision algorithm. This is primarily because of difference
+  in their architectures. But we empirically found this computation
+  useful and reasonable based on specific processors, e.g., Intel's i7
+  quad-core vs ARM Cortex A53 -- the computation about an 1/10th scale
+  down of computational resources from a typical PC to an embedded
+  system.}
 
 One of the dominant frameworks for online object tracking is the
 correlation filter that essentially solves a single-target tracking
