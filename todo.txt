@@ -22,6 +22,7 @@ YoungWoo:
 1) Go over the text and revise it asap,
 
 Burak:
+0) Take care fo YoungWoo's comments
 1) Refine/renew figures, Figure 2 and 3. Make Figure 4 and 5 more visible.
 2) Make Algorithm 1 more readable.
 
