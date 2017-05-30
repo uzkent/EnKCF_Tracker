@@ -352,18 +352,23 @@ features of the KCF related to this work.
 
 \subsection{Kernelized Correlation Filter} \label{sec:kcf}
 The Kernelized Correlation Filter is a well, known single target
-tracking method and the theory and its work flow has been detailed in
-other papers already \cite{henriques2012exploiting,henriques2015high}. This section briefly
-goes over the parts of the KCF relevant to this study. Its
-computational efficiency is derived from the correlation
-filter framework representing training examples as a circulant matrix. To reduce complexity, the
-circulant matrix can be diagonalized by Discrete Fourier Transform.  This way, off-diagonal elements become
-zero whereas the diagonal elements represent the eigenvalues of the circulant matrix. The egienvalues are equal
-to the DFT transformation of the base sample ($x$) elements. The Kernelized Correlation Filter, on the other hand,
-applies a kernel to $x$ to transform to a more discriminative domain. The circulant matrix is then formed by applying
-cylic shifts on the kernelized $x$. Such kernelization operation does not introduce additional complexity to the baseline
-correlation filter framework.
-
+tracking method and its work flow has been detailed in other papers
+already \cite{henriques2012exploiting,henriques2015high}. This section
+briefly goes over the parts of the KCF relevant to this study. Its
+computational efficiency is derived from the correlation filter
+framework representing training examples as a circulant matrix. The
+fact that a circulant matrix can be diagonalized by Discrete Fourier
+transform is the key to reduce the complexity of any tracking method
+based on correlation filter. The off-diagonal elements become zero
+whereas the diagonal elements represent the eigenvalues of the
+circulant matrix. The egienvalues are equal to the DFT transformation
+of the base sample ($x$) elements. The Kernelized Correlation Filter,
+in particular, applies a kernel to $x$ to transform to a more
+discriminative domain. The circulant matrix is then formed by applying
+cylic shifts on the kernelized $x$. Such kernelization operation does
+not introduce additional complexity to the baseline correlation filter
+framework.
+\begin{comment}
 {\it Burak: The above paragraph didn't connect to the following
   paragraphs. You'll have to finish up the sentence about a
   correlation filter's, not KCF yet, computational efficiency and then
@@ -371,7 +376,7 @@ correlation filter framework.
   be transformed into KCF w/ the same computational complexity.}
 
 {\it YoungWoo : I edited it based on your comment}
-
+\end{comment}
 The KCF essentially solves the problem of a regression in the form of
 the regularized ridge regression as:
 \begin{equation}
@@ -468,29 +473,37 @@ UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite
 The OTB100 dataset is comprised of the videos about 100 objects
 whereas UAV123 dataset contains aerial footages of 123 objects. We
 aims at developing an object tracking algorithm that ``efficiently''
-runs on an embedded system in ``high speed,'' $\ge 300$ fps, e.g.,
-running our tracking algorithms on a drone. Given this, we believe
-that the UAV123 video data is a better fit in evaluating the
-performance of the proposed algorithm than any other existing tracking
-datasets. This is because there are many challenging scenes, e.g.,
-abrupt scale/illumination changes. Although we are primarily
-interested in developing an algorithm for mobile, embedded robotic
-applications, it is important to compare the performance of the
-proposed algorithm with those of the state-of-the-art in nominal
-dataset for comparison. To this end, we chose the OTB100 data that
-contains the videos recorded from smart phones and typical cameras in
-perspective view. Finally, the {\it E}nKCF2 is tested on temporally
-down-sampled version of the UAV123 dataset, called UAV123$\_$10fps dataset. 
-This way, by modifying the proposed {\it E}nKCF framework slightly we can tackle scenarios dominated by extreme camera and object
-motion as we run multiple correlation filter at each frame. One can also perform such modifications based on the hardware specifications. 
-A more sophisticated hardware can be more friendly to apply multiple correlation filter ({\it E}nKCF2) at one frame
-whereas the ones on the low end can only accommodate a single correlation filter at each frame ({\it E}nKCF).
+runs on an embedded system (e.g., a drone) in ``high speed,'' $\ge
+300$ fps, e.g. Given this, we believe that the UAV123 video data is a
+better fit in evaluating the performance of the proposed algorithm
+than any other existing tracking datasets. This is because there are
+many challenging scenes, e.g., abrupt scale/illumination
+changes. Although we are primarily interested in developing an
+algorithm for mobile, embedded robotic applications, it is important
+to compare the performance of the proposed algorithm with those of the
+state-of-the-art in nominal dataset for comparison. To this end, we
+chose the OTB100 data that contains the videos recorded from smart
+phones and typical cameras in perspective view. 
 
-{\it Burak: You need to explain why it is useful or meaningful to
-  evaluate our algorithm w/ a down-sampled version of the UAV123
-  dataset.}
+Lastly, we tested the proposed algorithm on a temporally down-sampled
+version of the UAV123 dataset, called UAV123$\_$10fps dataset. What we
+would like to see from this experiment is to evaluate how robust the
+proposed algorithm is to drastic motions of camera and targets. 
 
-{\it YoungWoo: I edited the preceding paragraph based on your comment.}
+{\it Burak: We have never told what EnKCF2 is before the following sentence. Just don't mention EnKCF2, but say a modification of EnKCF!}
+
+\begin{comment}
+Finally, the {\it E}nKCF2 is tested on temporally down-sampled version
+of the UAV123 dataset, called UAV123$\_$10fps dataset.  This way, by
+modifying the proposed {\it E}nKCF framework slightly we can tackle
+scenarios dominated by extreme camera and object motion as we run
+multiple correlation filter at each frame. One can also perform such
+modifications based on the hardware specifications.  A more
+sophisticated hardware can be more friendly to apply multiple
+correlation filter ({\it E}nKCF2) at one frame whereas the ones on the
+low end can only accommodate a single correlation filter at each frame
+({\it E}nKCF).
+\end{comment}
 
 \textbf{Finding Optimal Hyperparameters} Each of three KCFs in {\it
   E}nKCF is designed for addressing a specific challenge of a single,
@@ -580,9 +593,6 @@ another low-speed scale adaptive SAMF tracker.
   for the OTB100 dataset.}
 \label{fig:OTB100_DATASET}
 \end{figure}
-
-{\it Burak: I don't think I agreed to put the following part as a part
-  of our submission.}
 
 \textbf{Performance on UAV123$\_$10fps Dataset.} It maybe a slight
 digression from the main idea -- the idea of deploying multiple KCFs
