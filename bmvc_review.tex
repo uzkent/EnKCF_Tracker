@@ -3,9 +3,11 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools} % mathtools builds on and extends amsmath package
-\usepackage{algorithm}		% http://ctan.org/pkg/algorithms
+% \usepackage{algorithm}		% http://ctan.org/pkg/algorithms
 \usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
 \usepackage{comment, url}
+\usepackage[ruled, vlined, linesnumbered]{algorithm2e}
+
 %% Enter your paper number here for the review copy
 \bmvcreviewcopy{825}
 
@@ -213,44 +215,89 @@ efficient nature and small-footprint of the KCF computation.
 
 \begin{algorithm}[h]
 \small
-	\caption{{\it E}nKCF Tracking Algorithm.}\label{alg:MKCF}
-	\begin{algorithmic}[1]
-	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n = 5$,
-	\State \textbf{Output} : 
-				\If{$fc\:\%\:n=0$} \Comment{Condition 1}
-						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
-						Scale filter (\textit{target-only}) model $R_{s}$.
-			     \EndIf
-				\If{$fc\:\%\:n=1\:\:or\:\:fc\:\%\:n=2$}\Comment{Condition 2}
-						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t_1})$,
-						Large Area Translation Filter model $R_{t}^{L}$.
-				\EndIf
-				\If{$fc\:\%\:n=3\:\:or\:\:fc\:\%\:n=4$}\Comment{Condition 3}
-						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
-						Small Area Translation Filter model $R_{t}^{S}$.
-				\EndIf
-	\Procedure{track}{$x_{t-1},y_{t-1},s_{t-1}$} 
-				\State // Translation Estimation
-				\State Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $x_{t} = (x_{t},y_{t},s_{t-1})$;
-				\State // Translation Estimation
-				\State Crop the ROI for the $R_{t}^{L}$, or $R_{t}^{S}$ given $x_{t}$
-				and estimate translation ($x_{t}$,$y_{t}$) using $R_{t}^{L}$ (Condition 2) or $R_{t}^{S}$ (Condition 3),
-				\State Skip translation estimation for $R_{s}$ (Condition 1);
-				\State // Scale Estimation
-			    \State Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$, using $R_{s}$ (Condition 1), 
-				\State Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$;
-		        \State Skip it for $R_{t}^{L}$ and $R_{t}^{S}$ (Condition 1, and 2),
-				\State // Update Translation
-				\State Perform Importance Re-sampling (if necessary) for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
-			    \State // Model Update
-			    \State Update $R_{t}^{S}$ (Condition 3);
-			    \State Update $R_{t}^{L}$ (Condition 2);
-			     \If{$PSR(y_{R_{s}}) \geq T_{R_{s}}$}
-				\State Update $R_{s}$ (Condition 1);
-			     \EndIf		
-	\EndProcedure	
-	\end{algorithmic}
+\DontPrintSemicolon
+\KwIn{ Initial bounding box $(x_{0},y_{0},s_{0})$, frame counter $fc$, scale filter frequency $n = 5$,}
+\KwOut{	\uIf{$fc\:\%\:n=0$ (Condition 1)}
+			{
+				Estimated Target State $(x_{t},y_{t},s_{t})$,
+				Scale filter (\textit{target-only}) model $R_{s}$.
+			}			  
+			 \ElseIf{$fc\:\%\:n=1\:\:or\:\:fc\:\%\:n=2$ (Condition 2)}
+			 {
+				Estimated Target State $(x_{t},y_{t},s_{t})$,
+			  	Large Area Translation Filter model $R_{t}^{L}$.
+			}			 
+			 \Else (\textit{Condition 3})
+			{			 
+				 Estimated Target State $(x_{t},y_{t},s_{t})$,
+				Small Area Translation Filter model $R_{t}^{S}$.				
+			}	
+		}
+\SetKwBlock{Begin}{function}{end function}
+\Begin($\text{track($x_{t-1},y_{t-1},s_{t-1}$) }$)
+{
+ 	// \textit{Translation Estimation - Particle Filter} \\
+	Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $(x_{t},y_{t},s_{t-1})$ \\
+     // \textit{Translation Estimation - Correlation Filter} \\
+	Crop the ROI for the $R_{t}^{L}$ (Condition 2), or $R_{t}^{S}$ (Condition 3) given $(x_{t},y_{t})$ and estimate new position ($x_{t}$,$y_{t}$),\\
+	// \textit{Scale Estimation - Correlation Filter}\\
+	Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$ (Condition 1),\\ 
+	Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$,\\
+	Skip it for $R_{t}^{L}$ and $R_{t}^{S}$ ($s_{t}$=$s_{t-1}$)\\
+	// \textit{Update Translation - Particle Filter}\\
+	Do Importance Re-sampling (if necessary) and compute the 
+	mean of posterior pdf $(x_{t},y_{t})$\\
+	// \textit{Model Update}\\
+	Update $R_{t}^{S}$ (Condition 3),\\
+	Update $R_{t}^{L}$ (Condition 2),\\
+	\uIf{$PSR(y_{R_{s}}) \geq T_{R_{s}}$}{
+		Update $R_{s}$ (Condition 1)}
+  \label{endfor}
+  \Return{($x_{t},y_{t},s_{t}$)}
+}
+\caption{{\it E}nKCF Tracking Algorithm}\label{costalgorithm}
 \end{algorithm}
+
+%\begin{algorithm}[h]
+%\small
+%	\caption{{\it E}nKCF Tracking Algorithm.}\label{alg:MKCF}
+%	\begin{algorithmic}[1]
+%	\State \textbf{Input} : Initial bounding box $x_{0}$, frame counter $fc$, scale filter frequency $n = 5$,
+%	\State \textbf{Output} : 
+%				\If{$fc\:\%\:n=0$} \Comment{Condition 1}
+%						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
+%						Scale filter (\textit{target-only}) model $R_{s}$.
+%			     \EndIf
+%				\If{$fc\:\%\:n=1\:\:or\:\:fc\:\%\:n=2$}\Comment{Condition 2}
+%						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
+%						Large Area Translation Filter model $R_{t}^{L}$.
+%				\EndIf
+%				\If{$fc\:\%\:n=3\:\:or\:\:fc\:\%\:n=4$}\Comment{Condition 3}
+%						\State Estimated Target State $x_{t} = (x_{t},y_{t},s_{t})$,
+%						Small Area Translation Filter model $R_{t}^{S}$.
+%				\EndIf
+%	\Procedure{track}{$x_{t-1},y_{t-1},s_{t-1}$} 
+%				\State // Translation Estimation
+%				\State Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $x_{t} = (x_{t},y_{t},s_{t-1})$;
+%				\State // Translation Estimation
+%				\State Crop the ROI for the $R_{t}^{L}$, or $R_{t}^{S}$ given $x_{t}$
+%				and estimate translation ($x_{t}$,$y_{t}$),
+%				\State Skip translation estimation for $R_{s}$ (Condition 1);
+%				\State // Scale Estimation
+%			    \State Crop the ROI for the $R_{s}$ and estimate scale, $s_{t}$, using $R_{s}$ (Condition 1), 
+%				\State Scale pool for $R_{s}$ : $\lbrace1.05,1.0,1/1.05\rbrace$;
+%		        \State Skip it for $R_{t}^{L}$ and $R_{t}^{S}$ ($s_{t}$=$s_{t-1}$),
+%				\State // Update Translation
+%				\State Perform Importance Re-sampling (if necessary) for Particle Filter and compute the mean of posterior pdf $x_{t} = (x_{t},y_{t},s_{t})$;
+%			    \State // Model Update
+%			    \State Update $R_{t}^{S}$ (Condition 3);
+%			    \State Update $R_{t}^{L}$ (Condition 2);
+%			     \If{$PSR(y_{R_{s}}) \geq T_{R_{s}}$}
+%				\State Update $R_{s}$ (Condition 1);
+%			     \EndIf		
+%	\EndProcedure	
+%	\end{algorithmic}
+%\end{algorithm}
 
 The proposed algorithm, {\it E}nKCF, learns three KCFs in turn: The
 first filter, $R_{t}^{S}$, focuses on learning the target area and its
