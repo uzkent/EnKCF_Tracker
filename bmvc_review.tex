@@ -350,19 +350,24 @@ features of the KCF related to this work.
 \subsection{Kernelized Correlation Filter} \label{sec:kcf}
 The Kernelized Correlation Filter is a well, known single target
 tracking method and the theory and its work flow has been detailed in
-other papers already
-\cite{henriques2012exploiting,henriques2015high}. This section briefly
+other papers already \cite{henriques2012exploiting,henriques2015high}. This section briefly
 goes over the parts of the KCF relevant to this study. Its
-computational efficiency is derived from the fact that the correlation
-filter framework represents training examples as the circulant matrix
-and the circulant matrix can be represented as a diagonal matrix by
-the discrete Fourier transform.
+computational efficiency is derived from the correlation
+filter framework representing training examples as a circulant matrix. To reduce complexity, the
+circulant matrix can be diagonalized by Discrete Fourier Transform.  This way, off-diagonal elements become
+zero whereas the diagonal elements represent the eigenvalues of the circulant matrix. The egienvalues are equal
+to the DFT transformation of the base sample ($x$) elements. The Kernelized Correlation Filter, on the other hand,
+applies a kernel to $x$ to transform to a more discriminative domain. The circulant matrix is then formed by applying
+cylic shifts on the kernelized $x$. Such kernelization operation does not introduce additional complexity to the baseline
+correlation filter framework.
 
 {\it Burak: The above paragraph didn't connect to the following
   paragraphs. You'll have to finish up the sentence about a
   correlation filter's, not KCF yet, computational efficiency and then
   continue to explain how this a regularized correlation filter will
   be transformed into KCF w/ the same computational complexity.}
+
+{\it YoungWoo : I edited it based on your comment}
 
 The KCF essentially solves the problem of a regression in the form of
 the regularized ridge regression as:
@@ -472,12 +477,17 @@ proposed algorithm with those of the state-of-the-art in nominal
 dataset for comparison. To this end, we chose the OTB100 data that
 contains the videos recorded from smart phones and typical cameras in
 perspective view. Finally, the {\it E}nKCF2 is tested on temporally
-down-sampled version of the UAV123 dataset, we call
-``UAV123$\_$10fps'' dataset.
+down-sampled version of the UAV123 dataset, called UAV123$\_$10fps dataset. 
+This way, by modifying the proposed {\it E}nKCF framework slightly we can tackle scenarios dominated by extreme camera and object
+motion as we run multiple correlation filter at each frame. One can also perform such modifications based on the hardware specifications. 
+A more sophisticated hardware can be more friendly to apply multiple correlation filter ({\it E}nKCF2) at one frame
+whereas the ones on the low end can only accommodate a single correlation filter at each frame ({\it E}nKCF).
 
 {\it Burak: You need to explain why it is useful or meaningful to
   evaluate our algorithm w/ a down-sampled version of the UAV123
   dataset.}
+
+{\it YoungWoo: I edited the preceding paragraph based on your comment.}
 
 \textbf{Finding Optimal Hyperparameters} Each of three KCFs in {\it
   E}nKCF is designed for addressing a specific challenge of a single,
