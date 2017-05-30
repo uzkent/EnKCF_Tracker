@@ -275,15 +275,12 @@ examples of the ROI covered by each of three filters.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.45\textwidth]{figures/Filters_Details.pdf}
+\includegraphics[width=0.75\textwidth]{figures/Filters_Details.pdf}
 \caption{Examples of three filters; the translation filter,
   \textit{target+small background}, the scale filter,
   \textit{target-only} and another translation filter,
   \textit{target+large background}, and their Hanning window and
-  expected Gaussian response. Instead of using a single, correlation
-  filter for estimating change of a target's scale and translation, it
-  would be better to use more than one correlation filter for better
-  estimating change of scale and translation individually.}
+  expected Gaussian response.}
 \label{fig:Filters}
 \end{figure}
 
@@ -310,12 +307,12 @@ supporting this observation.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.5\textwidth]{figures/LearnedFilterComparison.pdf}
+\includegraphics[width=1\textwidth]{figures/LearnedFiltersComparison2.pdf}
 \caption{This figure shows that there is marginal difference among the
   scale filters learned either at every frame or at every 5
-  frames. The sub-figures at the top row show the scale filters
-  trained from every frame and those at the bottom row show the scale
-  filters estimated every 5 frames.}
+  frames. The sub-figures at the the left show the scale filters
+  trained at every frame and those at the right show the scale
+  filters trained at every 5 frames.}
 \label{fig:Filters_Comparison}
 \end{figure}
 
