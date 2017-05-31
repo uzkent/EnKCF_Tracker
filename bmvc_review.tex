@@ -7,6 +7,7 @@
 \usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
 \usepackage{comment, url}
 \usepackage[ruled, vlined, linesnumbered]{algorithm2e}
+\newcommand{\forceindent}{\leavevmode{\parindent=1em\indent}}
 
 %% Enter your paper number here for the review copy
 \bmvcreviewcopy{825}
@@ -224,7 +225,7 @@ efficient nature and small-footprint of the KCF computation.
 			{
 				Estimated Target State $(x_{t},y_{t},s_{t})$,
 				Scale filter (\textit{target-only}) model $R_{s}$
-			}			  
+			}
 			 \ElseIf{$fc\:\%\:n>0\:\:and\:\:fc\:\%\:n\leq n/2$ (\textbf{Condition 2})}
 			 {
 				Estimated Target State $(x_{t},y_{t},s_{t} = s_{t-1})$,
@@ -279,6 +280,8 @@ examples of the ROI covered by each of three filters.
 {\it Burak: Please remove the in-figure text ``Correlation Filters
   employed...'' from Figure 3. Can you make the examples of these
   filters using the picture of ``David'' shown at Figure 2.}
+  
+{\it YoungWoo : I just did it. Let me know if you see any problem with it.}
 
 \begin{figure}[!h]
 \centering
