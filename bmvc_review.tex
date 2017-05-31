@@ -219,20 +219,20 @@ efficient nature and small-footprint of the KCF computation.
 \small
 \DontPrintSemicolon
 \KwIn{ Initial bounding box $(x_{0},y_{0},s_{0})$, frame counter $fc$, scale filter frequency $n = 5$,}
-\KwOut{	\uIf{$fc\:\%\:n=0$ (Condition 1)}
+\KwOut{	\uIf{$fc\:\%\:n=0$ (\textbf{Condition 1})}
 			{
 				Estimated Target State $(x_{t},y_{t},s_{t})$,
-				Scale filter (\textit{target-only}) model $R_{s}$.
+				Scale filter (\textit{target-only}) model $R_{s}$
 			}			  
-			 \ElseIf{$fc\:\%\:n=1\:\:or\:\:fc\:\%\:n=2$ (Condition 2)}
+			 \ElseIf{$fc\:\%\:n>0\:\:and\:\:fc\:\%\:n\leq n/2$ (\textbf{Condition 2})}
 			 {
 				Estimated Target State $(x_{t},y_{t},s_{t} = s_{t-1})$,
-			  	Large Area Translation Filter model $R_{t}^{L}$.
+			  	Large Area Translation Filter model $R_{t}^{L}$
 			}			 
-			 \Else (\textit{Condition 3})
+			 \Else (\textit{\textbf{Condition 3}})
 			{			 
 				 Estimated Target State $(x_{t},y_{t},s_{t} = s_{t-1})$,
-				Small Area Translation Filter model $R_{t}^{S}$.				
+				Small Area Translation Filter model $R_{t}^{S}$			
 			}	
 		}
 \SetKwBlock{Begin}{function}{end function}
@@ -241,10 +241,10 @@ efficient nature and small-footprint of the KCF computation.
  	// \textit{Translation Estimation - Particle Filter} \\
 	Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $\mathbf{(x_{t},y_{t},s_{t-1})}$ \\
      // \textit{Translation Estimation - Correlation Filter} \\
-	Crop the ROI for the $R_{t}^{L}$ (Condition 2), or $R_{t}^{S}$ (Condition 3) given $(x_{t},y_{t})$ and estimate new position as $\mathbf{(x_{t},y_{t})}$ = $\mathbf{max(y_{R_{t}})}$\\
+	Crop the ROI for the $R_{t}^{L}$ (Condition 2), or $R_{t}^{S}$ (Condition 3) given $(x_{t},y_{t})$ and estimate new position as $\mathbf{(x_{t},y_{t})}$ = $\mathbf{\textit{max}(y_{R_{t}})}$\\
 	// \textit{Scale Estimation - Correlation Filter}\\
 	Scale pool for $R_{s}$ : $S = \lbrace1.05,1.0,1/1.05\rbrace$,\\
-	Crop the ROI for the $R_{s}^{i}$ (Condition 1) and estimate scale factor, $\mathbf{\alpha}$ = $\mathbf{\underset{i\in S}{argmax}(PSR(y_{R_{s}^{i}}))}$, and new scale $\mathbf{s_{t} = \alpha * s_{t-1}}$,\\ 
+	Crop the ROI for the $R_{s}^{i}$ (Condition 1) and estimate scale factor, $\mathbf{\alpha}$ = $\mathbf{\underset{i\in S}{\textit{argmax}}(PSR(y_{R_{s}^{i}}))}$, and new scale $\mathbf{s_{t} = \alpha * s_{t-1}}$,\\ 
 	Skip it for $R_{t}^{L}$ and $R_{t}^{S}$ ($\mathbf{s_{t}}$=$\mathbf{s_{t-1}}$)\\
 	// \textit{Update Translation - Particle Filter}\\
 	Do Importance Re-sampling (if necessary) and compute the 
