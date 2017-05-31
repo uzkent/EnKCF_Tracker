@@ -174,7 +174,7 @@ performance (i.e., $\leq 50 fps$). Our method is motivated by this
 idea -- the idea of deploying multiple KCFs to address the issues of
 single target tracking: scale and translation, but in a more efficient
 way. In particular, we use an ensemble of KCFs in turn, instead of
-running them all together on every frame. We deploy three KCF in turn:
+running them all together on every frame. We deploy three KCFs in turn:
 \textit{target}+\textit{small background} translation filter
 ($R_{t}^{S}$), \textit{target-only} scale filter ($R_{s}$) and
 \textit{target}+\textit{large background} translation filter
@@ -189,14 +189,15 @@ work-flow of the {\it E}nKCF.
 \begin{tabular}{cc}
 \bmvaHangBox{\includegraphics[width=12.00cm]{./figures//Workflow_MKCF+PF.pdf}}\\
 \end{tabular}
-\caption{The work-flow of {\it E}nKCF tracking algorithm. We show the first seven frames of
-tracking where the first frame is the initialization frame. The tracking in between frames
-7-11, and 12-16 etc. is the repetition of tracking in frames 2-6.}
+\caption{The workflow of {\it E}nKCF tracking algorithm. We show the
+  first seven frames of tracking where the first frame is the
+  initialization frame. Afterward, the order of deploying three KCFs
+  is repeating.}
 \label{Workflows}
 \end{figure}
 The contribution of this study is a novel, single-target tracking
 algorithm running in a very high-speed, $\geq 300$ fps. In particular,
-the proposed algorithm, {\it E}nKCF, deploys an ensemble of KCF, in
+the proposed algorithm, {\it E}nKCF, deploys an ensemble of KCFs, in
 turn, to more effectively address the scale variance and the dynamic
 maneuver of a target while preserving run-time performance as high as
 possible. To minimize any potential performance gap from transiting
@@ -274,6 +275,10 @@ better discriminate the target from its background, and another
 correlation filter should focus on the target itself to estimate the
 right size or scale of the target. Figure \ref{fig:Filters} shows
 examples of the ROI covered by each of three filters. 
+
+{\it Burak: Please remove the in-figure text ``Correlation Filters
+  employed...'' from Figure 3. Can you make the examples of these
+  filters using the picture of ``David'' shown at Figure 2.}
 
 \begin{figure}[!h]
 \centering
@@ -355,8 +360,8 @@ features of the KCF related to this work.
 \subsection{Kernelized Correlation Filter} \label{sec:kcf}
 The Kernelized Correlation Filter is a well, known single target
 tracking method and its work flow has been detailed in other papers
-already \cite{henriques2012exploiting,henriques2015high}. This section
-briefly goes over the parts of the KCF relevant to this study. Its
+\cite{henriques2012exploiting,henriques2015high}. This section briefly
+goes over the parts of the KCF relevant to this study. Its
 computational efficiency is derived from the correlation filter
 framework representing training examples as a circulant matrix. The
 fact that a circulant matrix can be diagonalized by Discrete Fourier
@@ -367,20 +372,12 @@ circulant matrix. The egienvalues are equal to the DFT transformation
 of the base sample ($x$) elements. The Kernelized Correlation Filter,
 in particular, applies a kernel to $x$ to transform to a more
 discriminative domain. The circulant matrix is then formed by applying
-cylic shifts on the kernelized $x$. Such kernelization operation does
+cyclic shifts on the kernelized $x$. Such kernelization operation does
 not introduce additional complexity to the baseline correlation filter
 framework.
-\begin{comment}
-{\it Burak: The above paragraph didn't connect to the following
-  paragraphs. You'll have to finish up the sentence about a
-  correlation filter's, not KCF yet, computational efficiency and then
-  continue to explain how this a regularized correlation filter will
-  be transformed into KCF w/ the same computational complexity.}
 
-{\it YoungWoo : I edited it based on your comment}
-\end{comment}
-The KCF essentially solves the problem of a regression in the form of
-the regularized ridge regression as:
+The KCF solves essentially the problem of a regression in the form of
+the regularization:
 \begin{equation}
 E(h) = \frac{1}{2}||y-\sum_{c=1}^{C}h_{c}*x_{c}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||h_{c}||^{2}
 \label{eq:Closedform_RidgeReg}
@@ -390,17 +387,15 @@ $x_{c}$ represents the learned correlation filter and training
 template for the given channel. The parameter $c$ enabled one to
 integrate features in multiple channels, such as HoG and color, in
 this setup \cite{henriques2015high,galoogahi2013multi}. A closed-form
-solution for Equaiton \ref{eq:Closedform_RidgeReg} can be computed by
-taking the derivative of $E$ w.r.t $w$ to $0$. To make this,
-$\mathcal{0}(n^{3})$ solution more tractable, an element-wise,
-multiplication in frequency domain was proposed as a sub-linear
-solution for $\hat{w}$:
+solution for Equation \ref{eq:Closedform_RidgeReg} exists. To make the
+closed-form solution less complex, an element-wise, multiplication in
+frequency domain was proposed for $\hat{w}$:
 \begin{equation}
 \hat{w} = \hat{x}^{*}*\hat{y}(\hat{x}^{*}*\hat{x}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
 \end{equation}
-In fact, a non-linear version of this closed-form solution is proposed
-to make it more robust to any geometric and photometric variations
+A non-linear version of this closed-form solution is proposed to make
+it more robust to any geometric and photometric variations
 \cite{henriques2015high}. In particular, the diagonalized Fourier
 domain dual form solution is expressed as
 \begin{equation}
@@ -492,24 +487,7 @@ version of the UAV123 dataset, called UAV123$\_$10fps dataset. What we
 would like to see from this experiment is to evaluate how robust the
 proposed algorithm is to drastic motions of camera and targets. 
 
-{\it Burak: We have never told what EnKCF2 is before the following sentence. Just don't mention EnKCF2, but say a modification of EnKCF!}
-
-{\it YoungWoo :  I understand your point. It will give them the feeling of a new algorithm called EnKCF2. I will change the precision and success figures to EnKCF.}
-
-\begin{comment}
-Finally, the {\it E}nKCF2 is tested on temporally down-sampled version
-of the UAV123 dataset, called UAV123$\_$10fps dataset.  This way, by
-modifying the proposed {\it E}nKCF framework slightly we can tackle
-scenarios dominated by extreme camera and object motion as we run
-multiple correlation filter at each frame. One can also perform such
-modifications based on the hardware specifications.  A more
-sophisticated hardware can be more friendly to apply multiple
-correlation filter ({\it E}nKCF2) at one frame whereas the ones on the
-low end can only accommodate a single correlation filter at each frame
-({\it E}nKCF).
-\end{comment}
-
-\textbf{Finding Optimal Hyperparameters} Each of three KCFs in {\it
+\textbf{Finding Optimal Hyper-parameters} Each of three KCFs in {\it
   E}nKCF is designed for addressing a specific challenge of a single,
 target tracking problem. Thus each of them should have different value
 for the optimal parameters. For instance, the primary task of the
@@ -583,8 +561,8 @@ another low-speed scale adaptive SAMF tracker.
 \bmvaHangBox{\includegraphics[width=4.80cm]{./figures/Precision_UAV123.eps}}
 \bmvaHangBox{\includegraphics[width=5.30cm]{./figures/Success_UAV123.eps}}
 \end{tabular}
-\caption{Comparison of {\it E}nKCF
-  for the UAV123 dataset.}
+\caption{Comparison of {\it E}nKCF's performance with those of the
+  state-of-the-art tracking algorithms on the UAV123 dataset.}
 \label{fig:UAV123_DATASET}
 \end{figure}
 \begin{figure}[!h]
@@ -593,8 +571,8 @@ another low-speed scale adaptive SAMF tracker.
 \bmvaHangBox{\includegraphics[width=4.80cm]{./figures/Precision_OTB100.eps}}
 \bmvaHangBox{\includegraphics[width=5.30cm]{./figures/Success_OTB100.eps}}\\
 \end{tabular}
-\caption{Comparison of {\it E}nKCF
-  for the OTB100 dataset.}
+\caption{Comparison of {\it E}nKCF's performance with those of the
+  state-of-the-art tracking algorithms on the OTB100 dataset.}
 \label{fig:OTB100_DATASET}
 \end{figure}
 
@@ -623,19 +601,12 @@ tracker.
 \bmvaHangBox{\includegraphics[width=5.30cm]{./figures/Precision_UAV123_10fps.eps}}
 \bmvaHangBox{\includegraphics[width=5.30cm]{./figures/Success_UAV123_10fps.eps}}\\
 \end{tabular}
-\caption{Evaluation and comparison of the modified {\it E}nKCF tracker on the UAV123$\_$10fps dataset in terms of the precision and success rates. This dataset consists of temporally down-sampled $123$ video sequences captured from a micro UAV.}
+\caption{Comparison of a modified {\it E}nKCF's performance with those
+  of the state-of-the-art tracking algorithms on the UAV123$\_$10fps
+  dataset where the original UAV123 data was temporally downsampled.}
 \label{fig:UAV123_10fpsDATASET}
 \end{figure}
 
-%\begin{figure}[!h]
-%\centering
-%\begin{tabular}{cc}
-%\bmvaHangBox{\includegraphics[width=2.50cm]{./figures/Precision_OTB100.pdf}}
-%\bmvaHangBox{\includegraphics[width=2.50cm]{./figures/Success_OTB100.pdf}}\\
-%\end{tabular}
-%\caption{Evaluation and comparison of the proposed {\it E}nKCF tracker on the OTB100 dataset. OTB100 dataset consists of $100$ video sequences of different objects from recent literatures.}
-%\label{fig:OTB100_DATASET}
-%\end{figure}
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
 %---------------------------------------------------------------------- 
