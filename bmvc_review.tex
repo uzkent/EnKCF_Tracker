@@ -12,7 +12,8 @@
 %% Enter your paper number here for the review copy
 \bmvcreviewcopy{825}
 
-\title{ {\it E}nKCF: Ensemble of Kernelized Correlation Filters for Object Tracking in High Speed}
+\title{ {\it E}nKCF: Ensemble of Kernelized Correlation Filters for
+  High-Speed, Object Tracking}
 
 % Enter the paper's authors in order
 % \addauthor{Name}{email/homepage}{INSTITUTION_CODE}
@@ -84,8 +85,8 @@ A recent advancement of air/ground/water unmanned vehicle technologies
 has increased interests on deploying intelligent algorithms to
 existing embedded and mobile platforms. Among those technologies,
 computer vision algorithms are getting more attentions primarily
-because payloads of those mobile platforms are limited to carry other
-sensors than a lightweight or an array of monocular cameras. For
+because payloads of those mobile platforms are limited to carry any
+other sensors than a lightweight or an array of monocular cameras. For
 example, instead of just flying to record a video based on manual
 commands, an unmanned air vehicle (UAV) equipped with an object or
 feature following functionality would make it more useful in the
@@ -93,12 +94,12 @@ application of monitoring/surveillance/surveying on private
 properties/wild-life/crop, video recording on sports/movies/events,
 many others.
 
-In this paper, we propose a single-target tracking algorithm aiming at
-running on any embedded or mobile platforms that doesn't require an
-offline training. Specifically, we would like to make our algorithm 1)
-learn the appearance model of a target on the fly and 2) run as fast
-on a typical desktop as up to $300-400$ fps so that it could run, at
-least, faster than 30 fps when it is deployed on a low-end, embedded
+In this paper, we propose a single-target tracking algorithm, with no
+offline training, aiming at running on any embedded or mobile
+platforms. Specifically, we would like to make our algorithm 1) learn
+the appearance model of a target on the fly and 2) run as fast on a
+typical desktop as up to $300-400$ fps so that it could run, at least,
+faster than 30 fps when it is deployed on a low-end, embedded
 system.\footnote{In general, it would be very hard to compare an Intel
   or AMD processor running on a desktop or a laptop with that, e.g.,
   ARM, of a single-board, embedded system in terms of run-time
@@ -173,18 +174,18 @@ target. However, because of running more than a KCF on each frame,
 this method degrades its run-time performance (i.e., $\leq 50
 fps$). Our method is motivated by this idea -- the idea of deploying
 multiple KCFs to address the issues of single target tracking: scale
-and translation, but in a more efficient way. In particular, we use an
-ensemble of KCFs in turn, instead of running them all together on
-every frame. We deploy three KCFs in turn:
-\textit{target}+\textit{small background} translation filter
-($R_{t}^{S}$), \textit{target-only} scale filter ($R_{s}$) and
-\textit{target}+\textit{large background} translation filter
-($R_{t}^{L}$). By doing so, we could address the scale change and
-estimate target's motion efficiently while maintaining or increasing
-run-time performance. Figure \ref{fig:Filters} shows examples of the
-region of interest (ROI) associated with $R_{t}^{S}$, $R_{t}^{L}$, and
-$R_{s}$. Figure \ref{Workflows} illustrates the work-flow of the {\it
-  E}nKCF.
+and translation, but in a more efficient way. In particular, we use a
+multiple of KCFs, in an order of maximizing run-time performance and
+accuracy, instead of running them all together on every frame. We
+deploy three KCFs in turn: \textit{target}+\textit{small background}
+translation filter ($R_{t}^{S}$), \textit{target-only} scale filter
+($R_{s}$) and \textit{target}+\textit{large background} translation
+filter ($R_{t}^{L}$). By doing so, we could address the scale change
+and estimate target's motion efficiently while maintaining or
+increasing run-time performance. Figure \ref{fig:Filters} shows
+examples of the region of interest (ROI) associated with $R_{t}^{S}$,
+$R_{t}^{L}$, and $R_{s}$. Figure \ref{Workflows} illustrates the
+work-flow of the {\it E}nKCF.
 \begin{figure}[!t]
 \centering
 \begin{tabular}{cc}
@@ -207,7 +208,7 @@ one KCF to another, we use a Bayes filter.
 %---------------------------------------------------------------------- 
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
 %---------------------------------------------------------------------- 
-In this paper, we propose a novel way of utilizing multiple of the KCF
+In this paper, we propose a novel way of utilizing a multiple of the KCFs
 \cite{henriques2015high} to effectively handle scale variations and
 dynamic maneuvers of a target. To maintain or improve the run-time
 performance of the original KCF (e.g., $\ge$ 300), we deploy three
@@ -272,14 +273,14 @@ background, at least twice, bigger than that of the first filter,
 $R_{t}^{S}$, \textit{target}+\textit{large background}. We set up {\it
   E}nKCF in this way because, we believe, a correlation filter for
 learning a target's translation should include its background to
-better discriminate the target from its background, and another
+better discriminate the target from its surrounding, and another
 correlation filter should focus on the target itself to estimate the
-right size or scale of the target. Figure \ref{fig:Filters} shows
-examples of the ROI covered by each of three filters. 
+right scale of the target. Figure \ref{fig:Filters} shows examples of
+the image, sub-regions covered by each of these filters.
 
 \begin{figure}[!h]
 \centering
-\includegraphics[width=0.75\textwidth]{figures/Filters_Details.pdf}
+\includegraphics[width=1.0\textwidth]{figures/Filters_Details.pdf}
 \caption{Examples of three filters; the translation filter,
   \textit{target+small background}, the scale filter,
   \textit{target-only} and another translation filter,
@@ -399,7 +400,7 @@ domain dual form solution is expressed as
 \hat{\alpha} = \hat{y}(\hat{k}^{xx}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
 \end{equation}
-where $\hat{k}^{xx}$ represents the first row of the Kernel matrix $K$
+where $\hat{k}^{xx}$ represents the first row of the kernel matrix $K$
 known as \textit{gram matrix} and it is expressed as
 \begin{equation}
 k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\hat{x}_{c}^{*}\odot \hat{x}_{c}^{'})))
@@ -460,36 +461,35 @@ from uniform initial distribution to keep variance high enough.
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
 To evaluate the performance of the proposed algorithm, we choose two
-public, available datasets:
+publicly, available datasets:
 OTB100 \footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
 and
 UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}.
 The OTB100 dataset is comprised of the videos about 100 objects
 whereas UAV123 dataset contains aerial footages of 123 objects. We
 aims at developing an object tracking algorithm that ``efficiently''
-runs on an embedded system (e.g., a drone) in ``high speed,'' $\ge
-300$ fps, e.g. Given this, we believe that the UAV123 video data is a
-better fit in evaluating the performance of the proposed algorithm
-than any other existing tracking datasets. This is because there are
-many challenging scenes, e.g., abrupt scale/illumination
-changes. Although we are primarily interested in developing an
-algorithm for mobile, embedded robotic applications, it is important
-to compare the performance of the proposed algorithm with those of the
-state-of-the-art in nominal dataset for comparison. To this end, we
-chose the OTB100 data that contains the videos recorded from smart
-phones and typical cameras in perspective view. 
-
-Lastly, we tested the proposed algorithm on a temporally down-sampled
-version of the UAV123 dataset, called UAV123$\_$10fps dataset. What we
-would like to see from this experiment is to evaluate how robust the
-proposed algorithm is to drastic motions of camera and targets. 
+runs on an embedded system, a drone, for example, in ``high speed,''
+$\ge 300$ fps. Given this, we believe that the UAV123 data is a good
+fit in evaluating the performance of the proposed algorithm. In
+addition, in the UAV123 data, there are many challenging, realistic
+scenes, e.g., abrupt scale/illumination changes. Although we are
+primarily interested in developing an algorithm for mobile, embedded
+robotic applications, it is also important to compare the performance
+of the proposed algorithm with those of the state-of-the-art in a
+nominal dataset for comparison. To this end, we chose the OTB100 data
+that contains the videos recorded from smart phones and typical
+cameras in perspective view. Lastly, we tested the proposed algorithm
+on a temporally down-sampled version of the UAV123 dataset, called
+UAV123$\_$10fps dataset. What we would like to see from this
+experiment is to evaluate how robust the proposed algorithm is to
+drastic motions of camera and targets.
 
 \textbf{Finding Optimal Hyper-parameters} Each of three KCFs in {\it
-  E}nKCF is designed for addressing a specific challenge of a single,
-target tracking problem. Thus each of them should have different value
-for the optimal parameters. For instance, the primary task of the
-translation filter, $R_{t}^{L}$ is to estimate the translation of a
-target from the previous frame whereas the scale filter, $R_{s}$ and
+  E}nKCF is designed for addressing specific challenges in single,
+target tracking problem. Thus each of them should have different
+values for the optimal parameters. For instance, the primary task of
+the translation filter, $R_{t}^{L}$ is to estimate the translation of
+a target from the previous frame whereas the scale filter, $R_{s}$ and
 the estimated state of the particle filter are primarily used to
 estimate the scale and translation. Because of this, we set the
 learning rates ($\beta$) of individual filters, $R_{t}^{L}$,
@@ -497,25 +497,24 @@ $R_{t}^{S}$, and $R_{s}$ differently as $0.020$, $0.020$ and
 $0.010$. For the kernel of the Gaussian neighboring function, we
 empirically found the optimal values of $\alpha$ as $0.6$, $0.4$, and
 $0.4$ for $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$, and the learning rate
-as $0.12$ for $R_{t}^{L}$. For the particle filter, we empirically set
-the number of particles to $1000$ to balance the run-time performance
-and accuracy. To keep the level of variance among the particles
-reasonable, we performed the re-sampling only when the
+as $0.12$ for $R_{t}^{L}$. For our particle filter implementation, we
+empirically set the number of particles to $1000$ to balance the
+run-time performance and accuracy. To keep the level of variance among
+the particles reasonable, we performed the re-sampling only when the
 \textit{efficient number of samples} ($ \hat{N}_{eff} \approx
 (\sum_{p=1}^{P}w_{p}^{2})^{-1} $) is lower than a pre-defined
-threshold. 
+threshold.
 
 \textbf{Features Selections} As each of three KCFs in the {\it E}nKCF
 has different goals to accomplish, we used different features for each
 of them. In particular, the translation filter, $R_{t}^{L}$, uses both
-the fast Histograms of Oriented Gradients
-(fHoG)\cite{felzenszwalb2010object} and
-color-naming\cite{van2009learning} features to learn the background
-around the target more effectively. In fact we empirically found fHoG
-only didn't work well to cover the larger ROI. Another translation
-filter, $R_{t}^{S}$, used fHoG features only. The scale filter,
-$R_{s}$ used both fHoG and color features to learn the scale change
-more accurately.
+the fast Histograms of Oriented Gradients (fHoG)
+\cite{felzenszwalb2010object} and color-naming \cite{van2009learning}
+features to learn the background around the target more
+effectively. In fact we empirically found fHoG only didn't work well
+to cover the larger ROI. Another translation filter, $R_{t}^{S}$, used
+fHoG features only. The scale filter, $R_{s}$ used both fHoG and color
+features to learn the scale change more accurately.
 
 \textbf{Performance on UAV123 Dataset} We compared the performance of
 the proposed algorithm with those of the state-of-the-art high speed
@@ -592,6 +591,7 @@ $15\%$-$20\%$ and showed a precision rate similar to that of SAMF. On
 the other hand, it does decent job in scale estimation. It ranks as
 second in AUC while running about $150$ faster than the MUSTER
 tracker.
+
 \begin{figure}[!h]
 \centering
 \begin{tabular}{cc}
@@ -611,8 +611,8 @@ Running a computer vision algorithm on any existing embedded systems
 for real-world applications is economically and practically very
 attractive. To make such pipelines more plausible, however, those
 algorithms should run faster with small footprint of computation
-resource consumption. To make an object tracking algorithm with these
-practical requirements available, we proposed an extension of KCF that
+resource consumption. To make an object tracking algorithm meet these
+practical requirements, we proposed an extension of KCF that
 essentially deploys three KCFs, in turn, to address the scale change
 and dynamic maneuvers of a target. The way we ran three KCFs is
 optimal in a sense that efficiently handled the scale change and
