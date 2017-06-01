@@ -375,9 +375,9 @@ circulant matrix. The egienvalues are equal to the DFT transformation
 of the base sample ($x$) elements. The Kernelized Correlation Filter,
 in particular, applies a kernel to $x$ to transform to a more
 discriminative domain. The circulant matrix is then formed by applying
-cyclic shifts on the kernelized $x$. Such kernelization operation does
-not introduce additional complexity to the baseline correlation filter
-framework.
+cyclic shifts on the kernelized $x$. Such kernelization operation maintains 
+O($nlog(n)$) complexity unlike other kernel algorithms leading to O($n^{2}$) or even higher 
+complexities.
 
 The KCF solves essentially the problem of a regression in the form of
 the regularization:
