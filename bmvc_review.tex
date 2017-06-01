@@ -86,8 +86,8 @@ existing embedded and mobile platforms. Among those technologies,
 computer vision algorithms are getting more attentions primarily
 because payloads of those mobile platforms are limited to carry other
 sensors than a lightweight or an array of monocular cameras. For
-example, instead of having just bare flight function with video
-recording, an unmanned air vehicle (UAV) equipped with an object or
+example, instead of just flying to record a video based on manual
+commands, an unmanned air vehicle (UAV) equipped with an object or
 feature following functionality would make it more useful in the
 application of monitoring/surveillance/surveying on private
 properties/wild-life/crop, video recording on sports/movies/events,
@@ -95,20 +95,19 @@ many others.
 
 In this paper, we propose a single-target tracking algorithm aiming at
 running on any embedded or mobile platforms that doesn't require an
-offline training, and can run on an embedded system. Specifically, we
-would like to make our algorithm 1) learn the appearance model of a
-target on the fly and 2) run as fast on a typical desktop as up to
-$300$-$400$ fps so that it could run, at least, faster than 30 fps
-when it is deployed on a low-end, embedded system.\footnote{In
-  general, it would be very hard to compare an Intel or AMD processor
-  running on a desktop or a laptop with that, e.g., ARM, of a
-  single-board, embedded system in terms of run-time performance of a
-  computer vision algorithm. This is primarily because of difference
-  in their architectures. But we empirically found this computation
-  useful and reasonable based on specific processors, e.g., Intel's i7
-  quad-core vs ARM Cortex A53 -- the computation about an 1/10th scale
-  down of computational resources from a typical PC to an embedded
-  system.}
+offline training. Specifically, we would like to make our algorithm 1)
+learn the appearance model of a target on the fly and 2) run as fast
+on a typical desktop as up to $300-400$ fps so that it could run, at
+least, faster than 30 fps when it is deployed on a low-end, embedded
+system.\footnote{In general, it would be very hard to compare an Intel
+  or AMD processor running on a desktop or a laptop with that, e.g.,
+  ARM, of a single-board, embedded system in terms of run-time
+  performance of a computer vision algorithm. This is primarily
+  because of difference in their architectures. But we empirically
+  found this computation useful and reasonable based on specific
+  processors, e.g., Intel's i7 quad-core vs ARM Cortex A53 -- the
+  computation about an 1/10th scale down of computational resources
+  from a typical PC to an embedded system.}
 
 One of the dominant frameworks for online object tracking is the
 correlation filter that essentially solves a single-target tracking
@@ -125,23 +124,23 @@ $\mathcal{O}(n^{3})$. The correlation filter offers a less complex
 solution, $\mathcal{O}(n\log n)$ over element-wise multiplication in a
 frequency domain \cite{bolme2010visual,henriques2015high}. Thank to
 this reformulation, an object tracking pipeline based on the
-correlation filter can be easily implemented and run very efficiently
-on the fly. In fact, an extension of a linear correlation filter, the
+correlation filter can run very efficiently and be even easily
+implemented. In fact, an extension of a linear correlation filter, the
 kernelized correlation filter with multi-channel features
 \cite{henriques2015high} showed impressive object tracking results and
 outperformed other state-of-the-art tracking algorithms in terms of
 run-time and tracking accuracy. However, a vanilla form of such an
 online tracker is prone to drift, and fails to track a target over a
-long period of time primarily \cite{henriques2015high}. This is
-primarily due to the dilemma of stability-plasticity in updating
-appearance model, where the appearance model will be overfitted to
-only the images used to train, unless a compromise on the frequency of
-updating the model is carefully implemented
-\cite{santner2010prost}. For example, one may handle a target's scale
-variation by just concatenating multiple correlation filters including
-KCF and running them on each frame. Alternatively one could think of
-scanning the region of interest (ROI) with a list of templates in
-predefined scale ratios to find the target in appropriate scale
+long period of time \cite{henriques2015high}. This is primarily due to
+the dilemma of stability-plasticity in updating appearance model,
+where the appearance model will be overfitted to only the images used
+to train, unless a compromise on the frequency of updating the model
+is carefully implemented \cite{santner2010prost}. For example, one may
+handle a target's scale variation by just concatenating multiple
+correlation filters including KCF and running them on each
+frame. Alternatively one could think of scanning the region of
+interest (ROI) with a list of templates in predefined scale ratios to
+find the target in appropriate scale
 \cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. However,
 these approaches will drastically reduce run-time performance because
 they are proposed to run multiple of a correlation filter including
@@ -165,26 +164,27 @@ a target's translation. And then they attempted to update the scale of
 the target by further analyzing image, sub-regions with high
 confidence to figure out the scale of a target. This is based on an
 assumption that the scale of a target would not change much over two
-consecutive frames. Similarly \cite{ma2015long} used two KCFs to learn
-the translation and scale of a target separately. To be more specific,
-a KCF is used to learn the translation of the target and its
-background. Given this, another KCF is used to learn the target area
-to estimate a new scale of the target. However, because of running
-more than a KCF on each frame, this method degrades its run-time
-performance (i.e., $\leq 50 fps$). Our method is motivated by this
-idea -- the idea of deploying multiple KCFs to address the issues of
-single target tracking: scale and translation, but in a more efficient
-way. In particular, we use an ensemble of KCFs in turn, instead of
-running them all together on every frame. We deploy three KCFs in turn:
+consecutive frames. Similarly, Ma and his colleagues used two KCFs to
+learn the translation and scale of a target separately
+\cite{ma2015long}. In particular, a KCF is used to learn the
+translation of the target and its background. Given this, another KCF
+is used to learn the target area to estimate a new scale of the
+target. However, because of running more than a KCF on each frame,
+this method degrades its run-time performance (i.e., $\leq 50
+fps$). Our method is motivated by this idea -- the idea of deploying
+multiple KCFs to address the issues of single target tracking: scale
+and translation, but in a more efficient way. In particular, we use an
+ensemble of KCFs in turn, instead of running them all together on
+every frame. We deploy three KCFs in turn:
 \textit{target}+\textit{small background} translation filter
 ($R_{t}^{S}$), \textit{target-only} scale filter ($R_{s}$) and
 \textit{target}+\textit{large background} translation filter
-($R_{t}^{L}$). By doing so, we could still address the scale change
-and estimate target's motion efficiently while maintaining or
-increasing run-time performance. Figure \ref{fig:Filters} shows
-examples of the region of interest (ROI) associated with $R_{t}^{S}$,
-$R_{t}^{L}$, and $R_{s}$. Figure \ref{Workflows} illustrates the
-work-flow of the {\it E}nKCF.
+($R_{t}^{L}$). By doing so, we could address the scale change and
+estimate target's motion efficiently while maintaining or increasing
+run-time performance. Figure \ref{fig:Filters} shows examples of the
+region of interest (ROI) associated with $R_{t}^{S}$, $R_{t}^{L}$, and
+$R_{s}$. Figure \ref{Workflows} illustrates the work-flow of the {\it
+  E}nKCF.
 \begin{figure}[!t]
 \centering
 \begin{tabular}{cc}
@@ -215,7 +215,7 @@ KCFs in turn, not on the same image frame together. Each of these KCFs
 is designed to address specific challenges, i.e., scale and
 translation. By alternating their deployments, our algorithm will
 improve the performance of the original KCF while preserving the
-efficient nature and small-footprint of the KCF computation. 
+efficient nature and small-footprint of the KCF computation.
 
 \begin{algorithm}[h]
 \small
@@ -276,12 +276,6 @@ better discriminate the target from its background, and another
 correlation filter should focus on the target itself to estimate the
 right size or scale of the target. Figure \ref{fig:Filters} shows
 examples of the ROI covered by each of three filters. 
-
-{\it Burak: Please remove the in-figure text ``Correlation Filters
-  employed...'' from Figure 3. Can you make the examples of these
-  filters using the picture of ``David'' shown at Figure 2.}
-  
-{\it YoungWoo : I just did it. Let me know if you see any problem with it.}
 
 \begin{figure}[!h]
 \centering
