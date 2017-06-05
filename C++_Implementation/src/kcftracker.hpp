@@ -7,7 +7,8 @@
 #define _OPENCV_KCFTRACKER_HPP_
 #endif
 
-void PrecisionCurve(std::vector<std::vector<float>> EucDistance, std::string prDataFile);
+using namespace cv;
+void PrecisionCurve(std::vector<std::vector<float>> EucDistance, std::string prDataFile, float runTime);
 
 class KCFTracker : public Tracker
 {
@@ -37,7 +38,7 @@ public:
     std::pair<int,float> target_redetection(std::vector<cv::Vec4i> BoundingBoxes, cv::Mat frame, cv::Rect result, int rdIndex, std::vector<std::pair<int,float>>& boxProposed);
 
     float interp_factor, interp_factor_scale, interp_factor_w_roi; // linear interpolation factor for adaptation
-    float sigma, sigma_scale;        // gaussian kernel bandwidth
+    float sigma, sigma_w_roi, sigma_scale;        // gaussian kernel bandwidth
     float lambda;       // regularization
     int cell_size;      // HOG cell size
     int cell_sizeQ;     // cell size^2, to avoid repeated operations
@@ -113,6 +114,9 @@ protected:
 
     // Calculate sub-pixel peak for one dimension
     float subPixelPeak(float left, float center, float right);
+
+    // Compute the PSR value
+    float computePSR(const Mat &ConfidenceMap);
 
     cv::Mat _alphaf,_alphafScale, _alphafScaleRD,  _alphaf_w_roi;
     cv::Mat _prob, _prob_scale, _prob_w_roi;

@@ -41,32 +41,33 @@ Outputs of update():
 #include <fstream>
 #endif
 
+using namespace cv;
 // Constructor
 KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
 {
 
     // Parameters equal in all cases
-    lambda = 0.0001;    		// Regularization Parameter for the Regression Task
-    padding = 2.00;     		// The ROI parameter to get n times larger area than the Selected Target - Translation Filter
-    padding_w_roi = 3.00; 		// The Wider ROI Parameter for the Second Translation Filter
-    padding_scale = 1.00;   		// The ROI Parameter for the scale filter
-    output_sigma_factor = 0.125 * 0.8;    	// Variance Parameter for the Desired Translation Filter Response
-    output_sigma_factor_w_roi = 0.125 * 1.2; 	// Variance Parameter for the Wide ROI translation filter Response
-    output_sigma_factor_scale = 0.125 * 0.5; 	// Variance Parameter for the Desired Scale Filter Response
+    lambda = 0.0001;	    			// Regularization Parameter for the Regression Task
+    padding = 2.50;     			// The ROI parameter to get n times larger area than the Selected Target - Translation Filter
+    padding_w_roi = 3.00; 			// The Wider ROI Parameter for the Second Translation Filter
+    padding_scale = 1.00;   			// The ROI Parameter for the scale filter
+    output_sigma_factor = 0.125 * 1.00;    	// Variance Parameter for the Desired Translation Filter Response
+    output_sigma_factor_w_roi = 0.125 * 1.25; 	// Variance Parameter for the Wide ROI translation filter Response
+    output_sigma_factor_scale = 0.125 * 0.75; 	// Variance Parameter for the Desired Scale Filter Response
 
-    if (hog) {    		// HOG
-        // UAV123
-        interp_factor = 0.016; 	// Learning Rate for the Translation Filter
-        interp_factor_w_roi = 0.016; // Learning Rate for the Wide ROI Translation Filter
-        interp_factor_scale = 0.016; // Learning Rate for the Scale Filter
+    if (hog) {    		// HOG to be Used?
+        interp_factor = 0.020; 	// Learning Rate for the Translation Filter
+        interp_factor_w_roi = 0.020; // Learning Rate for the Wide ROI Translation Filter
+        interp_factor_scale = 0.010; // Learning Rate for the Scale Filter
         sigma = 0.60;           // Gaussian Bandwith Parameter for the Gaussian Kernel in KCF
         cell_size = 4;          // Cell Size for the HoG Feature Channels
         _hogfeatures = true;
 
         if (lab) {  // Activate the LAB Color Features
-            sigma_scale = 0.40;
-            output_sigma_factor_scale = 0.005;
-            std::cout << "Lab Features" << std::endl;
+            sigma_scale = 0.7;
+            sigma_w_roi = 0.7;
+            output_sigma_factor_w_roi = 0.06;
+            output_sigma_factor_scale = 0.04;
             _labfeatures = true;
             _labCentroids = cv::Mat(nClusters, 3, CV_32FC1, &data);
             cell_sizeQ = cell_size*cell_size;
@@ -89,13 +90,12 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
 
 
     if (multiscale) { // Multiscale KCF Implementation
-        template_size = 64;     // Template Size for the Translation Filter
+        template_size = 96;       // Template Size for the Translation Filter
         template_size_w_roi = 96; // Template Size for the Wide ROI Translation Filter
-        template_size_scale = 48;   // Template Size for the Scale Filter
-        scale_step = 1.03;      // Scale Factor for the Multiscale Search
+        template_size_scale = 64; // Template Size for the Scale Filter
+        scale_step = 1.05;     	  // Scale Factor for the Multiscale Search
         scale_weight = 2.0 - scale_step;    // Priority is given to the Same Scale with Previous Frame Scale
-        if (!fixed_window) {    // Fixed Window KCF Implementation during Tracking
-            //printf("Multiscale does not support non-fixed window.\n");
+        if (!fixed_window) {     // Fixed Window KCF Implementation during Tracking
             fixed_window = true;
         }
     }
@@ -150,49 +150,6 @@ cv::Rect KCFTracker::update(cv::Mat image)
     // Detect the Target Translation
     float peak_value;
     cv::Point2f res = detect(_tmpl, getFeatures(image, 0, 1.0f), peak_value);
-
-    // Search Different Scale
-    scale_step = 1.03;
-    scale_weight = 2.0 - scale_step;
-    if (scale_step != 1) {
-
-        // Test at a smaller _scale
-        float new_peak_value;
-        cv::Point2f new_res = detect(_tmpl, getFeatures(image, 0, 1.0f / scale_step), new_peak_value);
-
-        // Update the Scale if the Confidence is Larger than the Maximum
-        if (scale_weight * new_peak_value > peak_value) {
-            res = new_res;
-            peak_value = new_peak_value;
-            _scale /= scale_step;
-            _scale_w_roi /= scale_step;
-            _scale2 /= scale_step;
-            _roi.width /= scale_step;
-            _roi.height /= scale_step;
-            _roi_w.width /= scale_step;
-            _roi_w.height /= scale_step;
-            _roi_scale.width /= scale_step;
-            _roi_scale.height /= scale_step;
-        }
-
-        // Test at a bigger _scale
-        new_res = detect(_tmpl, getFeatures(image, 0, scale_step), new_peak_value);
-
-        // Update the Scale if the Confidence is Larger than the Maximum
-        if (scale_weight * new_peak_value > peak_value) {
-            res = new_res;
-            peak_value = new_peak_value;
-            _scale *= scale_step;
-            _scale_w_roi *= scale_step;
-            _scale2 *= scale_step;
-            _roi.width *= scale_step;
-            _roi.height *= scale_step;
-            _roi_w.width *= scale_step;
-            _roi_w.height *= scale_step;
-            _roi_scale.width *= scale_step;
-            _roi_scale.height *= scale_step;
-        }
-    }
 
     // Adjust by cell size and _scale
     _roi.x = cx - _roi.width / 2.0f + ((float) res.x * cell_size * _scale);
@@ -273,9 +230,7 @@ cv::Rect KCFTracker::updateScale(cv::Mat image)
     float new_peak_value;
 
     // Search Different Scales
-    scale_step = 1.05;
-    scale_weight = 2.0 - scale_step;
-    if (scale_step != 1) {
+   if (scale_step != 1) {
 
         // Test at a smaller _scale
         cv::Point2f new_res = detectScale(_tmplScale, getFeaturesScale(image, 0, 1.0f / scale_step), new_peak_value);
@@ -315,7 +270,7 @@ cv::Rect KCFTracker::updateScale(cv::Mat image)
     }
     // Train the Scale Filter
     cv::Mat x = getFeaturesScale(image, 0);
-    if (PSR_scale > 4.0){
+    if (PSR_scale > 4.00){
        trainScale(x, interp_factor_scale);
     }
     /// --------------------------------------------------------------------
@@ -347,9 +302,7 @@ cv::Point2f KCFTracker::detect(cv::Mat z, cv::Mat x, float &peak_value)
     peak_value = (float) pv;
 
     // Compute the Peak-to-Sidelobe Ratio
-    cv::Scalar mean, stdev;
-    cv::meanStdDev(res,mean,stdev);
-    PSR_sroi = (peak_value - mean[0])/stdev[0];
+    // PSR_sroi = computePSR(res);
 
     // subpixel peak estimation, coordinates will be non-integer
     cv::Point2f p((float)pi.x, (float)pi.y);
@@ -383,9 +336,7 @@ cv::Point2f KCFTracker::detectWROI(cv::Mat z, cv::Mat x, float &peak_value)
     peak_value = (float) pv;
 
     // Compute the Peak-to-Sidelobe Ratio
-    cv::Scalar mean, stdev;
-    cv::meanStdDev(res,mean,stdev);
-    PSR_wroi = (peak_value - mean[0])/stdev[0];
+    // PSR_wroi = computePSR(res);
 
     // subpixel peak estimation, coordinates will be non-integer
     cv::Point2f p((float)pi.x, (float)pi.y);
@@ -419,9 +370,7 @@ cv::Point2f KCFTracker::detectScale(cv::Mat z, cv::Mat x, float &peak_value)
     peak_value = (float) pv;
 
     // Compute the Peak-to-Sidelobe Ratio
-    cv::Scalar mean, stdev;
-    cv::meanStdDev(res,mean,stdev);
-    PSR_scale = (peak_value - mean[0])/stdev[0];
+    PSR_scale = computePSR(res);
 
     // subpixel peak estimation, coordinates will be non-integer
     cv::Point2f p((float)pi.x, (float)pi.y);
@@ -551,7 +500,7 @@ cv::Mat KCFTracker::gaussianCorrelationWROI(cv::Mat x1, cv::Mat x2)
     cv::Mat d; 
     cv::max(( (cv::sum(x1.mul(x1))[0] + cv::sum(x2.mul(x2))[0])- 2. * c) / (size_patch_w_roi[0]*size_patch_w_roi[1]*size_patch_w_roi[2]) , 0, d);
     cv::Mat k;
-    cv::exp((-d / (sigma * sigma)), k);
+    cv::exp((-d / (sigma_w_roi * sigma_w_roi)), k);
     return k;
 }
 
@@ -705,7 +654,8 @@ cv::Mat KCFTracker::getFeatures(const cv::Mat & image, bool inithann, float scal
     cv::Mat FeaturesMap;  
     cv::Mat z = RectTools::subwindow(image, extracted_roi, cv::BORDER_REPLICATE);
     
-    if (z.cols != _tmpl_sz.width || z.rows != _tmpl_sz.height) {
+    
+if (z.cols != _tmpl_sz.width || z.rows != _tmpl_sz.height) {
         cv::resize(z, z, _tmpl_sz);
     }   
 
@@ -809,13 +759,60 @@ cv::Mat KCFTracker::getFeaturesWROI(const cv::Mat & image, bool inithann, float 
         FeaturesMap = cv::Mat(cv::Size(map->numFeatures,map->sizeX*map->sizeY), CV_32F, map->map);  // Procedure do deal with cv::Mat multichannel bug
         FeaturesMap = FeaturesMap.t();
         freeFeatureMapObject(&map);
+
+        // Lab features
+        if (_labfeatures) {
+            cv::Mat imgLab;
+            cvtColor(z, imgLab, CV_BGR2Lab);
+            unsigned char *input = (unsigned char*)(imgLab.data);
+
+            // Sparse output vector
+            cv::Mat outputLab = cv::Mat(_labCentroids.rows, size_patch_w_roi[0]*size_patch_w_roi[1], CV_32F, float(0));
+
+            int cntCell = 0;
+            // Iterate through each cell
+            for (int cY = cell_size; cY < z.rows-cell_size; cY+=cell_size){
+                for (int cX = cell_size; cX < z.cols-cell_size; cX+=cell_size){
+                    // Iterate through each pixel of cell (cX,cY)
+                    for(int y = cY; y < cY+cell_size; ++y){
+                        for(int x = cX; x < cX+cell_size; ++x){
+                            // Lab components for each pixel
+                            float l = (float)input[(z.cols * y + x) * 3];
+                            float a = (float)input[(z.cols * y + x) * 3 + 1];
+                            float b = (float)input[(z.cols * y + x) * 3 + 2];
+
+                            // Iterate trough each centroid
+                            float minDist = FLT_MAX;
+                            int minIdx = 0;
+                            float *inputCentroid = (float*)(_labCentroids.data);
+                            for(int k = 0; k < _labCentroids.rows; ++k){
+                                float dist = ( (l - inputCentroid[3*k]) * (l - inputCentroid[3*k]) )
+                                           + ( (a - inputCentroid[3*k+1]) * (a - inputCentroid[3*k+1]) )
+                                           + ( (b - inputCentroid[3*k+2]) * (b - inputCentroid[3*k+2]) );
+                                if(dist < minDist){
+                                    minDist = dist;
+                                    minIdx = k;
+                                }
+                            }
+                            // Store result at output
+                            outputLab.at<float>(minIdx, cntCell) += 1.0 / cell_sizeQ;
+                            //((float*) outputLab.data)[minIdx * (size_patch_scale[0]*size_patch_scale[1]) + cntCell] += 1.0 / cell_sizeQ; 
+                        }
+                    }
+                    cntCell++;
+                }
+            }
+            // Update size_patch_scale[2] and add features to FeaturesMap
+            size_patch_w_roi[2] += _labCentroids.rows;
+            FeaturesMap.push_back(outputLab);
+        }
     }
     else {
         FeaturesMap = RectTools::getGrayImage(z);
         FeaturesMap -= (float) 0.5; // In Paper;
-        size_patch[0] = z.rows;
-        size_patch[1] = z.cols;
-        size_patch[2] = 1;  
+        size_patch_w_roi[0] = z.rows;
+        size_patch_w_roi[1] = z.cols;
+        size_patch_w_roi[2] = 1;  
     }
     
     if (inithann) {
@@ -949,7 +946,6 @@ cv::Mat KCFTracker::getFeaturesScale(const cv::Mat &image, bool inithann, float 
         size_patch_scale[1] = z.cols;
         size_patch_scale[2] = 1;  
     }
-    // std::cout << FeaturesMap.cols << "xxx"  << FeaturesMap.rows << std::endl; 
     return FeaturesMap;
 }
 
@@ -1036,69 +1032,101 @@ std::pair<int,float> KCFTracker::target_redetection(std::vector<cv::Vec4i> Bound
         // Filter Boxes too large or too small
 	float aspectProposed = (float) BoundingBoxes[boxIndex][2] /  (float) BoundingBoxes[boxIndex][3];
         float aspectTarget = (float) result.width / (float) result.height;
-        if (rdIndex < 2){
-	   if (result.width * result.height > 500){
-              if (((float)result.width / (float)BoundingBoxes[boxIndex][2]) > 3.0){
+        if (rdIndex < 600){
+	   if (result.width * result.height > 1000){
+              if (((float)result.width / (float)BoundingBoxes[boxIndex][2]) > 1.75){
                  continue;
               }
-              if (((float)result.width / (float)BoundingBoxes[boxIndex][2]) < 0.3){
+              if (((float)result.width / (float)BoundingBoxes[boxIndex][2]) < 0.60){
                  continue;
               }
-              if (((float)result.height / (float)BoundingBoxes[boxIndex][3]) > 3.0){
+              if (((float)result.height / (float)BoundingBoxes[boxIndex][3]) > 1.75){
                  continue;
               }
-              if (((float)result.height / (float)BoundingBoxes[boxIndex][3]) < 0.3){
+              if (((float)result.height / (float)BoundingBoxes[boxIndex][3]) < 0.60){
                  continue;
               }
-              if (aspectProposed > 3 * aspectTarget){
+              if (aspectProposed > 1.5 * aspectTarget){
                  continue;
               }
-              if (aspectProposed < 0.3 * aspectTarget){
+              if (aspectProposed < 0.65 * aspectTarget){
                  continue;
               }
-              if ((BoundingBoxes[boxIndex][0] < result.x - 3*result.width/2.0) || (BoundingBoxes[boxIndex][0] > result.x + 5*result.width/2.0)){
-                 continue;
+              if (result.width > 50){
+                 if ((BoundingBoxes[boxIndex][0] < (result.x - 1.5*result.width))){
+                    continue;
+                 } 
+	         if ((BoundingBoxes[boxIndex][0]+BoundingBoxes[boxIndex][2] > result.x + 2.5*result.width)){
+                    continue;
+                 }
               }
-              if ((BoundingBoxes[boxIndex][1] < result.y - 3*result.width/2.0) || (BoundingBoxes[boxIndex][1] > result.y + 5*result.height/2.0)){
-                continue;
+	      else{
+                 if ((BoundingBoxes[boxIndex][0] < (result.x - 2.5*result.width))){
+                    continue;
+                 }
+                 if ((BoundingBoxes[boxIndex][0]+BoundingBoxes[boxIndex][2] > result.x + 3.5*result.width)){
+                    continue;
+                 }
+              }
+              if (result.height > 50){
+                 if ((BoundingBoxes[boxIndex][1] < (result.y - 1.5*result.height))){
+                    continue;
+                 }
+                 if ((BoundingBoxes[boxIndex][1]+BoundingBoxes[boxIndex][3] > result.y + 2.5*result.height)){
+                    continue;
+                 }
+              }
+              else{
+                 if ((BoundingBoxes[boxIndex][1] < (result.y - 2.5*result.height))){
+                    continue;
+                 }
+                 if ((BoundingBoxes[boxIndex][1]+BoundingBoxes[boxIndex][3] > result.y + 3.5*result.height)){
+                    continue;
+                 }
               }
            }
            else{
-              if ((BoundingBoxes[boxIndex][0] < result.x - 5*result.width/2.0) || (BoundingBoxes[boxIndex][0] > result.x + 7*result.width/2.0)){
+              if ((BoundingBoxes[boxIndex][0] < result.x - 2.0*result.width)){
+                 continue;
+              }             
+              if ((BoundingBoxes[boxIndex][1] < result.y - 2.0*result.height)){
+                continue;
+              }
+              if ((BoundingBoxes[boxIndex][0]+BoundingBoxes[boxIndex][2] > result.x + 3.0*result.width)){
                  continue;
               }
-              if ((BoundingBoxes[boxIndex][2] > 5*result.width) || (BoundingBoxes[boxIndex][3] > 5*result.height)){
-                 continue;
-              }
-              if ((BoundingBoxes[boxIndex][1] < result.y - 5*result.width/2.0) || (BoundingBoxes[boxIndex][1] > result.y + 7*result.height/2.0)){
+              if ((BoundingBoxes[boxIndex][1]+BoundingBoxes[boxIndex][3] > result.y + 3.0*result.height)){
                 continue;
               }
            }
        }
        // Detect the Peak at the Same Scale and Corresponding Value
        float rd_peak_value, rd2_peak_value;
-       if (rdIndex < 2){
-          detectScaleRedetection(_tmplScale, _alphafScale, getFeaturesScaleRedetection(frame, bb), rd_peak_value);
+       if (rdIndex < 600){
+          detectRedetection(_tmpl, _alphaf, getFeaturesRedetection(frame, bb), rd_peak_value);       
        }
        else{
           rd_peak_value = 1;
        }
-       detectScaleRedetection(_tmplScaleRD, _alphafScaleRD, getFeaturesScaleRedetection(frame, bb), rd2_peak_value);
-       boxProposed.push_back(std::make_pair(boxIndex,(rd_peak_value+rd2_peak_value)/2.0));
+       // rd_peak_value = 1;
+       detectScaleRedetection(_tmplScale, _alphafScale, getFeaturesScaleRedetection(frame, bb), rd2_peak_value);
+       boxProposed.push_back(std::make_pair(boxIndex,(rd2_peak_value)));
+     
        // Update the Index and Confidence 
-        if (rd_peak_value * rd2_peak_value > rd_max_confidence){
+       if (rd_peak_value * rd2_peak_value > rd_max_confidence){
             rd_max_confidence = rd_peak_value * rd2_peak_value;
             BoxElements.first = boxIndex;
-            BoxElements.second = (rd2_peak_value + rd2_peak_value) / 2.0;
+            BoxElements.second = (rd2_peak_value);
         }
         // Update the Number of Boxes and Stop Iteration
         validBoxCount++;
-	if (validBoxCount >  2500){
-	   break;
-	}
-    }
     
-    return BoxElements;
+       if (validBoxCount > 20){
+          break;
+       }
+    
+   } 
+   return BoxElements;
 }
 
 // Detect object in the current frame.
@@ -1115,10 +1143,10 @@ void KCFTracker::detectScaleRedetection(cv::Mat z, cv::Mat alphaModel, cv::Mat x
     cv::minMaxLoc(res, NULL, &pv, NULL, &pi);
     peak_value = (float) pv;
 
+ 
     // Compute the Peak-to-Sidelobe Ratio
-    cv::Scalar mean, stdev;
-    cv::meanStdDev(res,mean,stdev);
-    float psr = (peak_value - mean[0])/stdev[0];
+    float psr = computePSR(res);
+    
     peak_value = psr;  // Assign PSR value to peak value
     
 }
@@ -1138,9 +1166,7 @@ void KCFTracker::detectRedetection(cv::Mat z, cv::Mat alphaModel, cv::Mat x, flo
     peak_value = (float) pv;
 
     // Compute the Peak-to-Sidelobe Ratio
-    cv::Scalar mean, stdev;
-    cv::meanStdDev(res,mean,stdev);
-    float psr = (peak_value - mean[0])/stdev[0];
+    float psr = computePSR(res);
     peak_value = psr;  // Assign PSR value to peak value
 
 }
@@ -1152,8 +1178,8 @@ cv::Mat KCFTracker::getFeaturesRedetection(const cv::Mat &image, cv::Vec4i box)
     cv::Rect roi_proposal;
     roi_proposal.width = box[2] * padding;
     roi_proposal.height = box[3] * padding;
-    roi_proposal.x = box[0] - box[2] / padding;
-    roi_proposal.y = box[1] - box[3] / padding;
+    roi_proposal.x = box[0]+box[2]/2.0 - roi_proposal.width/2.0;
+    roi_proposal.y = box[1]+box[3]/2.0 - roi_proposal.height/2.0;
 
     // Crop the Scale Filter ROI
     cv::Mat FeaturesMap;
@@ -1302,26 +1328,72 @@ cv::Rect_<float> KCFTracker::applyHomography(cv::Mat homography, cv::Mat image, 
     return roi;
 }
 
-void PrecisionCurve(std::vector<std::vector<float>> EucDistance, std::string prDataFile)
+void PrecisionCurve(std::vector<std::vector<float>> EucDistance, std::string prDataFile, float runTime)
 {
     // Save into the Corresponding Text File
-    std::ofstream output_file("/home/buzkent/Downloads/Results/"+prDataFile+".txt");
-    std::vector<std::vector<float>> prScore(2); /// \param[in] prScore vector of vector to store precision
-    for (int i = 1; i <= 101; i++){      	/// \param[in] i Spatial Threshold
-        std::vector<int> precision{0,0};
+    std::ofstream prFile("/home/buzkent/Downloads/Results/Precision/"+prDataFile+".txt");
+    std::ofstream successFile("/home/buzkent/Downloads/Results/Success/"+prDataFile+".txt");
+    std::ofstream runTimeFile("/home/buzkent/Downloads/Results/RunTime/RunTimes.txt", std::ios::app);    
+    for (int i = 0; i <= 50; i++){      	/// \param[in] i Spatial Threshold
+        float precision = 0;
         for(int j = 0; j < EucDistance[0].size(); j++){ /// Check each time step
-            if (EucDistance[0][j] <= i){ 	// Compare With Threshold for Precision
-                precision[0] += 1;       	// Successfull Tracking
+            if ( i != 0){
+               if (EucDistance[0][j] <= i){ 	// Compare With Threshold for Precision
+                  precision += 1;       	// Successfull Tracking
+               }
             }
-            if (EucDistance[1][j] > i - 1){  	// Compare with Threshold for Success Overlap
-                precision[1] += 1;       	// Successfull Tracking  
+            else{
+               if (EucDistance[0][j] == i){     // Compare With Threshold for Precision
+                  precision += 1;               // Successfull Tracking
+               }
             }
         }
-        prScore[0].push_back(double(precision[0])/EucDistance[0].size()); // Precision Score for the Video - TBM
-        prScore[1].push_back(double(precision[1])/EucDistance[1].size()); // Precision Score for the Video - TBM    
-        std::cout << prScore[0][i-1] << "---------------" << i - 1 << "++++++++++++" << prScore[1][i-1]<< std::endl;
-        output_file << prScore[0][i-1] << "," << prScore[1][i-1];
-        output_file << std::endl;
+        prFile << (precision/(float)EucDistance[0].size());
+        prFile << std::endl;
     }
 
+    for (int i = 0; i <= 100; i+=1){             /// \param[in] i Spatial Threshold
+        float success = 0;
+        for(int j = 0; j < EucDistance[1].size(); j++){ /// Check each time step
+            if (EucDistance[1][j] > i){     // Compare with Threshold for Success Overlap
+               success += 1;               // Successfull Tracking  
+            }
+        }
+        successFile << (success/(float)EucDistance[1].size());
+        successFile << std::endl;
+    }
+
+    runTimeFile << runTime;
+    runTimeFile << std::endl;
+}
+
+float KCFTracker::computePSR(const Mat &correlation_mat)
+{//Compute Peak-to-Sidelobe Ratio
+
+    double max_val = 0;
+    Point max_loc;
+    cv::Mat PSR_mask = cv::Mat::ones(correlation_mat.rows,correlation_mat.cols, CV_8U);
+    cv::Scalar mean,stddev;
+
+    minMaxLoc(correlation_mat,NULL,&max_val,NULL,&max_loc);     //Get location of max arg
+
+    //Define PSR mask
+    int win_size = floor(11/2);
+    Rect mini_roi = Rect(std::max(max_loc.x - win_size,0), std::max(max_loc.y - win_size,0), 11, 11);
+
+    //Handle image boundaries
+    if ( (mini_roi.x+mini_roi.width) > PSR_mask.cols )
+    {
+        mini_roi.width = PSR_mask.cols - mini_roi.x;
+    }
+    if ( (mini_roi.y+mini_roi.height) > PSR_mask.rows )
+    {
+        mini_roi.height = PSR_mask.rows - mini_roi.y;
+    }
+
+    Mat temp = PSR_mask(mini_roi);
+    temp *= 0;
+    meanStdDev(correlation_mat,mean,stddev,PSR_mask);   //Compute matrix mean and std
+
+    return (max_val - mean.val[0]) / stddev.val[0];     //Compute PSR
 }
