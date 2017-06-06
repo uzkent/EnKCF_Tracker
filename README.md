@@ -11,7 +11,7 @@ the proposed EnKCF tracker. </p>
 <li> sigma_small_roi_translation = 0.6 // Gaussian Kernel in KCF
 <li> lambda = 0.0001 // Regularization Weight - Same for all the KCFs
 <li> scale_filter_frequency = 5 // Scale Filter Applied every 5 frames
-<li> learning_rate_scale = 0.15
+<li> learning_rate_scale = 0.10
 <li> learning_rate_large_roi_translation = 0.20
 <li> learning_rate_small_roi_translation = 0.20
 <li> scale_filter_training_psr_threshold = 4.0 // Threshold to Train Scale Filter
