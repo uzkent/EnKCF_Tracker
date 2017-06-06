@@ -34,9 +34,6 @@ public:
     // Apply Homography to Previous Target Position for Motion Removal
     cv::Rect_<float> applyHomography(cv::Mat homography, cv::Mat image, cv::Rect_<float> oldRoi);
     
-    // Target Re-detection Module
-    std::pair<int,float> target_redetection(std::vector<cv::Vec4i> BoundingBoxes, cv::Mat frame, cv::Rect result, int rdIndex, std::vector<std::pair<int,float>>& boxProposed);
-
     float interp_factor, interp_factor_scale, interp_factor_w_roi; // linear interpolation factor for adaptation
     float sigma, sigma_w_roi, sigma_scale;        // gaussian kernel bandwidth
     float lambda;       // regularization
@@ -57,12 +54,6 @@ protected:
 
     // Detect object in the current frame.
     cv::Point2f detectScale(cv::Mat z, cv::Mat x, float &peak_value);
-
-    // Detect object in the current frame.
-    void detectScaleRedetection(cv::Mat z, cv::Mat Model, cv::Mat x, float &peak_value);
-
-    // Detect object in the current frame.
-    void detectRedetection(cv::Mat z, cv::Mat Model, cv::Mat x, float &peak_value);
 
     // train tracker with a single image
     void train(cv::Mat x, float train_interp_factor);
@@ -99,12 +90,6 @@ protected:
 
     // Obtain sub-window from image, with replication-padding and extract features
     cv::Mat getFeaturesScale(const cv::Mat & image, bool inithann, float scale_adjust = 1.0f);
-
-    // Obtain sub-window from image, with replication-padding and extract features
-    cv::Mat getFeaturesScaleRedetection(const cv::Mat & image, cv::Vec4i box);
-
-    // Obtain sub-window from image, with replication-padding and extract features
-    cv::Mat getFeaturesRedetection(const cv::Mat & image, cv::Vec4i box);
 
     // Initialize Hanning window. Function called only in the first frame.
     void createHanningMats();

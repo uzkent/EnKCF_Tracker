@@ -17,9 +17,6 @@
 #include <unistd.h>
 #include <stack>
 #include <random>
-#include "../main/include/interface.h"
-#include "../tools/include/image_tools.h"
-#include "../edge/include/edge_boxes_interface.h"
 
 using namespace cv;
 using namespace std;
@@ -85,7 +82,6 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
     }
 }
 
-float bbs[10000*5];
 int main(int argc, char* argv[])
 {
 
@@ -100,9 +96,7 @@ int main(int argc, char* argv[])
    char gtDataFile[256];
    char szImageFile[256];
    char szSaveVideofile[256];
-   char path_model[256] = "/home/buzkent/EdgeBox/model_train.txt"; 
    char prDataFile[256];   
-   InitializedBox(path_model);
 
    // Terminate if less than 9 inputs are provided
    if (argc < 9) {
@@ -174,8 +168,6 @@ int main(int argc, char* argv[])
    int seed2 = time(0);
    std::default_random_engine engine2(seed2);
    std::uniform_int_distribution<int> dist2(0,1000);
-   float rdThresholds[3] = {6.00,6.00,5.00};
-   int rdTriggerIndex = 0; // Indexes for ReDetection
 
    // Read the Video
 #ifdef _AutelDATASET_
@@ -336,8 +328,8 @@ int skipOPE = 0;
         /// \param[in] frame : The First Frame
         ///
         tracker.init( Rect(Obs[0], Obs[1], Obs[2], Obs[3]), frame );
-	Metrics[0].push_back(0);
-	Metrics[1].push_back(100);
+	Metrics[0].push_back(0); // Precision
+	Metrics[1].push_back(100); // Success
         cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
       }
       else {
@@ -345,10 +337,7 @@ int skipOPE = 0;
         /// Use Translation and Scale Filter Interchangeably
         float PSR;
         cv::Rect roi_WROI = tracker.extracted_w_roi;
-	tracker.PSR_wroi = 20;
-	tracker.PSR_sroi = 20;
-	tracker.PSR_scale = 20;
-        tic();
+	tic();
 	if ((nFrames % 5 > 0) && (nFrames % 5 < 3)){
            result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
            PSR = tracker.PSR_wroi;
@@ -361,80 +350,14 @@ int skipOPE = 0;
            result = tracker.updateScale(frame); // Estimate Scale
            PSR = tracker.PSR_scale;
 	}
-        // result = tracker.update(frame);      // Estimate Translation
-        // PSR = tracker.PSR_sroi;
         float indRunTime = toc();
         runTime += indRunTime;
-	// std::cout << indRunTime << std::endl;
-        /// -------------------------------------------------------------------------------
-        /* if (((tracker.PSR_wroi < rdThresholds[0]) || (tracker.PSR_sroi < rdThresholds[1]) || (tracker.PSR_scale < rdThresholds[2])) && (rdCallFrames<7)){
-           rdCallFrames++;  
-           // Determine the ROI for Re-Detection
-           cv::Mat roiImage = frame.clone();
 
-	   // Increament the Number of Times redetection is called			
-           rdTriggerIndex++;
-
-           // Initialize Edge Box
-           std::vector<cv::Vec4i> BoundingBoxes;
-           int box_number = 0;
-           GetBox(frame.data, frame.cols, frame.rows, &box_number, bbs);
-           int idx = 0;
-           for(idx = 0; idx < box_number; ++idx)
-           {
-             cv::Vec4i rect = {(int)bbs[5*idx], (int)bbs[5*idx+1], (int)bbs[5*idx+2], (int)bbs[5*idx+3]};
-             BoundingBoxes.push_back(rect);
-	   }
-
-           // Perform Re-detection Interface
-           std::vector<pair<int,float>> boxProposed;
-           std::pair<int,float> MatchedBoxIndex = tracker.target_redetection(BoundingBoxes, frame, result, rdTriggerIndex, boxProposed);
-
-	   // Display all the bounding boxes
-           for (int i = 0; i < boxProposed.size(); i++){
-               int j = boxProposed[i].first;
-               std::string rdConf = to_string(float(boxProposed[i].second));
-               cv::rectangle(roiImage,cv::Point(BoundingBoxes[j][0],BoundingBoxes[j][1]),
-               cv::Point(BoundingBoxes[j][0]+BoundingBoxes[j][2],BoundingBoxes[j][1]+BoundingBoxes[j][3]),cv::Scalar(0,255,0),4,8);
-               cv::putText(roiImage,rdConf, cv::Point(BoundingBoxes[j][0],(BoundingBoxes[j][1])), fontFace, 4, cv::Scalar::all(255), 2, 4);  
-           }
- 
-           // Display the ROI Searched by the Large Translation Filter
-           cv::rectangle(roiImage,cv::Point(roi_WROI.x,roi_WROI.y),cv::Point(roi_WROI.x+roi_WROI.width,roi_WROI.y+roi_WROI.height),cv::Scalar(255,0,0),4,8);
-	   
-           // Crop the Re-detection ROI
-           cv::imshow("RD ROI",roiImage);
-           cv::waitKey(2);
-	   
-           // Re-initiate the Tracker
-           Obs[0] = BoundingBoxes[MatchedBoxIndex.first][0]; Obs[1] = BoundingBoxes[MatchedBoxIndex.first][1]; 
-           Obs[2] = BoundingBoxes[MatchedBoxIndex.first][2]; Obs[3] = BoundingBoxes[MatchedBoxIndex.first][3];
-           if (MatchedBoxIndex.second > (rdThresholds[2] - 2.0)){
-              // Re-Initiate the Track
-              tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
-              result.x = Obs[0]; result.y = Obs[1]; result.width = Obs[2]; result.height = Obs[3];
-              rdTriggerIndex = -1;
-              rdThresholds[0] += -2; rdThresholds[1] += -2; rdThresholds[2] += -2;
-           }
-           
-           // if the object is not found, initiate with the object with highest objectness
-           if(MatchedBoxIndex.second < 6.00 && rdTriggerIndex >= 600.0){
-              // Re-Initiate the Track
-              tracker.init( Rect(Obs[0],Obs[1],Obs[2],Obs[3]), frame );
-              result.x = Obs[0]; result.y = Obs[1]; result.width = Obs[2]; result.height = Obs[3];
-              rdTriggerIndex = -1;
-           }
-           // Draw the Selected Rectangle
-           std::string rd_confidence = to_string(float(MatchedBoxIndex.second));
-           cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
-           cv::putText(frame,rd_confidence, cv::Point(Obs[0],Obs[1]), fontFace, 4, cv::Scalar::all(255), thickness, 4); // Display the Confidence	 
-  	   
-        }
-	*/
         // TRACKING RESULTS OVERLAID ON THE FRAME
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
         cv::rectangle( frame, cv::Point(gX,gY), cv::Point(gX+gWidth,gY+gHeight), cv::Scalar(0,255,0),4,8);
-        std::string confidence = to_string(int(tracker.PSR_sroi));
+        std::cout << PSR << std::endl;
+	std::string confidence = to_string(int(PSR));
         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
 
         // Compute the Euclidean Distance for Precision Metric
@@ -494,8 +417,8 @@ int skipOPE = 0;
      firstFrame++;
 #endif
       if (!SILENT) {
-        // cv::imshow("Name", frame);
-        // cv::waitKey(2);
+        cv::imshow("Name", frame);
+        cv::waitKey(2);
       }
    }
    // Estimate Precision Curve

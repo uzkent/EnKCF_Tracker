@@ -14,9 +14,9 @@ add_definitions( -D_UAV123_DATASET_)
 # add_definitions( -D_AutelDATASET_)
 # add_definitions( -D_VOT15_DATASET_ )
 # add_definitions( -D_OTB100_DATASET_ )
-FILE(GLOB_RECURSE sourcefiles ./src/runtracker.cpp ./src/kcftracker.cpp ./src/fhog.cpp ./src/Function_Definitions.cpp ./main/src/interface.cpp ./edge/src/edge_boxes_interface.cpp ./edge/src/edge_box.cpp ./edge/src/edge_detection.cpp ./tools/src/conv_triangle.cpp ./tools/src/gradient.cpp ./tools/src/image_tools.cpp ./tools/src/data_define.cpp)
+FILE(GLOB_RECURSE sourcefiles ./src/runtracker.cpp ./src/kcftracker.cpp ./src/fhog.cpp ./src/Function_Definitions.cpp)
 
-INCLUDE_DIRECTORIES(./src ./main/include/ ./edge/include/ ./tools/include/)
+INCLUDE_DIRECTORIES(./src)
 add_executable( EnKCF ${sourcefiles} )
 target_link_libraries( EnKCF ${OpenCV_LIBS})
 
