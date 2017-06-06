@@ -1,5 +1,5 @@
 <p> This code includes the Ensemble of Kernelized Correlation Filter Tracker for the BMVC17 Submission.
-The EnKCF runs multiple KCFs to tackle different aspects of tracking such as : scaling, and fast motion.
+The EnKCF runs multiple KCFs [1] to tackle different aspects of tracking such as : scaling, and fast motion.
 We also employ a Particle Filter to smoothen the interaction among different KCFs. Our tracker achieves
 higher success and precision rates than the baseline KCF tracker at 416hz on UAV123 dataset. We will share
 more details on our tracker soon. Below, you can find the hyperparameters and their optimal values for
@@ -24,3 +24,6 @@ the proposed EnKCF tracker. </p>
 <li> number_particles = 1000		// Number of Particles in the Particle Filter
 <li> number_efficient_particles = 1000/3.0 // Number of Efficient Particles to Enable Resampling
 </ul>
+
+[1] - Henriques, João F., Rui Caseiro, Pedro Martins, and Jorge Batista. "High-speed tracking with kernelized correlation filters." IEEE Transactions on Pattern Analysis and Machine Intelligence 37, no. 3 (2015): 583-596.
+
