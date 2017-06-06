@@ -27,3 +27,20 @@ the proposed EnKCF tracker. </p>
 
 [1] - Henriques, João F., Rui Caseiro, Pedro Martins, and Jorge Batista. "High-speed tracking with kernelized correlation filters." IEEE Transactions on Pattern Analysis and Machine Intelligence 37, no. 3 (2015): 583-596.
 
+### To Compile
+<ul> 
+<li> cd C++_Implementation
+<li> mkdir build
+<li> cd build
+<li> cmake ..
+</ul>
+
+### To Run for Video Input
+<ul>
+<li> ./EnKCF -d video -e "Video of Interest" -g "Ground Truth" -p "Text File for Precision and Success Curves"
+</ul>
+
+### To Run for Series of Images Input
+<ul>
+<li> ./EnKCF -d image -e "Images Folder" -g "Ground Truth" -p "Text File for Precision and Success Curves"
+</ul>
