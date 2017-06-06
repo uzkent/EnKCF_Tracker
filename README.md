@@ -6,9 +6,9 @@ more details on our tracker soon. Below, you can find the hyperparameters and th
 the proposed EnKCF tracker. </p>
 
 <ul>
-<li> sigma_scale = 0.7   // Gaussian Kernel in KCF
-<li> sigma_large_roi_translation = 0.7 // Gaussian Kernel in KCF
-<li> sigma_small_roi_translation = 0.6 // Gaussian Kernel in KCF
+<li> sigma_scale = 0.9   // Gaussian Kernel Bandwith in KCF
+<li> sigma_large_roi_translation = 0.7 // Gaussian Kernel Bandwith in KCF
+<li> sigma_small_roi_translation = 0.6 // Gaussian Kernel Bandwith in KCF
 <li> lambda = 0.0001 // Regularization Weight - Same for all the KCFs
 <li> scale_filter_frequency = 5 // Scale Filter Applied every 5 frames
 <li> learning_rate_scale = 0.10

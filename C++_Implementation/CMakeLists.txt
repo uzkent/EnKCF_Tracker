@@ -4,9 +4,9 @@ project(EnKCF+ParticleFilter)
 
 find_package(OpenCV REQUIRED)
 
-SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
+SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11 -O3")
 
-# SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
+SET(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -O3")
 
 # uncomment bellow if you want to use ground truth
 # add_definitions( -D_USE_VIDEO_INPUT_ )

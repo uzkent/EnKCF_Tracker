@@ -352,8 +352,8 @@ int skipOPE = 0;
 	}
         float indRunTime = toc();
         runTime += indRunTime;
-
-        // TRACKING RESULTS OVERLAID ON THE FRAME
+ 
+       // TRACKING RESULTS OVERLAID ON THE FRAME
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
         cv::rectangle( frame, cv::Point(gX,gY), cv::Point(gX+gWidth,gY+gHeight), cv::Scalar(0,255,0),4,8);
 	std::string confidence = to_string(int(PSR));
@@ -416,8 +416,8 @@ int skipOPE = 0;
      firstFrame++;
 #endif
       if (!SILENT) {
-        cv::imshow("Name", frame);
-        cv::waitKey(2);
+        // cv::imshow("Name", frame);
+        // cv::waitKey(2);
       }
    }
    // Estimate Precision Curve
