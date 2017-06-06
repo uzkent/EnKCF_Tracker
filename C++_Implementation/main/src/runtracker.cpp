@@ -356,7 +356,6 @@ int skipOPE = 0;
         // TRACKING RESULTS OVERLAID ON THE FRAME
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
         cv::rectangle( frame, cv::Point(gX,gY), cv::Point(gX+gWidth,gY+gHeight), cv::Scalar(0,255,0),4,8);
-        std::cout << PSR << std::endl;
 	std::string confidence = to_string(int(PSR));
         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
 
