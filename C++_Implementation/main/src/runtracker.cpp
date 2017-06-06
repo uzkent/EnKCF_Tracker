@@ -146,8 +146,8 @@ int main(int argc, char* argv[])
    int dimension = 4;          // State Space Dimensionality
    vector<double> Q{10,10,5,5}; // Transition Noise Variance
    double R = 5;               // Measurement Noise Variance
-   double beta = 0.10;         // Likelihood Parameter
-   Particle_Filter Tracker(N_Particles,dimension,beta,Q,R);
+   double beta = 0.50;         // Likelihood Parameter
+   Particle_Filter PfTracker(N_Particles,dimension,beta,Q,R);
 
    // Frame read
    cv::Mat frame, frame_old;
@@ -212,7 +212,7 @@ char ch;
    std::string seqName; 
    std::string seqNameID;
    std::string matchString = prDataFile;
-   std::ifstream startFrame("/home/buzkent/Desktop/startFrames_UAV123.txt");
+   std::ifstream startFrame("/Users/buzkent/Downloads/UAV123/startFrames_UAV123.txt");
    while(startFrame >> fFrame >> lFrame >> seqNameID >> seqName){
      if (seqNameID.compare(matchString) == 0){
          frameID = fFrame;
@@ -306,7 +306,6 @@ int skipOPE = 0;
       if (nFrames == 0) 
       {
         /// Observation on the first frame given by the user
-        // Obs[0] = xMin+width/2; Obs[1] = yMin+height/2; Obs[2] = width; Obs[3] = height;
 #ifdef _UAV123_DATASET_
         Obs[0] = gX; Obs[1] = gY; Obs[2] = gWidth; Obs[3] = gHeight;
 #endif
@@ -328,6 +327,11 @@ int skipOPE = 0;
         /// \param[in] frame : The First Frame
         ///
         tracker.init( Rect(Obs[0], Obs[1], Obs[2], Obs[3]), frame );
+	
+	///
+	/// Initiate the Particles for the Particle Filter
+	///
+	PfTracker.particle_initiation(Obs);
 	Metrics[0].push_back(0); // Precision
 	Metrics[1].push_back(100); // Success
         cv::rectangle(frame,cv::Point(Obs[0],Obs[1]),cv::Point(Obs[0]+Obs[2],Obs[1]+Obs[3]),cv::Scalar(0,255,0),4,8);
@@ -336,7 +340,17 @@ int skipOPE = 0;
         /// -------------------- UPDATE STEP --------------------------------------------
         /// Use Translation and Scale Filter Interchangeably
         float PSR;
-        cv::Rect roi_WROI = tracker.extracted_w_roi;
+        
+	// Perform PF Transition
+	State_Mean[0] = 0; State_Mean[1] = 0;
+	PfTracker.particle_transition();
+	PfTracker.mean_estimation(State_Mean);
+
+	// Update CF new centroids
+	result.x = State_Mean[0] - result.width/2.0;
+	result.y = State_Mean[1] - result.height/2.0;
+	// tracker.updateKCFbyPF(result);
+	
 	tic();
 	if ((nFrames % 5 > 0) && (nFrames % 5 < 3)){
            result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
@@ -352,8 +366,24 @@ int skipOPE = 0;
 	}
         float indRunTime = toc();
         runTime += indRunTime;
- 
-       // TRACKING RESULTS OVERLAID ON THE FRAME
+
+        // Update Particle Filter Weights
+	Obs[0] = result.x + result.width/2.0;
+	Obs[1] = result.y + result.height/2.0;
+	PfTracker.particle_weights(Obs); 
+
+	// Perform Re-Sampling
+	PfTracker.particle_resampling();
+
+	// Find Posterior Mean
+	State_Mean[0] = 0; State_Mean[1] = 0;
+	PfTracker.mean_estimation(State_Mean);
+
+	// Update Final Results
+	// result.x = State_Mean[0] - result.width/2.0;
+	// result.y = State_Mean[1] - result.height/2.0;
+
+        // TRACKING RESULTS OVERLAID ON THE FRAME
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
         cv::rectangle( frame, cv::Point(gX,gY), cv::Point(gX+gWidth,gY+gHeight), cv::Scalar(0,255,0),4,8);
 	std::string confidence = to_string(int(PSR));
@@ -416,8 +446,9 @@ int skipOPE = 0;
      firstFrame++;
 #endif
       if (!SILENT) {
-        // cv::imshow("Name", frame);
-        // cv::waitKey(2);
+	cv::resize(frame,frame,Size(300,150));
+        cv::imshow("Name", frame);
+        cv::waitKey(2);
       }
    }
    // Estimate Precision Curve
