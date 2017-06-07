@@ -144,9 +144,9 @@ int main(int argc, char* argv[])
    ///
    int N_Particles = 1000;     // Number of Particles
    int dimension = 4;          // State Space Dimensionality
-   vector<double> Q{10,10,5,5}; // Transition Noise Variance
+   vector<double> Q{5,5,1,1}; // Transition Noise Variance
    double R = 5;               // Measurement Noise Variance
-   double beta = 0.50;         // Likelihood Parameter
+   double beta = 0.05;         // Likelihood Parameter
    Particle_Filter PfTracker(N_Particles,dimension,beta,Q,R);
 
    // Frame read
@@ -212,7 +212,7 @@ char ch;
    std::string seqName; 
    std::string seqNameID;
    std::string matchString = prDataFile;
-   std::ifstream startFrame("/Users/buzkent/Downloads/UAV123/startFrames_UAV123.txt");
+   std::ifstream startFrame("/home/buzkent/Desktop/startFrames_UAV123.txt");
    while(startFrame >> fFrame >> lFrame >> seqNameID >> seqName){
      if (seqNameID.compare(matchString) == 0){
          frameID = fFrame;
@@ -338,34 +338,37 @@ int skipOPE = 0;
       }
       else {
         /// -------------------- UPDATE STEP --------------------------------------------
-        /// Use Translation and Scale Filter Interchangeably
-        float PSR;
-        
 	// Perform PF Transition
 	State_Mean[0] = 0; State_Mean[1] = 0;
 	PfTracker.particle_transition();
 	PfTracker.mean_estimation(State_Mean);
 
+	// PfTracker.Draw_Particles(frame, Scalar (0,0,255), 3);
+
 	// Update CF new centroids
 	result.x = State_Mean[0] - result.width/2.0;
 	result.y = State_Mean[1] - result.height/2.0;
-	// tracker.updateKCFbyPF(result);
+	tracker.updateKCFbyPF(result);
 	
 	tic();
+	float PSR;
 	if ((nFrames % 5 > 0) && (nFrames % 5 < 3)){
            result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
            PSR = tracker.PSR_wroi;
 	}
         if ((nFrames % 5 == 3) || (nFrames % 5 == 4)){
-           result = tracker.update(frame);      // Estimate Translation
+           result = tracker.update(frame);      // Estimate Translation using Smaller ROI
            PSR = tracker.PSR_sroi;
 	}
 	if (nFrames % 5 == 0){
-           result = tracker.updateScale(frame); // Estimate Scale
+           result = tracker.updateScale(frame); // Estimate Scale using Scale Filter
            PSR = tracker.PSR_scale;
 	}
         float indRunTime = toc();
         runTime += indRunTime;
+
+	// Overlay the EnKCF result
+	cv::circle(frame,Point(result.x+result.width/2.0,result.y+result.height/2.0),1,cv::Scalar(0,255,0),6);
 
         // Update Particle Filter Weights
 	Obs[0] = result.x + result.width/2.0;
@@ -380,8 +383,12 @@ int skipOPE = 0;
 	PfTracker.mean_estimation(State_Mean);
 
 	// Update Final Results
-	// result.x = State_Mean[0] - result.width/2.0;
-	// result.y = State_Mean[1] - result.height/2.0;
+	result.x = State_Mean[0] - result.width/2.0;
+	result.y = State_Mean[1] - result.height/2.0;
+
+	PfTracker.Draw_Particles(frame,Scalar (0,0,0), 3);
+
+        cv::circle(frame,Point(result.x+result.width/2.0,result.y+result.height/2.0),1,cv::Scalar(255,25,25),6);
 
         // TRACKING RESULTS OVERLAID ON THE FRAME
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
@@ -446,7 +453,7 @@ int skipOPE = 0;
      firstFrame++;
 #endif
       if (!SILENT) {
-	cv::resize(frame,frame,Size(300,150));
+	// cv::resize(frame,frame,Size(300,150));
         cv::imshow("Name", frame);
         cv::waitKey(2);
       }

@@ -281,9 +281,11 @@ cv::Rect KCFTracker::updateScale(cv::Mat image)
 
 // Update KCF output by the PF output
 void KCFTracker::updateKCFbyPF(cv::Rect ROI){
-	_roi.x = ROI.x;     // Centroid given by Particle Filter
+	_roi.x = ROI.x;  	// Centroid given by Particle Filter
 	_roi.y = ROI.y;
-	_roi_scale.x = ROI.x;   // Centroid given by Particle Filter
+	_roi_w.x = ROI.x;	// Centroid given by Particle Filter
+	_roi_w.y = ROI.y;
+	_roi_scale.x = ROI.x;	// Centroid given by Particle Filter
 	_roi_scale.y = ROI.y;
 }
 

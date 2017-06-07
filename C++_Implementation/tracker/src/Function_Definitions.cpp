@@ -24,12 +24,15 @@ using namespace cv;
 void Particle_Filter::particle_initiation(vector<double> Obs)
 {
     // Initiate Particles for the First Time Step
-    vector<double> Q{10,10,5,5};
+    vector<double> Q{20,20,5,5};
+    Obs[0] += Obs[2]/2.0; Obs[1] += Obs[3]/2.0;
     Obs[2] = 0; Obs[3] = 0;
-    for (int i = 0; i < N_Particles; i++)
-        for (int j = 0; j < ss_dimension; j++){
+    for (int i = 0; i < N_Particles; i++){
+        Weights[i] = 1.0/ N_Particles;
+	for (int j = 0; j < ss_dimension; j++){
             particles[i*ss_dimension+j] = Obs[j] + Q[j] * double(randomDevice(generator)-500)/500;
         }
+    }
 }
 
 void Particle_Filter::particle_transition()
@@ -53,6 +56,7 @@ void Particle_Filter::particle_weights(vector<double> Obs)
     for (int i = 0; i < N_Particles; i++) {    
 	int Obs_x = Obs[0];
 	int Obs_y = Obs[1];
+	// Find Spatial Distance
 	Dist = pow((particles[i*ss_dimension]- Obs_x),2) +
 	pow(particles[i*ss_dimension+1] - Obs_y,2);
 
@@ -70,27 +74,25 @@ void Particle_Filter::particle_weights(vector<double> Obs)
 
 void Particle_Filter::particle_resampling()
 {
-
     // Resample Particles with Low Variance Sampling
     double U;
     double r = double(randomDevice(generator))/(1000*N_Particles);
     double c = Weights[0];
     int i = 0;
-    if ((1/Neff) < (N_Particles / 3.0)){
-    for (int m = 0; m < N_Particles; m++){
-	U = r + m * (1/double(N_Particles));  			   // Update
+    if ((1/Neff) < (N_Particles / 0.50)){
+       for (int m = 0; m < N_Particles; m++){
+	   U = r + m * (1/double(N_Particles));	// Update
 	
-	while (U > c){		
-	    i++;
-	    c += Weights[i];
-	}
+	   while (U > c){		
+	       i++;
+	       c += Weights[i];
+	   }
 
-	particles[m*ss_dimension] = particles[i*ss_dimension];         // Sample with Replacement
-        particles[m*ss_dimension + 1] = particles[i*ss_dimension + 1]; // Sample with Replacement
-        particles[m*ss_dimension + 2] = particles[i*ss_dimension + 2]; // Sample with Replacement
-        particles[m*ss_dimension + 3] = particles[i*ss_dimension + 3]; // Sample with Replacement  	
-   	Weights[m] = 1.0 / N_Particles;
-    }
+	   particles[m*ss_dimension] = particles[i*ss_dimension];         // Sample with Replacement
+           particles[m*ss_dimension + 1] = particles[i*ss_dimension + 1]; // Sample with Replacement
+           particles[m*ss_dimension + 2] = particles[i*ss_dimension + 2]; // Sample with Replacement
+           particles[m*ss_dimension + 3] = particles[i*ss_dimension + 3]; // Sample with Replacement  	
+       }
     }
 }
 
@@ -99,8 +101,8 @@ void Particle_Filter::mean_estimation(vector<double>& State_Mean)
     // Estimate State Mean
     for (int i = 0; i < N_Particles; i++)
     {
-        State_Mean[0] = State_Mean[0] + Weights[i] * particles[i*ss_dimension];
-        State_Mean[1] = State_Mean[1] + Weights[i] * particles[i*ss_dimension+1];
+        State_Mean[0] += (1.0/N_Particles) * particles[i*ss_dimension];
+        State_Mean[1] += (1.0/N_Particles) * particles[i*ss_dimension+1];
     }
 }
 
@@ -132,4 +134,3 @@ Mat Particle_Filter::Draw_Particles(Mat frame,Scalar color, int thickness)
     }
     return frame;
 }
-
