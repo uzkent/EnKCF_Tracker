@@ -79,7 +79,7 @@ void Particle_Filter::particle_resampling()
     double r = double(randomDevice(generator))/(1000*N_Particles);
     double c = Weights[0];
     int i = 0;
-    if ((1/Neff) < (N_Particles / 0.50)){
+    if ((1/Neff) < (N_Particles / 3.00)){
        for (int m = 0; m < N_Particles; m++){
 	   U = r + m * (1/double(N_Particles));	// Update
 	
@@ -93,6 +93,7 @@ void Particle_Filter::particle_resampling()
            particles[m*ss_dimension + 2] = particles[i*ss_dimension + 2]; // Sample with Replacement
            particles[m*ss_dimension + 3] = particles[i*ss_dimension + 3]; // Sample with Replacement  	
        }
+       rsFlag = 1;
     }
 }
 
@@ -101,9 +102,16 @@ void Particle_Filter::mean_estimation(vector<double>& State_Mean)
     // Estimate State Mean
     for (int i = 0; i < N_Particles; i++)
     {
-        State_Mean[0] += (1.0/N_Particles) * particles[i*ss_dimension];
-        State_Mean[1] += (1.0/N_Particles) * particles[i*ss_dimension+1];
+	if (rsFlag == 0){
+           State_Mean[0] += Weights[i] * particles[i*ss_dimension];
+           State_Mean[1] += Weights[i] * particles[i*ss_dimension+1];
+    	}
+	else{
+   	   State_Mean[0] += (1.0/N_Particles) * particles[i*ss_dimension];
+           State_Mean[1] += (1.0/N_Particles) * particles[i*ss_dimension+1];
+	}
     }
+    rsFlag = 0;
 }
 
 void precision_curve(vector<vector<double> > RMSE)

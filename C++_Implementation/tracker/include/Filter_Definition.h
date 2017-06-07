@@ -31,6 +31,7 @@ public:
     double R; // Measurement Noise Covariance
     double* Weights; 
     double* particles; //Dynamic Array to Store Particles
+    int rsFlag;
 
     Particle_Filter(int nParticles,int Dim,double bt,vector<double> Q_transition,double R_measurement)
     {
@@ -42,7 +43,7 @@ public:
 	Obs_Dim = 2;
 	particles = new double[N_Particles*Dim] (); // Initiate PF State
 	Weights = new double[N_Particles] ();  // Initiate PF Weights
-       
+        rsFlag = 0;
     };
     
     ~Particle_Filter(){

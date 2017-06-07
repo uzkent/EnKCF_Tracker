@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
    ///
    int N_Particles = 1000;     // Number of Particles
    int dimension = 4;          // State Space Dimensionality
-   vector<double> Q{5,5,1,1}; // Transition Noise Variance
+   vector<double> Q{10,10,2,2}; // Transition Noise Variance
    double R = 5;               // Measurement Noise Variance
    double beta = 0.05;         // Likelihood Parameter
    Particle_Filter PfTracker(N_Particles,dimension,beta,Q,R);
@@ -212,7 +212,7 @@ char ch;
    std::string seqName; 
    std::string seqNameID;
    std::string matchString = prDataFile;
-   std::ifstream startFrame("/home/buzkent/Desktop/startFrames_UAV123.txt");
+   std::ifstream startFrame("/Users/buzkent/Downloads/UAV123/startFrames_UAV123.txt");
    while(startFrame >> fFrame >> lFrame >> seqNameID >> seqName){
      if (seqNameID.compare(matchString) == 0){
          frameID = fFrame;
@@ -366,7 +366,6 @@ int skipOPE = 0;
 	}
         float indRunTime = toc();
         runTime += indRunTime;
-
 	// Overlay the EnKCF result
 	cv::circle(frame,Point(result.x+result.width/2.0,result.y+result.height/2.0),1,cv::Scalar(0,255,0),6);
 
@@ -453,7 +452,7 @@ int skipOPE = 0;
      firstFrame++;
 #endif
       if (!SILENT) {
-	// cv::resize(frame,frame,Size(300,150));
+	cv::resize(frame,frame,Size(300,150));
         cv::imshow("Name", frame);
         cv::waitKey(2);
       }
