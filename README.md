@@ -5,6 +5,7 @@ higher success and precision rates than the baseline KCF tracker at 416hz on UAV
 more details on our tracker soon. Below, you can find the hyperparameters and their optimal values for
 the proposed EnKCF tracker. </p>
 
+### EnKCF Hyperparameters
 <ul>
 <li> sigma_scale = 0.9   // Gaussian Kernel Bandwith in KCF
 <li> sigma_large_roi_translation = 0.7 // Gaussian Kernel Bandwith in KCF
@@ -21,8 +22,21 @@ the proposed EnKCF tracker. </p>
 <li> responsevariance_scale = 0.04	// Variance for Desired Gaussian Response
 <li> responsevariance_large_roi_translation = 0.06
 <li> responsevariance_small_roi_translation = 0.125
+</ul>
+
+### Particle Filter Hyperparameters
+<ul>
 <li> number_particles = 1000		// Number of Particles in the Particle Filter
 <li> number_efficient_particles = 1000/3.0 // Number of Efficient Particles to Enable Resampling
+<li> process_noise_uniform_x = [-10,10]	// Transition Noise X Coordinate
+<li> process_noise_uniform_y = [-10,10] // Transition Noise Y Coordinate
+<li> process_noise_uniform_vx = [-2,2]  // Transition Noise X Velocity
+<li> process_noise_uniform_vy = [-2,2]  // Transition Noise Y Velocity
+<li> transition_noise_uniform_x = [-25,25] // Distribution Interval X Coordinate
+<li> transition_noise_uniform_y = [-25,25] // Y Coordinate
+<li> transition_noise_uniform_vx = [-10,10] // X Velocity
+<li> transition_noise_uniform_vy = [-10,10] // Y Velocity
+<li> beta_weight_function = 0.05 // exp(-dist * beta) - Weight Function Hyperparameter
 </ul>
 
 [1] - Henriques, João F., Rui Caseiro, Pedro Martins, and Jorge Batista. "High-speed tracking with kernelized correlation filters." IEEE Transactions on Pattern Analysis and Machine Intelligence 37, no. 3 (2015): 583-596.

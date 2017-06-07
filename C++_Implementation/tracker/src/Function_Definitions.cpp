@@ -24,7 +24,7 @@ using namespace cv;
 void Particle_Filter::particle_initiation(vector<double> Obs)
 {
     // Initiate Particles for the First Time Step
-    vector<double> Q{20,20,5,5};
+    vector<double> Q{25,25,10,10};
     Obs[0] += Obs[2]/2.0; Obs[1] += Obs[3]/2.0;
     Obs[2] = 0; Obs[3] = 0;
     for (int i = 0; i < N_Particles; i++){
