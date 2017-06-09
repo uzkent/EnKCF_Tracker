@@ -79,7 +79,7 @@ void Particle_Filter::particle_resampling()
     double r = double(randomDevice(generator))/(1000*N_Particles);
     double c = Weights[0];
     int i = 0;
-    if ((1/Neff) < (N_Particles / 3.00)){
+    if ((1/Neff) < (N_Particles / 0.50)){
        for (int m = 0; m < N_Particles; m++){
 	   U = r + m * (1/double(N_Particles));	// Update
 	
