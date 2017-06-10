@@ -57,6 +57,8 @@ public:
 
     void particle_weights(vector<double> Obs);
 
+    void particle_weights_cfMap(cv::Mat response, cv::Rect_<int> ROI);
+
     void particle_resampling();
     
     void mean_estimation(vector<double> &State_Mean);

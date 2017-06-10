@@ -147,6 +147,9 @@ cv::Rect KCFTracker::update(cv::Mat image)
     float cx = _roi.x + _roi.width / 2.0f;
     float cy = _roi.y + _roi.height / 2.0f;
 
+    // Transfer to the Global ROI
+    gROI = _roi;
+
     // Detect the Target Translation
     float peak_value;
     cv::Point2f res = detect(_tmpl, getFeatures(image, 0, 1.0f), peak_value);
@@ -188,6 +191,9 @@ cv::Rect KCFTracker::updateWROI(cv::Mat image)
     float cx = _roi_w.x + _roi_w.width / 2.0f;
     float cy = _roi_w.y + _roi_w.height / 2.0f;
 
+    // Transfer ROI to the Global ROI
+    gROI = _roi_w;
+
     // Detect the Target Translation
     float peak_value;
     cv::Point2f res = detectWROI(_tmpl_w_roi, getFeaturesWROI(image, 0, 1.0f), peak_value);
@@ -222,6 +228,10 @@ cv::Rect KCFTracker::updateWROI(cv::Mat image)
 // Update position based on the new frame
 cv::Rect KCFTracker::updateScale(cv::Mat image)
 {
+
+    // Transfer to the GLobal ROI
+    gROI = _roi_scale;
+
     ///
     /// Detect the Peak at the Same Scale and Corresponding Value
     ///
@@ -289,13 +299,19 @@ void KCFTracker::updateKCFbyPF(cv::Rect ROI){
 	_roi_scale.y = ROI.y;
 }
 
-// Detect object in the current frame.
+// Detect object in the current frame
 cv::Point2f KCFTracker::detect(cv::Mat z, cv::Mat x, float &peak_value)
 {
     using namespace FFTTools;
 
     cv::Mat k = gaussianCorrelation(x, z); // Apply Kernel Trick with the Test Template
     cv::Mat res = (real(fftd(complexMultiplication(_alphaf, fftd(k)), true))); // Response Map
+
+    // Transfer to the global response map
+    cfResponse = res;
+    cv::resize(cfResponse,cfResponse,Size(gROI.width,gROI.height));
+    cv::imshow("Response",cfResponse);
+    cv::waitKey(2);
 
     // minMaxLoc only accepts doubles for the peak, and integer points for the coordinates
     cv::Point2i pi;
@@ -331,6 +347,10 @@ cv::Point2f KCFTracker::detectWROI(cv::Mat z, cv::Mat x, float &peak_value)
     cv::Mat k = gaussianCorrelationWROI(x, z); // Apply Kernel Trick with the Test Template
     cv::Mat res = (real(fftd_w_roi(complexMultiplication(_alphaf_w_roi, fftd_w_roi(k)), true))); // Response Map
 
+    // Transfer to the global response map
+    cfResponse = res;
+    cv::resize(cfResponse,cfResponse,Size(gROI.width,gROI.height));
+
     // minMaxLoc only accepts doubles for the peak, and integer points for the coordinates
     cv::Point2i pi;
     double pv;
@@ -365,6 +385,10 @@ cv::Point2f KCFTracker::detectScale(cv::Mat z, cv::Mat x, float &peak_value)
     cv::Mat k = gaussianCorrelationScale(x, z); // Apply Kernel Trick with the Test Template
     cv::Mat res = (real(fftd_scale(complexMultiplication(_alphafScale, fftd_scale(k)), true))); // Response Map
 
+    // Transfer to the global response map
+    cfResponse = res;    
+    cv::resize(cfResponse,cfResponse,Size(gROI.width,gROI.height));
+
     // minMaxLoc only accepts doubles for the peak, and integer points for the coordinates
     cv::Point2i pi;
     double pv;
@@ -398,8 +422,8 @@ void KCFTracker::train(cv::Mat x, float train_interp_factor)
 {
     using namespace FFTTools;
 
-    cv::Mat k = gaussianCorrelation(x, x);  // Apply the Kernel Trick
-    cv::Mat alphaf = complexDivision(_prob, (fftd(k) + lambda));    // Model for the CUrrent Frame
+    cv::Mat k = gaussianCorrelation(x, x);  				// Apply the Kernel Trick
+    cv::Mat alphaf = complexDivision(_prob, (fftd(k) + lambda));    	// Model for the Current Frame
     
     _tmpl = (1 - train_interp_factor) * _tmpl + (train_interp_factor) * x;  // Update the Overall Template Model
     _alphaf = (1 - train_interp_factor) * _alphaf + (train_interp_factor) * alphaf; // Update the Overall Correlation Filter Model

@@ -72,6 +72,34 @@ void Particle_Filter::particle_weights(vector<double> Obs)
     }
 }
 
+void Particle_Filter::particle_weights_cfMap(cv::Mat response, cv::Rect_<int> ROI)
+{
+    // Compute Particles' Weights
+    double Acc = 0;
+    for (int i = 0; i < N_Particles; i++) {
+	if ((particles[i*ss_dimension] < ROI.x) || (particles[i*ss_dimension+1] < ROI.y) || (particles[i*ss_dimension] > (ROI.x+ROI.width)) || (particles[i*ss_dimension+1] > (ROI.y+ROI.height))){
+	   Weights[i] = 0;
+	}
+	else{
+	   int xCoord = abs(particles[i*ss_dimension] - ROI.x);
+           int yCoord = abs(particles[i*ss_dimension+1] - ROI.y);
+           Weights[i] = response.at<double>(yCoord,xCoord);
+	   cv::Point2i pi;
+	   double pv;
+           cv::minMaxLoc(response, NULL, &pv, NULL, &pi);
+	   cout << pi.x << "---" << pi.y << "---" << response.rows << "---" << response.cols << endl;
+        }
+        Acc += Weights[i];             // Cumulative Sum
+    }
+
+    // Normalize the weights
+    Neff = 0;
+    for (int i = 0; i < N_Particles; i++){
+        Weights[i] = Weights[i] / Acc;
+        Neff += pow(Weights[i],2); // Efficient # of Samples
+    }
+}
+
 void Particle_Filter::particle_resampling()
 {
     // Resample Particles with Low Variance Sampling

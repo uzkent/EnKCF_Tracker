@@ -142,9 +142,9 @@ int main(int argc, char* argv[])
    /// \param[in] Q : Transition Noise Variance
    /// \param[in] R : Measurement Noise Variance
    ///
-   int N_Particles = 1000;     // Number of Particles
+   int N_Particles = 300;     // Number of Particles
    int dimension = 4;          // State Space Dimensionality
-   vector<double> Q{5,5,1,1}; // Transition Noise Variance
+   vector<double> Q{10,10,2,2}; // Transition Noise Variance
    double R = 5;               // Measurement Noise Variance
    double beta = 0.1;         // Likelihood Parameter
    Particle_Filter PfTracker(N_Particles,dimension,beta,Q,R);
@@ -340,7 +340,7 @@ char ch;
         /// -------------------- UPDATE STEP --------------------------------------------
 	/// Perform PF Transition
 	State_Mean[0] = 0; State_Mean[1] = 0;
-	PfTracker.particle_transition();
+        PfTracker.particle_transition();	
 	PfTracker.mean_estimation(State_Mean);
 
 	// PfTracker.Draw_Particles(frame, Scalar (0,0,255), 3);
@@ -369,12 +369,13 @@ char ch;
         // float indRunTime = toc();
         // runTime += indRunTime;
 	// Overlay the EnKCF result
-	// cv::circle(frame,Point(result.x+result.width/2.0,result.y+result.height/2.0),1,cv::Scalar(0,255,0),6);
+	cv::circle(frame,Point(result.x+result.width/2.0,result.y+result.height/2.0),1,cv::Scalar(0,255,0),6);
 
         // Update Particle Filter Weights
 	Obs[0] = result.x + result.width/2.0;
 	Obs[1] = result.y + result.height/2.0;
-	PfTracker.particle_weights(Obs); 
+	// PfTracker.particle_weights(Obs); 
+	PfTracker.particle_weights_cfMap(tracker.cfResponse, tracker.gROI);
 
 	// Perform Re-Sampling
 	PfTracker.particle_resampling();
@@ -391,7 +392,7 @@ char ch;
         float indRunTime = toc();
         runTime += indRunTime;
 
-        cv::circle(frame,Point(result.x+result.width/2.0,result.y+result.height/2.0),1,cv::Scalar(255,25,25),6);
+        // cv::circle(frame,Point(result.x+result.width/2.0,result.y+result.height/2.0),1,cv::Scalar(255,25,25),6);
 
         // TRACKING RESULTS OVERLAID ON THE FRAME
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
@@ -459,7 +460,7 @@ char ch;
       if (!SILENT) {
 	// cv::resize(frame,frame,Size(300,150));
         cv::imshow("Name", frame);
-        cv::waitKey(2);
+        cv::waitKey(0);
       }
    }
    // Estimate Precision Curve

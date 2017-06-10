@@ -44,6 +44,8 @@ public:
     int template_size, template_size_scale, template_size_w_roi; // template size
     float scale_step;   // scale step for multi-scale estimation
     float scale_weight; // to downweight detection scores of other scales for added stability	
+    Rect_<int> gROI;
+    Mat cfResponse;
 
 protected:
     // Detect object in the current frame.
@@ -109,7 +111,7 @@ protected:
     cv::Mat _num;
     cv::Mat _den;
     cv::Mat _labCentroids;
-
+    
 private:
     int size_patch[3], size_patch_scale[3], size_patch_w_roi[3];
     cv::Mat hann, hann_wroi;
