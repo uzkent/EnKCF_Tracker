@@ -3,7 +3,9 @@ The EnKCF runs multiple KCFs [1] to tackle different aspects of tracking such as
 We also employ a Particle Filter to smoothen the interaction among different KCFs. Our tracker achieves
 higher success and precision rates than the baseline KCF tracker at 416hz on UAV123 dataset. We will share
 more details on our tracker soon. Below, you can find the hyperparameters and their optimal values for
-the proposed EnKCF tracker. </p>
+the proposed EnKCF tracker. This tracker is inspired by the long-term correlation (LCT) tracker proposed by [2], 
+however, our goal is to use multiple KCFs in an efficient way to keep the complexity at each frame similar to the 
+baseline KCF [1]. </p>
 
 ### EnKCF Hyperparameters
 <ul>
@@ -40,3 +42,5 @@ the proposed EnKCF tracker. </p>
 </ul>
 
 [1] - Henriques, João F., Rui Caseiro, Pedro Martins, and Jorge Batista. "High-speed tracking with kernelized correlation filters." IEEE Transactions on Pattern Analysis and Machine Intelligence 37, no. 3 (2015): 583-596.
+
+[2] - Ma, Chao, Xiaokang Yang, Chongyang Zhang, and Ming-Hsuan Yang. "Long-term correlation tracking." In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pp. 5388-5396. 2015.
