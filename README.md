@@ -1,9 +1,13 @@
+## Algorithm Description
+
 <p> This code includes the Ensemble of Kernelized Correlation Filter Tracker for the BMVC17 Submission.
 The EnKCF runs multiple KCFs [1] to tackle different aspects of tracking such as : scaling, and fast motion.
 We also employ a Particle Filter to smoothen the interaction among different KCFs. Our tracker achieves
 higher success and precision rates than the baseline KCF tracker at 416hz on UAV123 dataset. We will share
 more details on our tracker soon. Below, you can find the hyperparameters and their optimal values for
-the proposed EnKCF tracker. </p>
+the proposed EnKCF tracker. This tracker is inspired by the long-term correlation (LCT) tracker proposed by [2], 
+however, our goal is to use multiple KCFs in an efficient way to keep the complexity at each frame similar to the 
+baseline KCF ( O(nlogn) ) [1]. </p>
 
 ### EnKCF Hyperparameters
 <ul>
@@ -26,7 +30,7 @@ the proposed EnKCF tracker. </p>
 
 ### Particle Filter Hyperparameters
 <ul>
-<li> number_particles = 1000		// Number of Particles in the Particle Filter
+<li> number_particles = 300		// Number of Particles in the Particle Filter
 <li> number_efficient_particles = 1000/3.0 // Number of Efficient Particles to Enable Resampling
 <li> process_noise_uniform_x = [-10,10]	// Transition Noise X Coordinate
 <li> process_noise_uniform_y = [-10,10] // Transition Noise Y Coordinate
@@ -36,25 +40,9 @@ the proposed EnKCF tracker. </p>
 <li> transition_noise_uniform_y = [-25,25] // Y Coordinate
 <li> transition_noise_uniform_vx = [-10,10] // X Velocity
 <li> transition_noise_uniform_vy = [-10,10] // Y Velocity
-<li> beta_weight_function = 0.05 // exp(-dist * beta) - Weight Function Hyperparameter
+<li> beta_weight_function = 0.05 // exp(-dist * beta) - Weight Function Hyperparameter - For Importance Sampling based on spatial Eclidean Distance to Maximum of response map
 </ul>
 
 [1] - Henriques, João F., Rui Caseiro, Pedro Martins, and Jorge Batista. "High-speed tracking with kernelized correlation filters." IEEE Transactions on Pattern Analysis and Machine Intelligence 37, no. 3 (2015): 583-596.
 
-### To Compile
-<ul> 
-<li> cd C++_Implementation
-<li> mkdir build
-<li> cd build
-<li> cmake ..
-</ul>
-
-### To Run for Video Input
-<ul>
-<li> ./EnKCF -d video -e "Video of Interest" -g "Ground Truth" -p "Text File for Precision and Success Curves"
-</ul>
-
-### To Run for Series of Images Input
-<ul>
-<li> ./EnKCF -d image -e "Images Folder" -g "Ground Truth" -p "Text File for Precision and Success Curves"
-</ul>
+[2] - Ma, Chao, Xiaokang Yang, Chongyang Zhang, and Ming-Hsuan Yang. "Long-term correlation tracking." In Proceedings of the IEEE Conference on Computer Vision and Pattern Recognition, pp. 5388-5396. 2015.
