@@ -142,9 +142,9 @@ int main(int argc, char* argv[])
    /// \param[in] Q : Transition Noise Variance
    /// \param[in] R : Measurement Noise Variance
    ///
-   int N_Particles = 300;     // Number of Particles
+   int N_Particles = 1000;     // Number of Particles
    int dimension = 4;          // State Space Dimensionality
-   vector<double> Q{10,10,2,2}; // Transition Noise Variance
+   vector<double> Q{20,20,4,4}; // Transition Noise Variance
    double R = 5;               // Measurement Noise Variance
    double beta = 0.1;         // Likelihood Parameter
    Particle_Filter PfTracker(N_Particles,dimension,beta,Q,R);
@@ -212,7 +212,7 @@ char ch;
    std::string seqName; 
    std::string seqNameID;
    std::string matchString = prDataFile;
-   std::ifstream startFrame("/home/buzkent/Desktop/startFrames_UAV123.txt");
+   std::ifstream startFrame("/Users/buzkent/Downloads/UAV123/startFrames_UAV123.txt");
    while(startFrame >> fFrame >> lFrame >> seqNameID >> seqName){
      if (seqNameID.compare(matchString) == 0){
          frameID = fFrame;
@@ -397,6 +397,7 @@ char ch;
         // TRACKING RESULTS OVERLAID ON THE FRAME
         cv::rectangle( frame, cv::Point(result.x,result.y), cv::Point(result.x+result.width,result.y+result.height), cv::Scalar(255,0,0),4,8);
         cv::rectangle( frame, cv::Point(gX,gY), cv::Point(gX+gWidth,gY+gHeight), cv::Scalar(0,255,0),4,8);
+        cv::rectangle( frame, cv::Point(tracker.gROI.x,tracker.gROI.y), cv::Point(tracker.gROI.x+tracker.gROI.width,tracker.gROI.y+tracker.gROI.height), cv::Scalar(0,255,0),4,8);	
 	std::string confidence = to_string(int(PSR));
         cv::putText(frame,confidence, cv::Point(result.x-result.width/2,result.y-result.height/2), fontFace, 4, cv::Scalar::all(255), thickness, 4);
 
@@ -460,7 +461,7 @@ char ch;
       if (!SILENT) {
 	// cv::resize(frame,frame,Size(300,150));
         cv::imshow("Name", frame);
-        cv::waitKey(0);
+        cv::waitKey(2);
       }
    }
    // Estimate Precision Curve

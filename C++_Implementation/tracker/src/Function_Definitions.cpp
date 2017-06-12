@@ -83,11 +83,7 @@ void Particle_Filter::particle_weights_cfMap(cv::Mat response, cv::Rect_<int> RO
 	else{
 	   int xCoord = abs(particles[i*ss_dimension] - ROI.x);
            int yCoord = abs(particles[i*ss_dimension+1] - ROI.y);
-           Weights[i] = response.at<double>(yCoord,xCoord);
-	   cv::Point2i pi;
-	   double pv;
-           cv::minMaxLoc(response, NULL, &pv, NULL, &pi);
-	   cout << pi.x << "---" << pi.y << "---" << response.rows << "---" << response.cols << endl;
+           Weights[i] = response.at<float>(yCoord,xCoord);
         }
         Acc += Weights[i];             // Cumulative Sum
     }
@@ -107,7 +103,7 @@ void Particle_Filter::particle_resampling()
     double r = double(randomDevice(generator))/(1000*N_Particles);
     double c = Weights[0];
     int i = 0;
-    if ((1/Neff) < (N_Particles / 0.50)){
+    // if ((1/Neff) < (N_Particles / 2.00)){
        for (int m = 0; m < N_Particles; m++){
 	   U = r + m * (1/double(N_Particles));	// Update
 	
@@ -122,7 +118,7 @@ void Particle_Filter::particle_resampling()
            particles[m*ss_dimension + 3] = particles[i*ss_dimension + 3]; // Sample with Replacement  	
        }
        rsFlag = 1;
-    }
+    // }
 }
 
 void Particle_Filter::mean_estimation(vector<double>& State_Mean)

@@ -90,9 +90,9 @@ KCFTracker::KCFTracker(bool hog, bool fixed_window, bool multiscale, bool lab)
 
 
     if (multiscale) { // Multiscale KCF Implementation
-        template_size = 96;       // Template Size for the Translation Filter
-        template_size_w_roi = 96; // Template Size for the Wide ROI Translation Filter
-        template_size_scale = 64; // Template Size for the Scale Filter
+        template_size = 64*64;       // Template Size for the Translation Filter
+        template_size_w_roi = 64*64; // Template Size for the Wide ROI Translation Filter
+        template_size_scale = 48*48; // Template Size for the Scale Filter
         scale_step = 1.05;     	  // Scale Factor for the Multiscale Search
         scale_weight = 2.0 - scale_step;    // Priority is given to the Same Scale with Previous Frame Scale
         if (!fixed_window) {     // Fixed Window KCF Implementation during Tracking
@@ -147,9 +147,6 @@ cv::Rect KCFTracker::update(cv::Mat image)
     float cx = _roi.x + _roi.width / 2.0f;
     float cy = _roi.y + _roi.height / 2.0f;
 
-    // Transfer to the Global ROI
-    gROI = _roi;
-
     // Detect the Target Translation
     float peak_value;
     cv::Point2f res = detect(_tmpl, getFeatures(image, 0, 1.0f), peak_value);
@@ -191,9 +188,6 @@ cv::Rect KCFTracker::updateWROI(cv::Mat image)
     float cx = _roi_w.x + _roi_w.width / 2.0f;
     float cy = _roi_w.y + _roi_w.height / 2.0f;
 
-    // Transfer ROI to the Global ROI
-    gROI = _roi_w;
-
     // Detect the Target Translation
     float peak_value;
     cv::Point2f res = detectWROI(_tmpl_w_roi, getFeaturesWROI(image, 0, 1.0f), peak_value);
@@ -228,10 +222,6 @@ cv::Rect KCFTracker::updateWROI(cv::Mat image)
 // Update position based on the new frame
 cv::Rect KCFTracker::updateScale(cv::Mat image)
 {
-
-    // Transfer to the GLobal ROI
-    gROI = _roi_scale;
-
     ///
     /// Detect the Peak at the Same Scale and Corresponding Value
     ///
@@ -310,8 +300,6 @@ cv::Point2f KCFTracker::detect(cv::Mat z, cv::Mat x, float &peak_value)
     // Transfer to the global response map
     cfResponse = res;
     cv::resize(cfResponse,cfResponse,Size(gROI.width,gROI.height));
-    cv::imshow("Response",cfResponse);
-    cv::waitKey(2);
 
     // minMaxLoc only accepts doubles for the peak, and integer points for the coordinates
     cv::Point2i pi;
@@ -644,10 +632,13 @@ cv::Mat KCFTracker::getFeatures(const cv::Mat & image, bool inithann, float scal
         int padded_h = _roi.height * padding;
         
         if (template_size > 1) {  // Fit largest dimension to the given template size
-            if (padded_w >= padded_h)  //fit to width
-                _scale = padded_w / (float) template_size;
+	    int template_width = ((float) padded_w / (float) padded_h) * pow(template_size, 0.5);	
+            int template_height = ((float) padded_h / (float) padded_w) * pow(template_size, 0.5);	
+
+	    if (padded_w >= padded_h)  //fit to width
+                _scale = padded_w / (float) template_width;
             else
-                _scale = padded_h / (float) template_size;
+                _scale = padded_h / (float) template_height;
 
             _tmpl_sz.width = padded_w / _scale;
             _tmpl_sz.height = padded_h / _scale;
@@ -669,6 +660,7 @@ cv::Mat KCFTracker::getFeatures(const cv::Mat & image, bool inithann, float scal
         }
     }
 
+    // The ROI to be Extracted
     extracted_roi.width = scale_adjust * _scale * _tmpl_sz.width;
     extracted_roi.height = scale_adjust * _scale * _tmpl_sz.height;
 
@@ -676,12 +668,17 @@ cv::Mat KCFTracker::getFeatures(const cv::Mat & image, bool inithann, float scal
     extracted_roi.x = cx - extracted_roi.width / 2;
     extracted_roi.y = cy - extracted_roi.height / 2;
 
+    // ROI for the Tramslation Filter
+    gROI.x = extracted_roi.x;
+    gROI.y = extracted_roi.y;
+    gROI.width = extracted_roi.width;
+    gROI.height = extracted_roi.height;
+
     // Resize the ROI
     cv::Mat FeaturesMap;  
     cv::Mat z = RectTools::subwindow(image, extracted_roi, cv::BORDER_REPLICATE);
     
-    
-if (z.cols != _tmpl_sz.width || z.rows != _tmpl_sz.height) {
+   if (z.cols != _tmpl_sz.width || z.rows != _tmpl_sz.height) {
         cv::resize(z, z, _tmpl_sz);
     }   
 
@@ -730,10 +727,13 @@ cv::Mat KCFTracker::getFeaturesWROI(const cv::Mat & image, bool inithann, float 
         int padded_wroi_h = _roi_w.height * padding_w_roi;
         
         if (template_size_w_roi > 1) {           // Fit largest dimension to the given template size
+	    int template_width = ((float) padded_wroi_w / (float) padded_wroi_h) * pow(template_size_w_roi, 0.5);	
+            int template_height = ((float) padded_wroi_h / (float) padded_wroi_w) * pow(template_size_w_roi, 0.5);
+
             if (padded_wroi_w >= padded_wroi_h)  //fit to width
-                _scale_w_roi = padded_wroi_w / (float) template_size_w_roi;
+                _scale_w_roi = padded_wroi_w / (float) template_width;
             else
-                _scale_w_roi = padded_wroi_h / (float) template_size_w_roi;
+                _scale_w_roi = padded_wroi_h / (float) template_height;
 
             _tmpl_sz_w_roi.width = padded_wroi_w / _scale_w_roi;
             _tmpl_sz_w_roi.height = padded_wroi_h / _scale_w_roi;
@@ -761,6 +761,12 @@ cv::Mat KCFTracker::getFeaturesWROI(const cv::Mat & image, bool inithann, float 
     // center roi with new size
     extracted_w_roi.x = cx - extracted_w_roi.width / 2;
     extracted_w_roi.y = cy - extracted_w_roi.height / 2;
+
+    // ROI for the Wide ROI
+    gROI.x = extracted_w_roi.x;
+    gROI.y = extracted_w_roi.y;
+    gROI.width = extracted_w_roi.width;
+    gROI.height = extracted_w_roi.height;
 
     // Crop the ROI Area
     cv::Mat FeaturesMap;  
@@ -863,10 +869,13 @@ cv::Mat KCFTracker::getFeaturesScale(const cv::Mat &image, bool inithann, float 
         int padded_h = _roi_scale.height * padding_scale;
         
         if (template_size_scale > 1) {  // Fit largest dimension to the given template size
+	    int template_width = ((float) padded_w / (float) padded_h) * pow(template_size_scale, 0.5);	
+            int template_height = ((float) padded_h / (float) padded_w) * pow(template_size_scale, 0.5);
+
             if (padded_w >= padded_h)  //fit to width
-                _scale2 = padded_w / (float) template_size_scale;
+                _scale2 = padded_w / (float) template_width;
             else
-                _scale2 = padded_h / (float) template_size_scale;
+                _scale2 = padded_h / (float) template_height;
             _tmpl_sz_scale.width = padded_w / _scale2;
             _tmpl_sz_scale.height = padded_h / _scale2;
         }
@@ -887,12 +896,19 @@ cv::Mat KCFTracker::getFeaturesScale(const cv::Mat &image, bool inithann, float 
         }
     }
 
+    // ROI for the Scale Filter
     extracted_roi_scale.width = scale_adjust * _scale2 * _tmpl_sz_scale.width;
     extracted_roi_scale.height = scale_adjust * _scale2 * _tmpl_sz_scale.height;
 
     // Center ROI with new size
     extracted_roi_scale.x = cx - extracted_roi_scale.width / 2;
     extracted_roi_scale.y = cy - extracted_roi_scale.height / 2;
+
+    // ROI Transfer
+    gROI.x = extracted_roi_scale.x;
+    gROI.y = extracted_roi_scale.y;
+    gROI.width = extracted_roi_scale.width;
+    gROI.height = extracted_roi_scale.height;
 
     // Crop the Scale Filter ROI
     cv::Mat FeaturesMap;  
