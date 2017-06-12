@@ -7,7 +7,7 @@ higher success and precision rates than the baseline KCF tracker at 416hz on UAV
 more details on our tracker soon. Below, you can find the hyperparameters and their optimal values for
 the proposed EnKCF tracker. This tracker is inspired by the long-term correlation (LCT) tracker proposed by [2], 
 however, our goal is to use multiple KCFs in an efficient way to keep the complexity at each frame similar to the 
-baseline KCF (O(nlogn)) [1]. </p>
+baseline KCF ( O(nlogn) ) [1]. </p>
 
 ### EnKCF Hyperparameters
 <ul>
