@@ -572,6 +572,22 @@ another low-speed scale adaptive SAMF tracker.
 \label{fig:OTB100_DATASET}
 \end{figure}
 
+\begin{table}
+\begin{center}
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+Metric/Method & $R_{t}^{L}$+$R_{t}^{S}$+$R_{s}$ ({\it E}nKCF) & $R_{t}^{L}$+$R_{s}$ & $R_{t}^{S}$+$R_{s}$ & $R_{t}^{L}$ & $R_{t}^{S}$ & LCT \cite{ma2015long}\\
+\hline\hline
+Precision ($20$px) & \textbf{54.5} & 48.09 & & & &\\
+Success Rate ($50\%$) & \textbf{40.2} & 36.04 & & & & \\
+Frame Per Second & \textbf{416} & 370 & & & & \\
+\hline
+\end{tabular}
+\end{center}
+\caption{Evalutions of the different combinations of the proposed KCFs in UAV123 dataset. We decouple the re-detection module of the LCT tracker as we focus on the comparison of the multiple correlation filter framework between LCT and  {\it E}nKCF.}
+\end{table}
+
+
 \textbf{Performance on UAV123$\_$10fps Dataset.} It maybe a slight
 digression from the main idea -- the idea of deploying multiple KCFs
 to make a very fast and effective, single target tracking
