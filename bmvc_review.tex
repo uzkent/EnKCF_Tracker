@@ -570,22 +570,38 @@ another low-speed scale adaptive SAMF tracker.
 \end{figure}
 
 \begin{table}
-\small
+\smaller
 \begin{center}
 \begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
-Metric/Method & $R_{t}^{L}$+$R_{t}^{S}$+$R_{s}$ ({\it E}nKCF) & $R_{t}^{L}$+$R_{s}$ & $R_{t}^{S}$+$R_{s}$ & $R_{t}^{L}$ & $R_{t}^{S}$ & LCT \cite{ma2015long}\\
+Method & {\it E}nKCF & $R_{t}^{L}$+$R_{s}$ & $R_{t}^{S}$+$R_{s}$ & LCT  ($R_{t}^{S}$+$R_{s}$) & LCT  ($R_{t}^{L}$+$R_{s}$) & LCT  ($R_{t}^{L}+R_{t}^{S}$+$R_{s}$) \\
 \hline\hline
-Precision ($20$px) & \textbf{53.9} & 48.09 & 52.50 & 51.88 & 51.29 & 52.14 \\
-Success Rate ($50\%$) & \textbf{40.2} & 36.04 & 37.85 & 35.12 & 34.42 & 38.51\\
-Frame Per Second & \textbf{416} & 370 & 425 & 367 & 490 & 151 \\
+Pr. ($20$px) & \textbf{53.9} & 48.09 & 52.50 & 52.14 & &  \\
+SR ($50\%$) & \textbf{40.2} & 36.04 & 37.85 & 38.51 & & \\
+FPS & 416 & 370 & 425  & 151 & & \\
 \hline
 \end{tabular}
 \end{center}
-\caption{Evaluations of the different combinations of the proposed KCFs in UAV123 dataset. We decouple the re-detection module of the LCT tracker as we focus on the comparison of the multiple correlation filter framework between LCT and  {\it E}nKCF. $R_{t}^{S}$ and $R_{s}$ are used as proposed in
-\cite{ma2015long}, however, only three scale candidates ($1.02$, $1.00$, $1.00/1.02$) are used to perform realistic comparison. In the original paper, 33 scales with scale factor 1.02 is considered, resulting in low fps ($\leq50$fps).} 
+\caption{Evaluations of the different combinations of the proposed KCFs in UAV123 dataset. We decouple the re-detection module of the LCT tracker as we focus on the comparison of the multiple correlation filter framework between LCT and  {\it E}nKCF. The KCFs highlighted in LCT are applied in every frame as proposed in
+\cite{ma2015long}, however, only three scale candidates ($1.02$, $1.00$, $1.00/1.02$) are used in $R_{s}$ for fair comparison. In the original paper, 33 scales with scale factor 1.02 is considered, resulting in low fps ($\leq50$fps).} 
 \end{table}
 
+%\begin{table}
+%\smaller
+%\begin{center}
+%\begin{tabular*}{\textwidth}{|l|c|c|c|c|c|c|c|c|}
+%\hline
+% & $R_{t}^{L}$+$R_{t}^{S}$+$R_{s}$ ({\it E}nKCF) & $R_{t}^{L}$+$R_{s}$ & $R_{t}^{S}$+$R_{s}$ & $R_{t}^{L}$ & $R_{t}^{S}$ & LCT  $R_{t}^{S}$+$R_{s}$ & LCT  $R_{t}^{L}$+$R_{s}$ & LCT  $R_{t}^{L}+R_{t}^{S}$+$R_{s}$\\
+%\hline\hline
+%Pr. ($20$px) & \textbf{53.9} & 48.09 & 52.50 & 51.88 & 51.29 & 52.14 & &  \\
+%SR ($50\%$) & \textbf{40.2} & 36.04 & 37.85 & 35.12 & 34.42 & 38.51 & & \\
+%FPS & 416 & 370 & 425 & 367 & \textbf{490} & 151 & & \\
+%\hline
+%\end{tabular*}
+%\end{center}
+%\caption{Evaluations of the different combinations of the proposed KCFs in UAV123 dataset. We decouple the re-detection module of the LCT tracker as we focus on the comparison of the multiple correlation filter framework between LCT and  {\it E}nKCF. $R_{t}^{S}$ and $R_{s}$ are used as proposed in
+%\cite{ma2015long}, however, only three scale candidates ($1.02$, $1.00$, $1.00/1.02$) are used to perform realistic comparison. In the original paper, 33 scales with scale factor 1.02 is considered, resulting in low fps ($\leq50$fps).} 
+%\end{table}
 
 \textbf{Performance on UAV123$\_$10fps Dataset.} It maybe a slight
 digression from the main idea -- the idea of deploying multiple KCFs
