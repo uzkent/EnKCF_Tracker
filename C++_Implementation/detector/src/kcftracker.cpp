@@ -1153,3 +1153,4 @@ float KCFTracker::computePSR(const Mat &correlation_mat)
 
     return (max_val - mean.val[0]) / stddev.val[0];     //Compute PSR
 }
+

@@ -5,6 +5,7 @@
 #include <algorithm>
 #include "kcftracker.hpp"
 #include "Filter_Definition.h"
+#include "../include/findHom.hpp"
 #include <vector>
 #include <math.h>
 #include <string>
@@ -338,6 +339,10 @@ char ch;
       }
       else {
         /// -------------------- UPDATE STEP --------------------------------------------
+	/// Apply Camera Motion Model	
+	cv::Mat homography = cameraMotionModel(frame_old,frame);
+        frame_old = frame.clone();
+
 	/// Perform PF Transition
 	State_Mean[0] = 0; State_Mean[1] = 0;
         PfTracker.particle_transition();	
@@ -355,14 +360,17 @@ char ch;
 	tic();
 	float PSR;
 	if ((nFrames % 5 > 0) && (nFrames % 5 < 3)){
-           result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
+  	   tracker._roi = tracker.applyHomography(homography, frame, tracker._roi);      
+	   result = tracker.updateWROI(frame);  // Estimate Translation using Wider ROI
            PSR = tracker.PSR_wroi;
 	}
         if ((nFrames % 5 == 3) || (nFrames % 5 == 4)){
-           result = tracker.update(frame);      // Estimate Translation using Smaller ROI
+ 	   tracker._roi_w = tracker.applyHomography(homography, frame, tracker._roi_w);          
+	   result = tracker.update(frame);      // Estimate Translation using Smaller ROI
            PSR = tracker.PSR_sroi;
 	}
 	if (nFrames % 5 == 0){
+           tracker._roi_scale = tracker.applyHomography(homography, frame, tracker._roi_scale);
            result = tracker.updateScale(frame); // Estimate Scale using Scale Filter
            PSR = tracker.PSR_scale;
 	}
@@ -374,8 +382,8 @@ char ch;
         // Update Particle Filter Weights
 	Obs[0] = result.x + result.width/2.0;
 	Obs[1] = result.y + result.height/2.0;
-	// PfTracker.particle_weights(Obs); 
-	PfTracker.particle_weights_cfMap(tracker.cfResponse, tracker.gROI);
+	PfTracker.particle_weights(Obs); 
+	// PfTracker.particle_weights_cfMap(tracker.cfResponse, tracker.gROI);
 
 	// Perform Re-Sampling
 	PfTracker.particle_resampling();
