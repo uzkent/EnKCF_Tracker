@@ -565,6 +565,8 @@ FPS & \color{red} 416 & 370 & \textbf{425}  & 135 & 151 & 99 \\
 \label{table:Comparison_to_LCT}
 \end{table}
 
+Finally, on the $UAV123$ dataset, we compare the {\it E}nKCF with particle filter and without particle filter. To do so, we use the 50 video sequences with no abrupt camera motion as annotated by the authors. Also, we add noise, drawn from a uniform distribution ($[-20,20]$), to the translation estimations of the KCFs to further evaluate the robustness of particle filter. In this settings, the {\it E}nKCF with particle filter achieves $51.98\%$ precision ($20$px), outperforming the baseline {\it E}nKCF by $6.32\%$.  In conclusion, the proposed particle filter can be a useful tool in {\it E}nKCF framework with the removal of global camera motion.
+
 \textbf{Performance on OTB100 Dataset} Figure \ref{fig:UAV123_DATASET}
 shows the results on the OTB100 dataset. Same as with UAV123 dataset,
 we observed a similar performance. In particular, {\it E}nKCF showed a
@@ -583,7 +585,7 @@ another low-speed scale adaptive SAMF tracker.
 \bmvaHangBox{\includegraphics[width=3.20cm]{./figures/Success_OTB100.eps}}\\
 \end{tabular}
 \caption{Comparison of {\it E}nKCF's performance with those of the
-  state-of-the-art tracking algorithms on the UAV123 dataset.}
+  state-of-the-art tracking algorithms on the UAV123 and OTB100 datasets.}
 \label{fig:UAV123_DATASET}
 \end{figure}
 %\begin{figure}[!h]
@@ -637,8 +639,8 @@ tracker.
 \begin{figure}[!h]
 \centering
 \begin{tabular}{cc}
-\bmvaHangBox{\includegraphics[width=4.30cm]{./figures/Precision_UAV123_10fps.eps}}
-\bmvaHangBox{\includegraphics[width=4.30cm]{./figures/Success_UAV123_10fps.eps}}\\
+\bmvaHangBox{\includegraphics[width=3.30cm]{./figures/Precision_UAV123_10fps.eps}}
+\bmvaHangBox{\includegraphics[width=3.30cm]{./figures/Success_UAV123_10fps.eps}}\\
 \end{tabular}
 \caption{Comparison of a modified {\it E}nKCF's performance with those
   of the state-of-the-art tracking algorithms on the UAV123$\_$10fps
