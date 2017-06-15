@@ -3,7 +3,6 @@
 \usepackage{amsmath}
 \usepackage{amssymb}
 \usepackage{mathtools} % mathtools builds on and extends amsmath package
-% \usepackage{algorithm}		% http://ctan.org/pkg/algorithms
 \usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
 \usepackage{comment, url}
 \usepackage[ruled, vlined, linesnumbered]{algorithm2e}
@@ -98,7 +97,7 @@ In this paper, we propose a single-target tracking algorithm, with no
 offline training, aiming at running on any embedded or mobile
 platforms. Specifically, we would like to make our algorithm 1) learn
 the appearance model of a target on the fly and 2) run as fast on a
-typical desktop as up to $300-400$ fps so that it could run, at least,
+typical desktop as up to $300-450$ fps so that it could run, at least,
 faster than 30 fps when it is deployed on a low-end, embedded
 system.\footnote{In general, it would be very hard to compare an Intel
   or AMD processor running on a desktop or a laptop with that, e.g.,
@@ -148,6 +147,7 @@ they are proposed to run multiple of a correlation filter including
 KCF on each frame.
 
 \begin{figure*}[!t]
+\centering
 \includegraphics[width=\textwidth]{figures/ResultsIntroduction.pdf}
 \caption{Examples of tracking results (yellow rectangles) by the
   proposed method on the ``UAV123'' dataset. This ``UAV123'' dataset
@@ -464,7 +464,7 @@ and
 UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}.
 The OTB100 dataset is comprised of the videos about 100 objects
 whereas UAV123 dataset contains aerial footages of 123 objects. We
-aims at developing an object tracking algorithm that ``efficiently''
+aim at developing an object tracking algorithm that ``efficiently''
 runs on an embedded system, a drone, for example, in ``high speed,''
 $\ge 300$ fps. Given this, we believe that the UAV123 data is a good
 fit in evaluating the performance of the proposed algorithm. In
@@ -492,9 +492,9 @@ estimate the scale and translation. Because of this, we set the
 learning rates ($\beta$) of individual filters, $R_{t}^{L}$,
 $R_{t}^{S}$, and $R_{s}$ differently as $0.020$, $0.020$ and
 $0.010$. For the kernel of the Gaussian neighboring function, we
-empirically found the optimal values of $\alpha$ as $0.6$, $0.4$, and
-$0.4$ for $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$, and the learning rate
-as $0.12$ for $R_{t}^{L}$. For our particle filter implementation, we
+empirically found the optimal values of $\alpha$ as $0.7$, $0.6$, and
+$0.9$ for $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$. We set the scale filter update
+threshold, $T_{R_{s}}$, to 4. For our particle filter implementation, we
 empirically set the number of particles to $1000$ to balance the
 run-time performance and accuracy. To keep the level of variance among
 the particles reasonable, we performed the re-sampling only when the
@@ -515,10 +515,9 @@ features to learn the scale change more accurately.
 
 \textbf{Performance on UAV123 Dataset} We compared the performance of
 the proposed algorithm with those of the state-of-the-art high speed
-tracking algorithms by the \textit{Precision} and
-\textit{Success\:Rate} metrics. For the precision, we rank the
-trackers based on the precision numbers at 20 pixels whereas in the
-success rate plots, trackers are ranked based on area under curve
+tracking algorithms by the \textit{Precision} and \textit{Success\:Rate} metrics. 
+For the precision, we rank the trackers based on the precision numbers at 20 pixels 
+whereas in the success rate plots, trackers are ranked based on area under curve
 (AUC) scores. The tracking algorithms used for the comparison include
 ones in high-speed ($\geq$300 fps), i.e., KCF\cite{henriques2015high},
 CSK \cite{henriques2012exploiting}, DCF\cite{henriques2015high}, and
@@ -530,7 +529,7 @@ MUSTER \cite{hong2015multi}. TLD \cite{kalal2012tracking}, and OAB
 results on the UAV123 dataset. {\it E}nKCF outperformed most of the
 high-speed tracking methods by $3\%$-$15\%$ at 20 pixels precision
 metric. Three algorithms, SAMF, DSST, and Struck did about 5\% better
-than ours in accuracy, but 10-20\% slower than ours. For the scale
+than ours in accuracy, but 10-20 times slower than ours. For the scale
 adaptation, {\it E}nKCF did second best in terms of \textit{area under
   curve} (AUC) value for the success rate plot. It outperformed other
 tracking methods in high-speed by about $20\%$-$25\%$ in AUC
@@ -538,6 +537,18 @@ metric. In addition, it performed even better than those algorithms
 that are slow, but a bit better in precision. For example, for AUC,
 {\it E}nKCF outperformed Struck and DSST by $5\%$ and $10\%$ while
 running at more than $10$ and $30$ times faster.
+\begin{figure}[!h]
+\raggedright
+\begin{tabular}{ccc}
+\tiny \textbf{UAV123}\hspace{.45\linewidth}\textbf{OTB100}\\
+\bmvaHangBox{\includegraphics[width=2.90cm]{./figures/Precision_UAV123.eps}}
+\bmvaHangBox{\includegraphics[width=3.35cm]{./figures/Success_UAV123.eps}}
+\bmvaHangBox{\includegraphics[width=2.90cm]{./figures/Precision_OTB100.eps}}
+\bmvaHangBox{\includegraphics[width=3.35cm]{./figures/Success_OTB100.eps}}\\
+\end{tabular}
+\caption{Comparison of {\it E}nKCF's performance with other trackers on the UAV123 and OTB100 datasets.}
+\label{fig:UAV123_DATASET}
+\end{figure}
 
 We also compare the proposed {\it E}nKCF tracker to the LCT \cite{ma2015long} tracker in table~\ref{table:Comparison_to_LCT}. 
 By using three KCFs ( $R_{t}^{L}$, $R_{t}^{S}$,  $R_{s}$) in  {\it E}nKCF, we can achieve higher accuracy than using $R_{s}$ and $R_{t}^{L}$ or $R_{t}^{S}$ with similar
@@ -550,18 +561,18 @@ high speed but also more accurate tracker than the baseline methods having one t
 \begin{table}[!h]
 \smaller
 \begin{center}
-\begin{tabular}{|l|c|c|c|c|c|c|}
+\resizebox{\textwidth}{!}{\begin{tabular}{|l|c|c|c|c|c|c|c|}
 \hline
-Method & {\it E}nKCF & $R_{t}^{L}$+$R_{s}$ & $R_{t}^{S}$+$R_{s}$ & LCT  ($R_{t}^{L}$+$R_{s}$) & LCT  ($R_{t}^{S}$+$R_{s}$) & {\it m}LCT  ($R_{t}^{L}+R_{t}^{S}$+$R_{s}$) \\
+Method & {\it E}nKCF & $R_{t}^{S}$+$R_{t}^{L}$+$R_{s}$ & $R_{t}^{L}$+$R_{s}$ & $R_{t}^{S}$+$R_{s}$ & LCT($R_{t}^{L}$+$R_{s}$) & LCT($R_{t}^{S}$+$R_{s}$) & {\it m}LCT($R_{t}^{L}+R_{t}^{S}$+$R_{s}$) \\
 \hline\hline
-Pr. ($20$px) & 53.9 & 48.09 & 52.50 & \color{red} 55.85 & 52.14 & \textbf{58.16} \\
-SR ($50\%$) & \color{red} 40.2 & 36.04 & 37.85 & 39.89 & 38.51 & \textbf{41.58} \\
-FPS & \color{red} 416 & 370 & \textbf{425}  & 135 & 151 & 99 \\
+Pr. ($20$px) & 53.9 & 48.93 &52.41 & 48.10 & \color{red} 55.85 & 52.14 & \textbf{58.16} \\
+SR ($50\%$) & \color{red} 40.2 & 36.75 & 38.23 & 36.04 & 39.89 & 38.51 & \textbf{41.58} \\
+FPS & \color{red} 416 & 412 & 370 & \textbf{425}  & 135 & 151 & 99 \\
 \hline
-\end{tabular}
+\end{tabular}}
 \end{center}
-\caption{Evaluations of the different combinations of the proposed KCFs in UAV123 dataset. The 2nd method removes $R_{t}^{S}$ (fig.~\ref{Workflows}) and replaces with $R_{t}^{L}$ whereas the 3th one removes $R_{t}^{L}$. We decouple the re-detection module of the LCT tracker and particle filter from all the methods as we focus on the comparison of the multiple correlation filter framework between LCT and  {\it E}nKCF. The KCFs highlighted in LCT are applied in every frame in the listed order as proposed in
-\cite{ma2015long}, however, only three scale candidates ($1.02$, $1.00$, $1.00/1.02$) are used in $R_{s}$ for fair comparison. In the original paper, 33 scales with scale factor 1.02 is considered, resulting in low fps ($\leq50$fps).} 
+\caption{Evaluations of the different combinations of the proposed KCFs in UAV123 dataset. The 2nd method swaps the order of $R_{t}^{L}$ and $R_{t}^{S}$ (fig.~\ref{Workflows}). The 3th method removes $R_{t}^{S}$ and replaces with $R_{t}^{L}$ whereas the 3th one removes $R_{t}^{L}$. We decouple the re-detection module of the LCT tracker and particle filter from all the methods as we focus on the comparison of the multiple correlation filter framework between LCT and  {\it E}nKCF. The KCFs highlighted in LCT are applied in every frame in the listed order as proposed in
+\cite{ma2015long}, however, only three scale candidates ($1.02$, $1.00$, $1.00/1.02$) are used in $R_{s}$ for fair comparison. In the original paper, 33 scales with scale factor 1.02 is considered, resulting in low fps ($\approx30$fps).} 
 \label{table:Comparison_to_LCT}
 \end{table}
 
@@ -576,18 +587,6 @@ and the second fastest tracking algorithm. For the precision metric,
 in high-speed trackers. Interestingly, it outperformed another
 correlation filter based tracker, DSST, but performing $5\%$ behind of
 another low-speed scale adaptive SAMF tracker.
-\begin{figure}[!h]
-\centering
-\begin{tabular}{ccc}
-\bmvaHangBox{\includegraphics[width=2.80cm]{./figures/Precision_UAV123.eps}}
-\bmvaHangBox{\includegraphics[width=3.20cm]{./figures/Success_UAV123.eps}}
-\bmvaHangBox{\includegraphics[width=2.80cm]{./figures/Precision_OTB100.eps}}
-\bmvaHangBox{\includegraphics[width=3.20cm]{./figures/Success_OTB100.eps}}\\
-\end{tabular}
-\caption{Comparison of {\it E}nKCF's performance with those of the
-  state-of-the-art tracking algorithms on the UAV123 and OTB100 datasets.}
-\label{fig:UAV123_DATASET}
-\end{figure}
 %\begin{figure}[!h]
 %\centering
 %\begin{tabular}{ccc}
