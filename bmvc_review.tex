@@ -490,12 +490,13 @@ a target from the previous frame whereas the scale filter, $R_{s}$ and
 the estimated state of the particle filter are primarily used to
 estimate the scale and translation. Because of this, we set the
 learning rates ($\beta$) of individual filters, $R_{t}^{L}$,
-$R_{t}^{S}$, and $R_{s}$ differently as $0.020$, $0.020$ and
+$R_{t}^{S}$, and $R_{s}$ differently as $0.012$, $0.020$ and
 $0.010$. For the kernel of the Gaussian neighboring function, we
 empirically found the optimal values of $\alpha$ as $0.7$, $0.6$, and
 $0.9$ for $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$. We set the scale
 filter update threshold, $T_{R_{s}}$, to 4, peak-to-sidelobe (PSR)
-ratio. For our particle filter implementation, we empirically set the
+ratio. Finally, the padding size for the correlation filters is tuned to $3$ for $R_{t}^{L}$, $2$ for $R_{t}^{S}$, 
+and $1$ for $R_{s}$. For our particle filter implementation, we empirically set the
 number of particles to $1000$ to balance the run-time performance and
 accuracy. To keep the level of variance among the particles
 reasonable, we performed the re-sampling only when the
@@ -542,7 +543,7 @@ times faster.
 \begin{figure}[!h]
 \raggedright
 \begin{tabular}{ccc}
-\tiny \textbf{UAV123}\hspace{.45\linewidth}\textbf{OTB100}\\
+\tiny\:\:\:\:\:\:\textbf{UAV123}\hspace{.44\linewidth}\:\:\:\textbf{OTB100}\\
 \bmvaHangBox{\includegraphics[width=3.00cm]{./figures/pr_uav123.eps}}
 \bmvaHangBox{\includegraphics[width=3.20cm]{./figures/sr_uav123.eps}}
 \bmvaHangBox{\includegraphics[width=3.00cm]{./figures/pr_otb100.eps}}
