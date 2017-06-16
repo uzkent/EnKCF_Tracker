@@ -552,8 +552,8 @@ times faster.
 \label{fig:UAV123_DATASET}
 \end{figure}
 
-We also evaluate the performances of the different combinations of the
-proposed correlation filters and compare them to the {\it E}nKCF as shown in table~\ref{table:Comparison_to_LCT}.  
+We also evaluate the performances of different combinations of the proposed correlation filters and 
+compare them to {\it E}nKCF as shown in table~\ref{table:Comparison_to_LCT}.  
 By using three KCFs ( $R_{t}^{L}$, $R_{t}^{S}$, $R_{s}$) in {\it E}nKCF,
 we can achieve higher accuracy than using $R_{s}$ and $R_{t}^{L}$ or
 $R_{t}^{S}$ with similar run-time performance. On the other hand, we
@@ -585,7 +585,8 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 \end{tabular}}
 \end{center}
 \caption{Evaluations of the different combinations of the proposed
-  KCFs in UAV123 dataset. The $2^{nd}$ method swaps the order of
+  KCFs in UAV123 dataset. The particle filter is decoupled from all the methods for fair comparison. 
+  The $2^{nd}$ method swaps the order of
   $R_{t}^{L}$ and $R_{t}^{S}$ (fig.~\ref{Workflows}). The $3^{th}$
   method removes $R_{t}^{S}$ and replaces with $R_{t}^{L}$ whereas the
   $3^{th}$ one removes $R_{t}^{L}$. The methods denoted with "*" run
@@ -596,7 +597,7 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 \label{table:Comparison_to_LCT}
 \end{table}
 
-Finally, on the $UAV123$ dataset, we compare the {\it E}nKCF with particle filter and without particle filter. To do so, we use the 50 video sequences with no abrupt camera motion as annotated by the authors. Also, we add noise, drawn from a uniform distribution ($[-20,20]$), to the translation estimations of the KCFs to further evaluate the robustness of particle filter. In this settings, the {\it E}nKCF with particle filter achieves $51.98\%$ precision ($20$px), outperforming the baseline {\it E}nKCF by $6.32\%$.  In conclusion, the proposed particle filter can be a useful tool in {\it E}nKCF framework with the removal of global camera motion.
+Finally, on the $UAV123$ dataset, we compare the {\it E}nKCF with particle filter to the one without particle filter. To do so, we use 50 sequences labeled as no abrupt camera motion in the dataset. To evaluate the robustness of particle filter, we add noise, drawn from a uniform distribution ($[-20,20]$), to the translation estimations of the KCFs. In these settings, the {\it E}nKCF with particle filter achieves $51.98\%$ precision ($20$px), outperforming the baseline {\it E}nKCF by $6.32\%$.  In conclusion, with the removal of global camera motion, the integration of particle filter into the {\it E}nKCF as shown in fig.~\ref{Workflows} can further improve the results.
 
 \textbf{Performance on OTB100 Dataset} Figure \ref{fig:UAV123_DATASET}
 shows the results on the OTB100 dataset. Same as with UAV123 dataset,
