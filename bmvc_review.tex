@@ -552,22 +552,18 @@ times faster.
 \label{fig:UAV123_DATASET}
 \end{figure}
 
-{\it Burak: Remove LCT part!}
-
-We also compare the proposed {\it E}nKCF tracker to the LCT
-\cite{ma2015long} tracker in table~\ref{table:Comparison_to_LCT}.  By
-using three KCFs ( $R_{t}^{L}$, $R_{t}^{S}$, $R_{s}$) in {\it E}nKCF,
+We also evaluate the performances of the different combinations of the
+proposed correlation filters and compare them to the {\it E}nKCF as shown in table~\ref{table:Comparison_to_LCT}.  
+By using three KCFs ( $R_{t}^{L}$, $R_{t}^{S}$, $R_{s}$) in {\it E}nKCF,
 we can achieve higher accuracy than using $R_{s}$ and $R_{t}^{L}$ or
 $R_{t}^{S}$ with similar run-time performance. On the other hand, we
-employ $R_{s}$ and $R_{t}^{L}$ or $R_{t}^{S}$ in the LCT framework as
-we run filters in every frame. Running another filter, $R_{t}^{L}$ or
-$R_{t}^{S}$, in the {\it E}nKCF framework not only gives us
-significantly higher run-time performance but also higher
-accuracy. Finally, we modify the LCT tracker ({\it m}LCT) and run
-$R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$ in every frame in the given
-order. $R_{t}^{S}$ uses the translation estimation given by
-$R_{t}^{L}$ to update translation and $R_{s}$ uses the final
-translation estimation given by $R_{t}^{S}$ to update
+employ $R_{s}$ and $R_{t}^{L}$ or $R_{t}^{S}$ and run them in every frame in a similar way
+to the multiple correlation filter framework of the LCT tracker \cite{ma2015long}. Running another filter, $R_{t}^{L}$ or
+$R_{t}^{S}$, in the {\it E}nKCF framework not only boosts run-time performance but also increases
+accuracy. Finally, we run  $R_{L}$, $R_{t}^{S}$ and $R_{s}$ in every frame in the in the given order. 
+$R_{t}^{S}$ uses the translation estimation given by
+$R_{t}^{L}$ to update translation and finally $R_{s}$ uses the final
+translation estimation given by $R_{t}^{S}$ to update the
 scale. Interestingly, running two complementary translation filter
 results in significant improvement at the cost of decreased run-time
 performance. In conclusion, running two complementary translation
