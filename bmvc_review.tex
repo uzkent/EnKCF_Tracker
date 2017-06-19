@@ -476,17 +476,17 @@ proposed algorithm with those of the state-of-the-art in a nominal
 dataset for comparison. To this end, we chose the OTB100 data that
 contains the videos recorded from smart phones and typical cameras in
 perspective view. Lastly, we tested the proposed algorithm on a
-temporally down-sampled version of the UAV123 dataset, called
-UAV123$\_$10fps dataset. What we would like to see from this
-experiment is to evaluate how robust the proposed algorithm is to
+temporally down-sampled version of the UAV123 dataset, we call it
+UAV123$\_$10fps dataset. What we would like to evaluate using this
+modified dataset is how robust the proposed algorithm is to the
 drastic motions of camera and targets.
 
 \textbf{Finding Optimal Hyper-parameters} Each of three KCFs in {\it
-  E}nKCF is designed for addressing specific challenges in single,
-target tracking problem. Thus each of them should have different
-values for the optimal parameters. For instance, the primary task of
-the translation filter, $R_{t}^{L}$ is to estimate the translation of
-a target from the previous frame whereas the scale filter, $R_{s}$ and
+  E}nKCF is designed to address specific challenges in single, target
+tracking problem. Thus each of them should have different values for
+the optimal parameters. For instance, the primary task of the
+translation filter, $R_{t}^{L}$ is to estimate the translation of a
+target from the previous frame whereas the scale filter, $R_{s}$ and
 the estimated state of the particle filter are primarily used to
 estimate the scale and translation. Because of this, we set the
 learning rates ($\beta$) of individual filters, $R_{t}^{L}$,
@@ -495,10 +495,11 @@ $0.010$. For the kernel of the Gaussian neighboring function, we
 empirically found the optimal values of $\alpha$ as $0.7$, $0.6$, and
 $0.9$ for $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$. We set the scale
 filter update threshold, $T_{R_{s}}$, to 4, peak-to-sidelobe (PSR)
-ratio. Finally, the padding size for the correlation filters is tuned to $3$ for $R_{t}^{L}$, $2.50$ for $R_{t}^{S}$, 
-and $1$ for $R_{s}$. For our particle filter implementation, we empirically set the
-number of particles to $1000$ to balance the run-time performance and
-accuracy. To keep the level of variance among the particles
+ratio. Finally, the padding size for the correlation filters is tuned
+to $3$ for $R_{t}^{L}$, $2.50$ for $R_{t}^{S}$, and $1$ for
+$R_{s}$. For our particle filter implementation, we empirically set
+the number of particles to $1000$ to balance the run-time performance
+and accuracy. To keep the level of variance among the particles
 reasonable, we performed the re-sampling only when the
 \textit{efficient number of samples} ($ \hat{N}_{eff} \approx
 (\sum_{p=1}^{P}w_{p}^{2})^{-1} $) is lower than a pre-defined
@@ -508,29 +509,29 @@ threshold.
 three KCFs as each of them has different goals to accomplish. In
 particular, the translation filter, $R_{t}^{L}$, uses both the fast
 Histograms of Oriented Gradients (fHoG) \cite{felzenszwalb2010object}
-and color-naming \cite{van2009learning} features to learn the
-background around the target more effectively. However we found,
-through experiments, that only fHoG didn't work well to cover a larger
-ROI. In a same way, we found that another translation filter,
-$R_{t}^{S}$, worked well when it used fHoG features only and the scale
-filter, $R_{s}$ did when it used both fHoG and color features.
+and color-naming \cite{van2009learning} features to more effectively
+learn the background around the target. Through experiments, we found
+that only fHoG didn't work well to cover a larger ROI; another
+translation filter, $R_{t}^{S}$, worked well when it used fHoG
+features only; the scale filter, $R_{s}$ did when it used both fHoG
+and color features.
 
-\textbf{Performance on UAV123 Dataset} We compared, using the
-precision and success rate metrics, the performance of the proposed
+\textbf{Performance on UAV123 Dataset} We used the precision and
+success rate metrics to compare the performance of the proposed
 algorithm with those of the state-of-the-art high speed tracking
 algorithms. For the precision, we rank the trackers based on the
 precision numbers at 20 pixels whereas in the success rate plots,
 trackers are ranked based on area under curve (AUC) scores. The
 tracking algorithms under the comparison include ones in high-speed
-($\geq$300 fps): KCF\cite{henriques2015high}, CSK
-\cite{henriques2012exploiting}, DCF\cite{henriques2015high}, and
-MOSSE\cite{bolme2010visual,henriques2015high} and ones in relatively
-lower-speed ($\geq$50): SAMF\cite{li2014scale},
-DSST\cite{danelljan2014accurate}, Struck\cite{hare2012efficient},
-MUSTER \cite{hong2015multi}, TLD \cite{kalal2012tracking}, and OAB
+($\geq$300 fps): KCF \cite{henriques2015high}, CSK
+\cite{henriques2012exploiting}, DCF \cite{henriques2015high}, and
+MOSSE \cite{bolme2010visual,henriques2015high} and ones in relatively
+lower-speed ($\geq$50): SAMF \cite{li2014scale}, DSST
+\cite{danelljan2014accurate}, Struck \cite{hare2012efficient}, MUSTER
+\cite{hong2015multi}, TLD \cite{kalal2012tracking}, and OAB
 \cite{zhang2012robust}. Figure \ref{fig:UAV123_DATASET} shows the
 results on the UAV123 dataset. {\it E}nKCF outperformed most of the
-high-speed tracking methods by $3\%$-$15\%$ in 20 pixels
+high-speed tracking methods by $3\%$-$15\%$ at 20 pixels
 precision. Three algorithms, SAMF, DSST, and Struck did about 5\%
 better than ours in accuracy, but 10-20 times slower. For the scale
 adaptation, {\it E}nKCF did second best in terms of AUC for the
@@ -553,24 +554,27 @@ times faster.
 \label{fig:UAV123_DATASET}
 \end{figure}
 
-We also evaluate the performances of different combinations of the proposed correlation filters and 
-compare them to {\it E}nKCF as shown in table~\ref{table:Comparison_to_LCT}.  
-By using three KCFs ( $R_{t}^{L}$, $R_{t}^{S}$, $R_{s}$) in {\it E}nKCF,
-we can achieve higher accuracy than using $R_{s}$ and $R_{t}^{L}$ or
-$R_{t}^{S}$ with similar run-time performance. On the other hand, we
-employ $R_{s}$ and $R_{t}^{L}$ or $R_{t}^{S}$ and run them in every frame in a similar way
-to the multiple correlation filter framework of the LCT tracker \cite{ma2015long}. Running another filter, $R_{t}^{L}$ or
-$R_{t}^{S}$, in the {\it E}nKCF framework not only boosts run-time performance but also increases
-accuracy. Finally, we run  $R_{L}$, $R_{t}^{S}$ and $R_{s}$ in every frame in the in the given order. 
-$R_{t}^{S}$ uses the translation estimation given by
-$R_{t}^{L}$ to update translation and finally $R_{s}$ uses the final
+Table \ref{table:Comparison_to_LCT} presents the performance of
+different combinations of the proposed algorithm. In short, we
+empirically verified that \textit{E}nKCF is an optimal combination in
+terms of tracking accuracy and run-time performance. We could achieve
+4.26\% higher in accuracy by running $R_{R}^{t}$ and $R_{S}$ at every
+frame, but this combination wills sacrifice run-time performance 317
+fps.  To be more specific, we employ $R_{s}$ and $R_{t}^{L}$ or
+$R_{t}^{S}$ to run them in every frame in a similar way to the
+multiple correlation filter framework of the LCT tracker
+\cite{ma2015long}. Running another filter, $R_{t}^{L}$ or $R_{t}^{S}$,
+in the {\it E}nKCF framework not only boosts run-time performance but
+also increases accuracy. Lastly, we run $R_{L}$, $R_{t}^{S}$ and
+$R_{s}$ in every frame.  $R_{t}^{S}$ uses the translation estimated by
+$R_{t}^{L}$ to update translation and $R_{s}$ uses the final
 translation estimation given by $R_{t}^{S}$ to update the
 scale. Interestingly, running two complementary translation filter
 results in significant improvement at the cost of decreased run-time
-performance. In conclusion, running two complementary translation
-filter and a scale filter in the {\it E}nKCF framework not only
-provides high speed but also more accurate tracker than the baseline
-methods having one translation and one scale filter.
+performance. In summary, running two (complementary) translation
+filters and a scale filter as {\it E}nKCF not only increases run-time
+performance but also offers more accurate tracker than the baseline
+method with one translation and one scale filter.
 \begin{table}[!h]
 \smaller
 \begin{center}
@@ -585,20 +589,31 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 \hline
 \end{tabular}}
 \end{center}
-\caption{Evaluations of the different combinations of the proposed
-  KCFs in UAV123 dataset. The particle filter is decoupled from all the methods for fair comparison. 
-  The $2^{nd}$ method swaps the order of
-  $R_{t}^{L}$ and $R_{t}^{S}$ (fig.~\ref{Workflows}). The $3^{th}$
-  method removes $R_{t}^{S}$ and replaces with $R_{t}^{L}$ whereas the
-  $3^{th}$ one removes $R_{t}^{L}$. The methods denoted with "*" run
-  the filters in every frame in the listed order. The LCT tracker
-  \cite{ma2015long} runs a translation and scale filter in every frame
-  (similar to $6^{th}$ method) and couples a re-detection method to
-  perform long-term tracking at $\approx30$ fps.}
+\caption{Evaluations on different combinations of the KCFs for UAV123
+  dataset. We removed the particle filter from this experiment. The
+  $2^{nd}$ method fliped the way of deploying $R_{t}^{L}$ and
+  $R_{t}^{S}$ (fig.~\ref{Workflows}). The $3^{th}$ method removed
+  $R_{t}^{S}$ and replaces with $R_{t}^{L}$ whereas the $3^{th}$ one
+  removes $R_{t}^{L}$. {\it Burak: $3^{th}$ and $3^{th}$?} The methods
+  marked with "*" run the filters on every frame in the listed
+  order. The LCT tracker \cite{ma2015long} runs a translation and
+  scale filter in every frame (similar to the method at the $6^{th}$
+  column {\it Burak: Not in $7^{th}$?} and couples a re-detection
+  method to perform long-term tracking at $\approx30$ fps.}
 \label{table:Comparison_to_LCT}
 \end{table}
 
-Finally, on the $UAV123$ dataset, we compare the {\it E}nKCF with particle filter to the one without particle filter. To do so, we use 50 sequences labeled as no abrupt camera motion in the dataset. To evaluate the robustness of particle filter, we add noise, drawn from a uniform distribution ($[-20,20]$), to the translation estimations of the KCFs. In these settings, the {\it E}nKCF with particle filter achieves $51.98\%$ precision ($20$px), outperforming the baseline {\it E}nKCF by $6.32\%$.  In conclusion, with the removal of global camera motion, the integration of particle filter into the {\it E}nKCF as shown in fig.~\ref{Workflows} can further improve the results.
+For the $UAV123$ dataset, we also evaluated the performance of the
+{\it E}nKCF with and without the particle filter. In particular, we
+use 50 sequences labeled as no abrupt camera motion in the dataset. To
+evaluate the robustness of particle filter, we add noise, drawn from a
+uniform distribution ($[-20,20]$), to the translation estimations of
+the KCFs. In these settings, the {\it E}nKCF with particle filter
+achieves $51.98\%$ precision ($20$px), outperforming the baseline {\it
+  E}nKCF by $6.32\%$. {\it Burak: the baseline here is the one without
+  particle filter?} In summary, with the removal of global camera
+motion, the integration of particle filter into the {\it E}nKCF as
+shown in fig.~\ref{Workflows} further improved the results.
 
 \textbf{Performance on OTB100 Dataset} Figure \ref{fig:UAV123_DATASET}
 shows the results on the OTB100 dataset. Same as with UAV123 dataset,
