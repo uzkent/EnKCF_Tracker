@@ -11,21 +11,21 @@ baseline KCF ( O(nlogn) ) [1]. </p>
 
 ### EnKCF Hyperparameters
 <ul>
-<li> sigma_scale = 0.9   // Gaussian Kernel Bandwith in KCF
-<li> sigma_large_roi_translation = 0.7 // Gaussian Kernel Bandwith in KCF
-<li> sigma_small_roi_translation = 0.6 // Gaussian Kernel Bandwith in KCF
+<li> sigma_scale = 0.9   // Gaussian Kernel Bandwith in Scale KCF
+<li> sigma_large_roi_translation = 0.7 // Gaussian Kernel Bandwith in Large ROI Trans. KCF
+<li> sigma_small_roi_translation = 0.6 // Gaussian Kernel Bandwith in Small ROI Trans. KCF
 <li> lambda = 0.0001 // Regularization Weight - Same for all the KCFs
 <li> scale_filter_frequency = 5 // Scale Filter Applied every 5 frames
-<li> learning_rate_scale = 0.10
+<li> learning_rate_scale = 0.10 // Make it 0.25 for the UAV123_10fps dataset
 <li> learning_rate_large_roi_translation = 0.20
 <li> learning_rate_small_roi_translation = 0.20
 <li> scale_filter_training_psr_threshold = 4.0 // Threshold to Train Scale Filter
-<li> padding_scale_filter = 1.0 // Area to Consider for Scale Filter
+<li> padding_scale_filter = 1.0          // Area to Consider for Scale Filter
 <li> padding_large_roi_translation = 3.0 // Area to Consider for Large Area Trans. Filter
 <li> padding_small_roi_translation = 2.5 // Area to COnsider for Small Area Trans. Filter
-<li> responsevariance_scale = 0.04	// Variance for Desired Gaussian Response
-<li> responsevariance_large_roi_translation = 0.06
-<li> responsevariance_small_roi_translation = 0.125
+<li> responsevariance_scale = 0.04	// Variance for Desired Gaussian Response for Scale KCF
+<li> responsevariance_large_roi_translation = 0.06 // Variance of the Gaussian Response for Large ROI Translation KCF
+<li> responsevariance_small_roi_translation = 0.125 // Variance of the Gaussian Response for Small ROI Translation KCF
 </ul>
 
 ### Particle Filter Hyperparameters
