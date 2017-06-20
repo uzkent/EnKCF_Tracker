@@ -593,12 +593,12 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
   dataset. We removed the particle filter from this experiment. The
   $2^{nd}$ method fliped the way of deploying $R_{t}^{L}$ and
   $R_{t}^{S}$ (fig.~\ref{Workflows}). The $3^{th}$ method removed
-  $R_{t}^{S}$ and replaces with $R_{t}^{L}$ whereas the $3^{th}$ one
-  removes $R_{t}^{L}$. {\it Burak: $3^{th}$ and $3^{th}$?} The methods
+  $R_{t}^{S}$ and replaces with $R_{t}^{L}$ whereas the $4^{th}$ one
+  removes $R_{t}^{L}$. {\it Burak: $3^{th}$ and $3^{th}$?} {\it YoungWoo : I meant to say $4^{th}$} The methods
   marked with "*" run the filters on every frame in the listed
   order. The LCT tracker \cite{ma2015long} runs a translation and
-  scale filter in every frame (similar to the method at the $6^{th}$
-  column {\it Burak: Not in $7^{th}$?} and couples a re-detection
+  scale filter in every frame (similar to the methods at the $7^{th}$ and $8^{th}$
+  columns) {\it Burak: Not in $7^{th}$?} {\it YoungWoo: I meant to say $7^{th}$ and $8^{th}$} and couples a re-detection
   method to perform long-term tracking at $\approx30$ fps.}
 \label{table:Comparison_to_LCT}
 \end{table}
@@ -611,7 +611,8 @@ uniform distribution ($[-20,20]$), to the translation estimations of
 the KCFs. In these settings, the {\it E}nKCF with particle filter
 achieves $51.98\%$ precision ($20$px), outperforming the baseline {\it
   E}nKCF by $6.32\%$. {\it Burak: the baseline here is the one without
-  particle filter?} In summary, with the removal of global camera
+  particle filter?} {\it YoungWoo : Yes, the baseline is the one without Particle Filter.} 
+In summary, with the removal of global camera
 motion, the integration of particle filter into the {\it E}nKCF as
 shown in fig.~\ref{Workflows} further improved the results.
 
