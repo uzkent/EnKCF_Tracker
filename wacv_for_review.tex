@@ -644,11 +644,19 @@ deep learning features.
 
 Our {\it E}nKCF framework provides us flexibility to exploit different feature representations. The translation filters, $R_{t}^{L}$ and $R_{t}^{S}$, 
 considers at more than twice larger area than $R_{s}$. Taking this into account, we can assign deeper feature encodings to $R_{s}$ as it requires less
-spatial information than  $R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the fourth convolutional layer features ($26\times26\times128$) to $R_{s}$  whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of the second layer features ($109\times109\times64$). This feature assignment is represented as  \textit{conv224-VGG}. Additionally, we assign the second convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and $R_{t}^{S}$ and compare this setting  (\textit{conv222-VGG}) to  \textit{conv224-VGG}. We use the VGGNet as it provides higher spatial resolution at the first layers than than AlexNet \cite{krizhevsky2012imagenet}.
+spatial information than  $R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the fourth convolutional layer features ($26\times26\times128$) to $R_{s}$  whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of the second layer features ($109\times109\times64$). This feature assignment is represented as  \textit{conv224-VGG} and shown in fig.~\ref{fig:Filters_CNN}. Additionally, we assign the second convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and $R_{t}^{S}$ and compare this setting  (\textit{conv222-VGG}) to  \textit{conv224-VGG}. We use the VGGNet as it provides higher spatial resolution at the first layers than than AlexNet \cite{krizhevsky2012imagenet}.
 
 As shown in fig.~\ref{fig:UAV123_DATASET_DeepFeatures}, both settings of the deep features outperform the HoG and color features as proposed in {\it E}nKCF by about $3\%$ to $5\%$ in precision (20 px) and $2\%$ in success rates (AUC). On the other hand, the \textit{conv224-VGG} setting performs slightly better than  \textit{conv222-VGG} in precision while achieving similar success rate (AUC).
 
-\begin{figure}[h]
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
+\caption{The proposed conv224-VGGNet feature extraction framework to use deep features in {\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied Hanning Window
+to avoid distortion due to FFT operation whereas $R_{s}$ is not applied as it would result in target information loss.}
+\label{fig:Filters_CNN}
+\end{figure}
+
+\begin{figure}[t]
 \begin{tabular}{ccc}
 \tiny\quad\quad\quad\textbf{UAV123}\\
 \includegraphics[width=3.30cm]{./figures/pr_deep.eps}
