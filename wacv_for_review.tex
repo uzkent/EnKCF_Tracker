@@ -652,11 +652,12 @@ As shown in fig.~\ref{fig:UAV123_DATASET_DeepFeatures}, both settings of the dee
 \centering
 \includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
 \caption{The proposed conv224-VGGNet feature extraction framework to use deep features in {\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied Hanning Window
-to avoid distortion due to FFT operation whereas $R_{s}$ is not applied as it would result in target information loss.}
+to avoid distortion due to FFT operation whereas $R_{s}$ is not applied as it would result in target boundary information loss.}
 \label{fig:Filters_CNN}
 \end{figure}
 
 \begin{figure}[t]
+\centering
 \begin{tabular}{ccc}
 \tiny\quad\quad\quad\textbf{UAV123}\\
 \includegraphics[width=3.30cm]{./figures/pr_deep.eps}
