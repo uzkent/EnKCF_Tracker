@@ -174,17 +174,6 @@ these approaches will drastically reduce run-time performance because
 they are proposed to run multiple of a correlation filter including
 KCF on each frame.
 
-\begin{figure*}[!h]
-\centering
-\includegraphics[width=0.70\textwidth]{./figures/Filters_Details.pdf}
-\caption{Examples of three filters; the translation filter,
-  \textit{target+small background}, the scale filter,
-  \textit{target-only} and another translation filter,
-  \textit{target+large background}, and their Hanning window and
-  expected Gaussian response.}
-\label{fig:Filters}
-\end{figure*}
-
 Another way of handling the scale change for the correlation filter
 based approach is to estimate a correct scale at a location where a
 target highly likely appears \cite{zhang2014fast} -- estimate a
@@ -214,6 +203,17 @@ change and estimate target's motion efficiently while maintaining or
 increasing run-time performance. Figure \ref{fig:Filters} shows
 examples of the region of interest (ROI) associated with $R_{t}^{S}$,
 $R_{t}^{L}$, and $R_{s}$.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.47\textwidth]{./figures/Filters_Details.pdf}
+\caption{Examples of three filters; the translation filter,
+  \textit{target+small background}, the scale filter,
+  \textit{target-only} and another translation filter,
+  \textit{target+large background}, and their Hanning window and
+  expected Gaussian response.}
+\label{fig:Filters}
+\end{figure}
 
 The contribution of this study is a novel, single-target tracking
 algorithm running in a very high-speed, $\geq 300$ fps that deploys an
@@ -516,7 +516,7 @@ threshold.
 \begin{figure*}[h]
 \centering
 \begin{tabular}{ccc}
-\tiny\quad\textbf{UAV123}\hspace{.45\linewidth}\textbf{OTB100}\\
+\tiny\quad\quad\textbf{UAV123}\hspace{.37\linewidth}\textbf{OTB100}\\
 \includegraphics[width=3.30cm]{./figures/pr_uav123.eps}
 \includegraphics[width=3.55cm]{./figures/sr_uav123.eps}
 \includegraphics[width=3.30cm]{./figures/pr_otb100.eps}
@@ -586,25 +586,6 @@ performance, slowing down 317 fps. Lastly, we run $R_{L}$, $R_{t}^{S}$
 and $R_{s}$ in every frame where $R_{t}^{S}$ uses the translation
 estimated by $R_{t}^{L}$ to update translation and $R_{s}$ uses the
 final translation estimation given by $R_{t}^{S}$ to update the scale.
-\begin{table*}[!h]
-\smaller
-\begin{center}
-\color{green}--- Best \hspace{.15\linewidth}\color{red}--- $2^{nd}$ Best \hspace{.15\linewidth}\color{blue}--- $3^{th}$ Best \color{black}\\
-\resizebox{\textwidth}{!}{\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|}
-\hline
-Method & {\it E}nKCF & $R_{t}^{S}$+$R_{t}^{L}$+$R_{s}$ & $R_{t}^{L}$+$R_{s}$ & $R_{t}^{S}$+$R_{s}$ & $R_{t}^{L}$* & $R_{t}^{S}$* & $R_{t}^{L}$+$R_{s}$* & $R_{t}^{S}$+$R_{s}$* & $R_{t}^{L}+R_{t}^{S}$+$R_{s}$* \\
-\hline\hline
-Pr. ($20$px) & \color{blue}53.9 & 48.93 &52.41 & 48.10 & 51.88 & 51.29 & \color{red} 55.85 & 52.14 & \color{green}58.16 \\
-SR ($50\%$) & \color{red} 40.2 & 36.75 & 38.23 & 36.04 & 35.12 & 34.43 & \color{blue}39.89 & 38.51 & \color{green}41.58 \\
-FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 135 & 151 & 99 \\
-\hline
-\end{tabular}}
-\end{center}
-\caption{Results of running different combinations of the KCFs for
-  UAV123 dataset. This table empirically supported the usefulness of
-  combining multiple KCFs as long as the deployment order is optimal.}
-\label{table:Comparison_to_LCT}
-\end{table*}
 
 For the $UAV123$ dataset, we also evaluated the performance of the
 {\it E}nKCF with and without the particle filter. In particular, we
@@ -628,7 +609,27 @@ in high-speed trackers. Interestingly, it outperformed another
 correlation filter based tracker, DSST, but performing $5\%$ behind of
 another low-speed scale adaptive SAMF tracker.
 
-\textbf{Deep Learning Features} Our focus so far was to build a high
+\begin{table*}[h]
+\smaller
+\begin{center}
+\color{green}--- Best \hspace{.15\linewidth}\color{red}--- $2^{nd}$ Best \hspace{.15\linewidth}\color{blue}--- $3^{th}$ Best \color{black}\\
+\resizebox{\textwidth}{!}{\begin{tabular}{|l|c|c|c|c|c|c|c|c|c|}
+\hline
+Method & {\it E}nKCF & $R_{t}^{S}$+$R_{t}^{L}$+$R_{s}$ & $R_{t}^{L}$+$R_{s}$ & $R_{t}^{S}$+$R_{s}$ & $R_{t}^{L}$* & $R_{t}^{S}$* & $R_{t}^{L}$+$R_{s}$* & $R_{t}^{S}$+$R_{s}$* & $R_{t}^{L}+R_{t}^{S}$+$R_{s}$* \\
+\hline\hline
+Pr. ($20$px) & \color{blue}53.9 & 48.93 &52.41 & 48.10 & 51.88 & 51.29 & \color{red} 55.85 & 52.14 & \color{green}58.16 \\
+SR ($50\%$) & \color{red} 40.2 & 36.75 & 38.23 & 36.04 & 35.12 & 34.43 & \color{blue}39.89 & 38.51 & \color{green}41.58 \\
+FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 135 & 151 & 99 \\
+\hline
+\end{tabular}}
+\end{center}
+\caption{Results of running different combinations of the KCFs for
+  UAV123 dataset. This table empirically supported the usefulness of
+  combining multiple KCFs as long as the deployment order is optimal.}
+\label{table:Comparison_to_LCT}
+\end{table*}
+
+\textbf{Evaluation with Deep Features}Our focus so far was to build a high
 speed tracker that can run about 30fps on a single-board, embedded
 system. Given this goal, we used HoG and color features in an
 efficient way for the proposed {\it E}nKCF. Deep Learning features, on
@@ -643,12 +644,10 @@ a target embedded system has GPUs.
   confused. At least you'll have to explain the point of adding this
   section.
 
-  I don't know why Figure 6 is presented separately from Figure 5. If
+  I don't know why Figure 7 is presented separately from Figure 5. If
   you want to keep this way, you need, at least, to have their scales
   same -- precision should have the same range, say 0.8 as the max
   value.
-
-  It seems most of reference on DNN hasn't added to the .bib file yet.
 }
 
 For example, \cite{danelljan2015convolutional} used the activations of
@@ -669,33 +668,43 @@ similar approach to \cite{danelljan2015convolutional} to embed deep
 learning features.
 
 Our {\it E}nKCF framework provides us flexibility to exploit different
-feature  representations.  The  translation filters,  $R_{t}^{L}$  and
-$R_{t}^{S}$,   considers  at   more  than   twice  larger   area  than
-$R_{s}$.  Taking  this into  account,  we  can assign  deeper  feature
-encodings  to $R_{s}$  as it  requires less  spatial information  than
-$R_{t}^{L}$ and $R_{t}^{S}$.  Hence, we assign the  activations of the
+level of abstractions in different KCFs. The translation filters,
+$R_{t}^{L}$ and $R_{t}^{S}$, considers more than twice larger area
+than $R_{s}$. Taking this into account, we can assign deeper feature
+encodings to $R_{s}$ as it requires less spatial information than
+$R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the
 fourth convolutional layer features ($26\times26\times128$) to $R_{s}$
-whereas $R_{t}^{L}$  and $R_{t}^{S}$  are assigned the  activations of
-the  second  layer  features  ($109\times109\times64$).  This  feature
-assignment  is represented  as \textit{conv224-VGG}.  Additionally, we
-assign  the  second convolutional  layer  features  to $R_{s}$  as  in
-$R_{t}^{L}$    and    $R_{t}^{S}$    and    compare    this    setting
-(\textit{conv222-VGG}) to  \textit{conv224-VGG}. We use the  VGGNet as
-it provides  higher spatial resolution  at the first layers  than than
-AlexNet \cite{krizhevsky2012imagenet}.
+whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of
+the second layer features ($109\times109\times64$). This feature
+assignment is represented as \textit{conv224-VGG} and shown in
+fig.~\ref{fig:Filters_CNN}. Additionally, we assign the second
+convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
+$R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
+\textit{conv224-VGG}. We use the VGGNet as it provides higher spatial
+resolution at the first layers than than AlexNet
+\cite{krizhevsky2012imagenet}.
 
 As shown in fig.~\ref{fig:UAV123_DATASET_DeepFeatures}, both settings
 of the deep features outperform the HoG and color features as proposed
 in {\it E}nKCF by about $3\%$ to $5\%$ in precision (20 px) and $2\%$
 in success rates (AUC). On the other hand, the \textit{conv224-VGG}
 setting performs slightly better than \textit{conv222-VGG} in
-precision while achieving similar success rate (AUC).
+precision while achieving similar success rate (AUC).  >>>>>>>
 
-\begin{figure}[h]
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
+\caption{The proposed conv224-VGGNet feature extraction framework to use deep features in {\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied Hanning Window
+to avoid distortion due to FFT operation whereas $R_{s}$ is not applied as it would result in target boundary information loss.}
+\label{fig:Filters_CNN}
+\end{figure}
+
+\begin{figure}[t]
+\centering
 \begin{tabular}{ccc}
-\tiny\quad\quad\quad\textbf{UAV123}\\
+\tiny\quad\quad\textbf{UAV123}\\
 \includegraphics[width=3.30cm]{./figures/pr_deep.eps}
-\includegraphics[width=3.50cm]{./figures/sr_deep.eps}\\
+\includegraphics[width=3.40cm]{./figures/sr_deep.eps}\\
 \end{tabular}
 \caption{Comparison of {\it E}nKCF's performance with deep features and HoG and Color features.}
 \label{fig:UAV123_DATASET_DeepFeatures}
