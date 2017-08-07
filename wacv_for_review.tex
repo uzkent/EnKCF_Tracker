@@ -65,21 +65,22 @@ deploy a computer vision algorithm on any existing embedded systems, a
 vision algorithm needs to satisfy, at least, two criteria with
 assumption of reasonably good performance: minimal, manual
 intervention after deployment and small footprint of consuming
-computational resources and on executable code. To develop a single,
-target tracking system in high accuracy and run-time performance, we
-propose an ensemble of the kernelized correlation filters (KCF), we
-call {\it E}nKCF. In particular, we developed a committee of KCFs to
-specifically address the scale-change and dynamic maneuver of the
-target over frames. To guarantee a high-speed, run-time performance, we
-deploy each of KCFs in turn. For a smooth transition between
-individual KCFs' executions, we developed a Bayes filter. Experimental
-results showed that the performance of ours are, on average, 70.10\%
-for precision at 20 pixels, 53.00\% for success rate for OTB100 data,
-and 54.50\% and 40.2\% for UAV123 data. These results showed that our
-method is better than existing ones over 5\% on precision on 20 pixels
-and 10-20\% on AUC on average. Moreover our implementation ran at 340
-fps for OTB100 and at 416 fps for UAV123 data that is faster than DCF
-(292 fps) for OTB100 and KCF (292 fps), DCF (457 fps) for UAV123.
+computational resources and executable code. To develop a single,
+target tracking system in high accuracy and run-time performance while
+these criteria kept in mind, we propose an ensemble of the kernelized
+correlation filters (KCF), we call {\it E}nKCF. This committee of KCFs
+is specifically designed to address the scale-change and dynamic
+maneuver of the target over frames. In particular, to guarantee a
+high-speed, run-time performance, we deploy each of KCFs in turn. For
+a smooth transition between individual KCFs' executions, we developed
+a Bayes filter. Experimental results showed that the performance of
+ours are, on average, 70.10\% for precision at 20 pixels, 53.00\% for
+success rate for OTB100 data, and 54.50\% and 40.2\% for UAV123
+data. These results showed that our method is better than existing
+ones over 5\% on precision on 20 pixels and 10-20\% on AUC on
+average. Moreover our implementation ran at 340 fps for OTB100 and at
+416 fps for UAV123 data that is faster than DCF (292 fps) for OTB100
+and KCF (292 fps), DCF (457 fps) for UAV123.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
@@ -89,9 +90,9 @@ has increased interests on deploying intelligent algorithms to
 existing embedded and mobile platforms. Among those technologies,
 computer vision algorithms are getting more attentions primarily
 because payloads of those mobile platforms are limited to carry any
-other sensors than a lightweight or an array of monocular cameras. For
-example, instead of just flying to record a video based on manual
-commands, an unmanned air vehicle (UAV) equipped with an object or
+other sensors than a lightweight or an array of monocular
+cameras. Given such a trend, instead of just manually flying for video
+recording, an unmanned air vehicle (UAV) equipped with an object or
 feature following functionality would make it more useful in the
 application of monitoring/surveillance/surveying on private
 properties/wild-life/crop, video recording on sports/movies/events,
@@ -107,21 +108,22 @@ many others.
 \label{ResultsIntroduction}
 \end{figure*}
 
-In this paper, we propose a single-target tracking algorithm, with no
-offline training, aiming at running on any embedded or mobile
+In this paper, we propose a single-target tracking algorithm that does
+not require offline training and can run on any embedded or mobile
 platforms. Specifically, we would like to make our algorithm 1) learn
 the appearance model of a target on the fly and 2) run as fast on a
-typical desktop as up to $300-450$ fps so that it could run, at least,
+typical desktop as up to $300-450$ fps, aiming at running, at least,
 faster than 30 fps when it is deployed on a low-end, embedded
-system.\footnote{In general, it would be very hard to compare an Intel
-  or AMD processor running on a desktop or a laptop with that, e.g.,
-  ARM, of a single-board, embedded system in terms of run-time
-  performance of a computer vision algorithm. This is primarily due to
-  the difference in their architectures. To derive this number, we
-  assume that there is roughly, at least, an 1/10th scale down of
-  computational resources from a typical PC to an embedded system. We
-  found such a scale-down in computation based on exemplar processors,
-  e.g., Intel's i7 quad-core vs ARMv8 dual-core.}
+system.\footnote{In general, it would not be easy to compare run-time
+  performance of a computer vision algorithm at an Intel or AMD
+  processor running on a desktop or a laptop and at that, e.g., ARM,
+  of a single-board, embedded system. This is primarily due to the
+  difference in their architectures and available computing
+  resources. To derive these numbers (300 and 30 fps), we assume that
+  there is roughly, at least, an 1/10th scale down of computational
+  resources from a typical PC to an embedded system. We found such a
+  scale-down in computation based on exemplar processors, e.g.,
+  Intel's i7 quad-core vs ARMv8 dual-core.}
 
 \begin{figure*}[!h]
 \centering
@@ -142,10 +144,10 @@ framework assumes that a target location is given at the beginning
 like other online tracking algorithms
 \cite{smeulders2014survey}. Given this positive example for the
 regression problem, a set of negative examples is collected around the
-initial, target bounding box and represented as a circulant matrix
-\cite{henriques2015high}. One can optimally solve this regression
-problem using a ridge regression in a closed form. However, this
-solution involves in expensive matrix operations
+initial, target bounding box and represented as a form of the
+circulant matrix \cite{henriques2015high}. One can optimally solve
+this regression problem using a ridge regression in a closed
+form. However, this solution involves in expensive matrix operations
 $\mathcal{O}(n^{3})$. The correlation filter offers a less complex
 solution, $\mathcal{O}(n\log n)$ over element-wise multiplication in a
 frequency domain \cite{bolme2010visual,henriques2015high}. Thank to
@@ -626,27 +628,68 @@ in high-speed trackers. Interestingly, it outperformed another
 correlation filter based tracker, DSST, but performing $5\%$ behind of
 another low-speed scale adaptive SAMF tracker.
 
-\textbf{Deep Learning Features} Our focus so far was to build a high speed tracker
-that can run about 30fps on a low-end hardware. In this direction, we used HoG and
-color features in an efficient way in the proposed {\it E}nKCF tracking concept. Deep Learning
-features, on the other hand, recently have been proved to boost tracking accuracy \cite{ma2015hierarchical,
-danelljan2015convolutional}. For this reason, we believe that, the {\it E}nKCF tracker can run more reliably with deep learning
-features on the more sophisticated platforms (GPUs). \cite{danelljan2015convolutional} used the activations of the first
-and second convolutional layer features of the VGGNet \cite{simonyan2014very}. Their experiments showed that
-the first convolutional layer features lead to slightly better precision and success rates than the second
-layer. \cite{ma2015hierarchical} proposed a KCF tracker with deeper features. Their method employs the third convolutional layer
-features to get the response map. In the next stage, they use the translation estimation from the first stage to
-employ second convolutional layer features. Finally, the first convolutional layer features is extracted from the 
-position estimated in the second stage. This coarse-to-fine position estimation approach allows embedding 
-more representative features of the object. However, such approach requires multiple runs of a KCF at a single
-frame, increasing the run-time complexity. For this reason, we follow a similar approach to \cite{danelljan2015convolutional} to embed
-deep learning features. 
+\textbf{Deep Learning Features} Our focus so far was to build a high
+speed tracker that can run about 30fps on a single-board, embedded
+system. Given this goal, we used HoG and color features in an
+efficient way for the proposed {\it E}nKCF. Deep Learning features, on
+the other hand, recently have been proved to boost tracking accuracy
+of some of the online tracking algorthms \cite{ma2015hierarchical,
+  danelljan2015convolutional}. For this reason, we believe that, the
+{\it E}nKCF tracker can perform better with deep learning features if
+a target embedded system has GPUs.
 
-Our {\it E}nKCF framework provides us flexibility to exploit different feature representations. The translation filters, $R_{t}^{L}$ and $R_{t}^{S}$, 
-considers at more than twice larger area than $R_{s}$. Taking this into account, we can assign deeper feature encodings to $R_{s}$ as it requires less
-spatial information than  $R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the fourth convolutional layer features ($26\times26\times128$) to $R_{s}$  whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of the second layer features ($109\times109\times64$). This feature assignment is represented as  \textit{conv224-VGG}. Additionally, we assign the second convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and $R_{t}^{S}$ and compare this setting  (\textit{conv222-VGG}) to  \textit{conv224-VGG}. We use the VGGNet as it provides higher spatial resolution at the first layers than than AlexNet \cite{krizhevsky2012imagenet}.
+{\it Burak: I'm not sure what you wanted to say with ``Deep Learning
+  Features.'' My edit stopped at the above paragraph because I got
+  confused. At least you'll have to explain the point of adding this
+  section.
 
-As shown in fig.~\ref{fig:UAV123_DATASET_DeepFeatures}, both settings of the deep features outperform the HoG and color features as proposed in {\it E}nKCF by about $3\%$ to $5\%$ in precision (20 px) and $2\%$ in success rates (AUC). On the other hand, the \textit{conv224-VGG} setting performs slightly better than  \textit{conv222-VGG} in precision while achieving similar success rate (AUC).
+  I don't know why Figure 6 is presented separately from Figure 5. If
+  you want to keep this way, you need, at least, to have their scales
+  same -- precision should have the same range, say 0.8 as the max
+  value.
+
+  It seems most of reference on DNN hasn't added to the .bib file yet.
+}
+
+For example, \cite{danelljan2015convolutional} used the activations of
+the first and second convolutional layer features of the VGGNet
+\cite{simonyan2014very} where their experiments showed that the first
+convolutional layer features lead to slightly better precision and
+success rates than the second layer. \cite{ma2015hierarchical}
+proposed a KCF tracker with deeper features. Their method employs the
+third convolutional layer features to get the response map. In the
+next stage, they use the translation estimation from the first stage
+to employ second convolutional layer features. Finally, the first
+convolutional layer features is extracted from the position estimated
+in the second stage. This coarse-to-fine position estimation approach
+allows embedding more representative features of the object. However,
+such approach requires multiple runs of a KCF at a single frame,
+increasing the run-time complexity. For this reason, we follow a
+similar approach to \cite{danelljan2015convolutional} to embed deep
+learning features.
+
+Our {\it E}nKCF framework provides us flexibility to exploit different
+feature  representations.  The  translation filters,  $R_{t}^{L}$  and
+$R_{t}^{S}$,   considers  at   more  than   twice  larger   area  than
+$R_{s}$.  Taking  this into  account,  we  can assign  deeper  feature
+encodings  to $R_{s}$  as it  requires less  spatial information  than
+$R_{t}^{L}$ and $R_{t}^{S}$.  Hence, we assign the  activations of the
+fourth convolutional layer features ($26\times26\times128$) to $R_{s}$
+whereas $R_{t}^{L}$  and $R_{t}^{S}$  are assigned the  activations of
+the  second  layer  features  ($109\times109\times64$).  This  feature
+assignment  is represented  as \textit{conv224-VGG}.  Additionally, we
+assign  the  second convolutional  layer  features  to $R_{s}$  as  in
+$R_{t}^{L}$    and    $R_{t}^{S}$    and    compare    this    setting
+(\textit{conv222-VGG}) to  \textit{conv224-VGG}. We use the  VGGNet as
+it provides  higher spatial resolution  at the first layers  than than
+AlexNet \cite{krizhevsky2012imagenet}.
+
+As shown in fig.~\ref{fig:UAV123_DATASET_DeepFeatures}, both settings
+of the deep features outperform the HoG and color features as proposed
+in {\it E}nKCF by about $3\%$ to $5\%$ in precision (20 px) and $2\%$
+in success rates (AUC). On the other hand, the \textit{conv224-VGG}
+setting performs slightly better than \textit{conv222-VGG} in
+precision while achieving similar success rate (AUC).
 
 \begin{figure}[h]
 \begin{tabular}{ccc}
