@@ -629,15 +629,20 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 \label{table:Comparison_to_LCT}
 \end{table*}
 
-\textbf{Evaluation with Deep Features}Our focus so far was to build a high
-speed tracker that can run about 30fps on a single-board, embedded
+\textbf{Evaluation with Deep Features} Our focus so far was to build a high
+speed tracker that can run at 30fps on a single-board, embedded
 system. Given this goal, we used HoG and color features in an
-efficient way for the proposed {\it E}nKCF. Deep Learning features, on
+efficient way for the proposed {\it E}nKCF. Deep features, on
 the other hand, recently have been proved to boost tracking accuracy
-of some of the online tracking algorthms \cite{ma2015hierarchical,
+of the KCFs based trackers \cite{ma2015hierarchical,
   danelljan2015convolutional}. For this reason, we believe that, the
-{\it E}nKCF tracker can perform better with deep learning features if
-a target embedded system has GPUs.
+{\it E}nKCF tracker can perform better with deep features trained
+on ImageNet dataset. Accomodating deep features on a single-board
+system prohibits from tracking at targeted speed. However, with the
+availability of GPUs on the embedded system, {\it E}nKCF tracker can
+afford convolutional neural network features (CNN) to improve tracking
+accuracy. Therefore, we wanted to evaluate how much accuracy gain we
+can achieve by switching from hand-crafted features to CNN features.
 
 {\it Burak: I'm not sure what you wanted to say with ``Deep Learning
   Features.'' My edit stopped at the above paragraph because I got
@@ -648,9 +653,26 @@ a target embedded system has GPUs.
   you want to keep this way, you need, at least, to have their scales
   same -- precision should have the same range, say 0.8 as the max
   value.
+
+  \it YoungWoo : The point of adding this section is to evaluate the
+  same tracker with deep features (CNN) and see how much accuracy improvement
+  we get. However, I tried to highlight that, by employing deep features
+  the targeted embedded system changes from low-end (CPU-only) to 
+  higher-end system (GPUs). The two papers I cited employs the features
+  from the first several layers of the VGGNet. This is a common practice
+  in supporting the trackers with CNN features. If I add this to figure 5,
+  it does not make sense, because all the trackers we compare, use hand-crafted
+  features and run on CPU. For this reason, I wanted to compare EnKCF 
+  with deep features (higher-end system) and hand-crafted features (low-end system).
+ 
+  The figure 7(a) and figure 5 have almost the same range (0,73 and 0.70)
+  I will update the figure 5 to have 0.73 range as well. I test the EnKCF
+  with CNN features only on the UAV123 dataset.
 }
 
-For example, \cite{danelljan2015convolutional} used the activations of
+There has been numerous studies on applying a pretrained CNN features
+to tracking-by-detection algorithms. For example, 
+\cite{danelljan2015convolutional} used the activations of
 the first and second convolutional layer features of the VGGNet
 \cite{simonyan2014very} where their experiments showed that the first
 convolutional layer features lead to slightly better precision and
