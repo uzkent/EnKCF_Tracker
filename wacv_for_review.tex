@@ -629,21 +629,20 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 \label{table:Comparison_to_LCT}
 \end{table*}
 
-\textbf{Evaluation with Deep Features} Our focus so far was to build a high
-speed tracker that can run at 30fps on a single-board, embedded
+\textbf{Evaluation with Deep Features} Our focus so far was to build a
+high speed tracker that can run at 30fps on a single-board, embedded
 system. Given this goal, we used HoG and color features in an
-efficient way for the proposed {\it E}nKCF. Deep features, on
-the other hand, recently have been proved to boost tracking accuracy
-of the KCFs based trackers \cite{ma2015hierarchical,
-  danelljan2015convolutional}. For this reason, we believe that, the
-{\it E}nKCF tracker can perform better with deep features trained
-on ImageNet dataset. Accomodating deep features on a single-board
-system prohibits from tracking at targeted speed. However, with the
-availability of GPUs on the embedded system, {\it E}nKCF tracker can
-afford convolutional neural network features (CNN) to improve tracking
-accuracy. Therefore, we wanted to evaluate how much accuracy gain we
-can achieve by switching from hand-crafted features to CNN features.
-
+efficient way for the proposed {\it E}nKCF. Deep features, on the
+other hand, recently have been used to boost tracking accuracy of the
+KCFs based trackers \cite{ma2015hierarchical,
+  danelljan2015convolutional}. We hypothesize that the {\it E}nKCF
+tracker could perform better with deep features trained on ImageNet
+dataset. Utilizing pretrained deep features would not be applicable to
+all the a single-board, embedded system due to their limited
+computational resources. But as these days some of the single-board
+systems offer GPU, we would like to see how much accuracy we can
+achieve by feeding {\it E}nKCF w/ CNN features.
+\begin{comment}
 {\it Burak: I'm not sure what you wanted to say with ``Deep Learning
   Features.'' My edit stopped at the above paragraph because I got
   confused. At least you'll have to explain the point of adding this
@@ -654,44 +653,64 @@ can achieve by switching from hand-crafted features to CNN features.
   same -- precision should have the same range, say 0.8 as the max
   value.
 
-  \it YoungWoo : The point of adding this section is to evaluate the
+  YoungWoo : The point of adding this section is to evaluate the
   same tracker with deep features (CNN) and see how much accuracy improvement
   we get. However, I tried to highlight that, by employing deep features
   the targeted embedded system changes from low-end (CPU-only) to 
   higher-end system (GPUs). The two papers I cited employs the features
   from the first several layers of the VGGNet. This is a common practice
-  in supporting the trackers with CNN features. If I add this to figure 5,
-  it does not make sense, because all the trackers we compare, use hand-crafted
-  features and run on CPU. For this reason, I wanted to compare EnKCF 
-  with deep features (higher-end system) and hand-crafted features (low-end system).
+  in supporting the trackers with CNN features. 
+
+  Burak: I'm not saying what you did -- use CNN features to feed an
+  online tracker. Yes, many people did such before. My worry is to
+  make our paper look a christmas tree -- a paper w/ too many stuffs
+  to evaluate under a certain theme. And, adding these new stuffs
+  along the way of preparing any submissions continuously asks us to
+  rewrite this paper from the top to all the way down. We need to
+  focus on a certain idea when to submit a paper to a
+  conference. Adding a bit more meats and stuffs to the main idea is
+  usually done in a journal paper.
+
+  If I add this to figure 5, it does not make sense, because all the
+  trackers we compare, use hand-crafted features and run on CPU. For
+  this reason, I wanted to compare EnKCF with deep features
+  (higher-end system) and hand-crafted features (low-end system).
+
+  Burak: Given what we agreed upon what you did, I think you can still
+  put them together in that we're comparing different versions of
+  apples, not orange, under the same criterion. Think about it.
  
   The figure 7(a) and figure 5 have almost the same range (0,73 and 0.70)
   I will update the figure 5 to have 0.73 range as well. I test the EnKCF
   with CNN features only on the UAV123 dataset.
-}
 
-There has been numerous studies on applying a pretrained CNN features
-to tracking-by-detection algorithms. For example, 
-\cite{danelljan2015convolutional} used the activations of
-the first and second convolutional layer features of the VGGNet
-\cite{simonyan2014very} where their experiments showed that the first
-convolutional layer features lead to slightly better precision and
-success rates than the second layer. \cite{ma2015hierarchical}
-proposed a KCF tracker with deeper features. Their method employs the
-third convolutional layer features to get the response map. In the
-next stage, they use the translation estimation from the first stage
-to employ second convolutional layer features. Finally, the first
-convolutional layer features is extracted from the position estimated
-in the second stage. This coarse-to-fine position estimation approach
-allows embedding more representative features of the object. However,
-such approach requires multiple runs of a KCF at a single frame,
-increasing the run-time complexity. For this reason, we follow a
-similar approach to \cite{danelljan2015convolutional} to embed deep
-learning features.
+  Burak: We don't expect the reviewers or readers to exactly see what
+  we saw here. Keep their scales same -- whatever maximum value you
+  choose for the y-axis for one graph, use the same scale to all other
+  same graphs.}
+\end{comment}
+There have been many studies on applying a pretrained CNN features to
+tracking-by-detection algorithms. For example,
+\cite{danelljan2015convolutional} used the activations of the first
+and second convolutional layer features of the VGGNet
+\cite{simonyan2014very} for this idea where their experiments showed
+that the first convolutional layer features lead to slightly better
+precision and success rates than the second
+layer. \cite{ma2015hierarchical} proposed a KCF tracker with deeper
+features. Their method employs the third convolutional layer features
+to get the response map. In the next stage, they used the estimation
+of the target's transition from the first stage to use the second
+convolutional layer features. Finally, the first convolutional layer
+features is extracted from the position estimated in the second
+stage. This coarse-to-fine position estimation approach allows to
+utilize more representative features of the object. However, such
+approach requires multiple runs of a KCF at a single frame, increasing
+the run-time complexity. For this reason, we follow a similar approach
+to \cite{danelljan2015convolutional} to embed deep learning features.
 
-Our {\it E}nKCF framework provides us flexibility to exploit different
+Our {\it E}nKCF framework provides us with a flexibility to exploit different
 level of abstractions in different KCFs. The translation filters,
-$R_{t}^{L}$ and $R_{t}^{S}$, considers more than twice larger area
+$R_{t}^{L}$ and $R_{t}^{S}$, considers more than twice bigger area
 than $R_{s}$. Taking this into account, we can assign deeper feature
 encodings to $R_{s}$ as it requires less spatial information than
 $R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the
@@ -706,12 +725,13 @@ $R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
 resolution at the first layers than than AlexNet
 \cite{krizhevsky2012imagenet}.
 
-As shown in fig.~\ref{fig:UAV123_DATASET_DeepFeatures}, both settings
-of the deep features outperform the HoG and color features as proposed
-in {\it E}nKCF by about $3\%$ to $5\%$ in precision (20 px) and $2\%$
-in success rates (AUC). On the other hand, the \textit{conv224-VGG}
-setting performs slightly better than \textit{conv222-VGG} in
-precision while achieving similar success rate (AUC).  >>>>>>>
+Figure \ref{fig:UAV123_DATASET_DeepFeatures} shows experimental
+results of utilizing DNN features. Two settings of utilizing the deep
+features outperformed the HoG and color features as proposed in {\it
+  E}nKCF by about $3\%$ to $5\%$ in precision (20 px) and $2\%$ in
+success rates (AUC). The \textit{conv224-VGG} setting performed
+slightly better than \textit{conv222-VGG} in precision while achieving
+similar success rate (AUC).
 
 \begin{figure}[!h]
 \centering
