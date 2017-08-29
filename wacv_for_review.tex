@@ -71,8 +71,9 @@ these criteria kept in mind, we propose an ensemble of the kernelized
 correlation filters (KCF), we call {\it E}nKCF. This committee of KCFs
 is specifically designed to address the scale-change and dynamic
 maneuver of the target over frames. In particular, to guarantee a
-high-speed, run-time performance, we deploy each of KCFs in turn. For
-a smooth transition between individual KCFs' executions, we developed
+high-speed, run-time performance, we deploy each of KCFs in turn and assign 
+them hand-crafted features including histogram of oriented gradients and color features.
+For a smooth transition between individual KCFs' executions, we developed
 a Bayes filter. Experimental results showed that the performance of
 ours are, on average, 70.10\% for precision at 20 pixels, 53.00\% for
 success rate for OTB100 data, and 54.50\% and 40.2\% for UAV123
@@ -80,7 +81,9 @@ data. These results showed that our method is better than existing
 ones over 5\% on precision on 20 pixels and 10-20\% on AUC on
 average. Moreover our implementation ran at 340 fps for OTB100 and at
 416 fps for UAV123 data that is faster than DCF (292 fps) for OTB100
-and KCF (292 fps), DCF (457 fps) for UAV123.
+and KCF (292 fps), DCF (457 fps) for UAV123. Finally, for the embedded
+systems with GPUs, we explored different levels of deep features for different
+correlation filters to boost tracking performance. 
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
@@ -200,20 +203,7 @@ all together on every frame, we deploy three KCFs in turn:
 \textit{target}+\textit{large background} translation filter
 ($R_{t}^{L}$). By doing so, our method aims at addressing a scale
 change and estimate target's motion efficiently while maintaining or
-increasing run-time performance. Figure \ref{fig:Filters} shows
-examples of the region of interest (ROI) associated with $R_{t}^{S}$,
-$R_{t}^{L}$, and $R_{s}$.
-
-\begin{figure}[!h]
-\centering
-\includegraphics[width=0.47\textwidth]{./figures/Filters_Details.pdf}
-\caption{Examples of three filters; the translation filter,
-  \textit{target+small background}, the scale filter,
-  \textit{target-only} and another translation filter,
-  \textit{target+large background}, and their Hanning window and
-  expected Gaussian response.}
-\label{fig:Filters}
-\end{figure}
+increasing run-time performance.
 
 The contribution of this study is a novel, single-target tracking
 algorithm running in a very high-speed, $\geq 300$ fps that deploys an
@@ -226,6 +216,7 @@ filter.
 %---------------------------------------------------------------------- 
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
 %---------------------------------------------------------------------- 
+
 In this paper, we propose a novel way of utilizing a multiple of the
 KCFs \cite{henriques2015high} to effectively handle scale variations
 and dynamic maneuvers of a target. To maintain or improve the run-time
@@ -316,7 +307,16 @@ learning a correlation filter over consecutive frames would not be
 much different from the one learned using the image few or $k$ frames
 later. Figure \ref{fig:Filters_Comparison} shows examples supporting
 this observation.
-
+\begin{figure}[!b]
+\centering
+\includegraphics[width=0.47\textwidth]{./figures/Filters_Details.pdf}
+\caption{Examples of three filters with hand-crafted features; the translation filter,
+  \textit{target+small background}, the scale filter,
+  \textit{target-only} and another translation filter,
+  \textit{target+large background}, and their Hanning window and
+  expected Gaussian response.}
+\label{fig:Filters}
+\end{figure}
 \begin{figure*}[!h]
 \centering
 \includegraphics[width=1\textwidth]{./figures/LearnedFiltersComparison2.pdf}
@@ -359,6 +359,63 @@ drifts. Another translation filter, $R_{t}^{S}$, on the other hand, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
 noisy shape features due to its large search area. In what follows, we
 will briefly describe the parts of the KCF related to this work.
+
+\textbf{{\it E}nKCF with Hand-crafted Features}
+We, first, explore traditional features to run  {\it E}nKCF on any embedded system as it is the primary
+objective of this study. In this direction, we employ two highly efficient features; fHoG \cite{felzenszwalb2010object}
+and color-naming \cite{li2014scale}. Figure \ref{fig:Filters} shows examples of the region of interest (ROI) associated with $R_{t}^{S}$,
+$R_{t}^{L}$, and $R_{s}$ assigned hand-crafted features, . This version of {\it E}nKCF is dedicated to run
+on any embedded system at real-time ($30$fps). 
+
+
+\textbf{{\it E}nKCF with Convolutional Neural Network Features}
+In addition to hand-crafted featurres, we explore deep features
+to boost tracking performance. This version of {\it E}nKCF, on the other hand, 
+is dedicated to run on high-end embedded systems (GPUs). 
+
+There have been many studies on applying a pretrained CNN features to
+tracking-by-detection algorithms. For example,
+\cite{danelljan2015convolutional} used the activations of the first
+and second convolutional layer features of the VGGNet
+\cite{simonyan2014very} for this idea where their experiments showed
+that the first convolutional layer features lead to slightly better
+precision and success rates than the second
+layer. \cite{ma2015hierarchical} proposed a KCF tracker with deeper
+features. Their method employs the third convolutional layer features
+to get the response map. In the next stage, they used the estimation
+of the target's transition from the first stage to use the second
+convolutional layer features. Finally, the first convolutional layer
+features is extracted from the position estimated in the second
+stage. This coarse-to-fine position estimation approach allows to
+utilize more representative features of the object. However, such
+approach requires multiple runs of a KCF at a single frame, increasing
+the run-time complexity. For this reason, we follow a similar approach
+to \cite{danelljan2015convolutional} to embed deep learning features.
+
+Our {\it E}nKCF framework provides us with a flexibility to exploit different
+level of abstractions in different KCFs. The translation filters,
+$R_{t}^{L}$ and $R_{t}^{S}$, considers more than twice bigger area
+than $R_{s}$. Taking this into account, we can assign deeper feature
+encodings to $R_{s}$ as it requires less spatial information than
+$R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the
+fourth convolutional layer features ($26\times26\times128$) to $R_{s}$
+whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of
+the second layer features ($109\times109\times64$). This feature
+assignment is represented as \textit{conv224-VGG} and shown in
+fig.~\ref{fig:Filters_CNN}. Additionally, we assign the second
+convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
+$R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
+\textit{conv224-VGG}. We use the VGGNet as it provides higher spatial
+resolution at the first layers than than AlexNet
+\cite{krizhevsky2012imagenet}.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
+\caption{The proposed conv224-VGGNet feature extraction framework to use deep features in {\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied Hanning Window
+to avoid distortion due to FFT operation whereas $R_{s}$ is not applied as it would result in target boundary information loss.}
+\label{fig:Filters_CNN}
+\end{figure}
 
 \textbf{Kernelized Correlation Filter} The Kernelized Correlation
 Filter is a well, known single target tracking method and its work
@@ -465,7 +522,8 @@ from uniform initial distribution to keep variance high enough.
 %----------------------------------------------------------------------
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
-To evaluate the performance of the proposed algorithm, we choose two
+To evaluate the performance of the proposed  {\it
+  E}nKCF with hand-crafted features, we choose two
 publicly, available datasets:
 OTB100 \footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
 and
@@ -531,8 +589,8 @@ three KCFs as each of them has different goals to accomplish. In
 particular, the translation filter, $R_{t}^{L}$, uses both the fast
 Histograms of Oriented Gradients (fHoG) \cite{felzenszwalb2010object}
 and color-naming \cite{van2009learning} features to more effectively
-learn the background around the target. Through experiments, we found
-that only fHoG didn't work well to cover a larger ROI; another
+learn the background around the target as shown in figure~\ref{fig:Filters}. 
+Through experiments, we found that only fHoG didn't work well to cover a larger ROI; another
 translation filter, $R_{t}^{S}$, worked well when it used fHoG
 features only; the scale filter, $R_{s}$ did when it used both fHoG
 and color features.
@@ -629,6 +687,38 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 \label{table:Comparison_to_LCT}
 \end{table*}
 
+\textbf{Performance on UAV123$\_$10fps Dataset} It maybe a slight
+digression from the main idea -- the idea of deploying multiple KCFs
+to make a very fast and effective, single target tracking
+available. We found that, with a slight modification, the proposed
+method can effectively handle tracking of object in fast motion and in
+large camera motion. Specifically we modified {\it E}nKCF by running
+$R_{t}^{L}$ every frame and remove the particle filter instead. We
+tested this modified {\it E}nKCF with another vision of the UAV123 that
+the original dataset was temporally down-sampled at $10$ fps and makes
+the challenging original dataset, because of objects in fast motion
+and large ego-motion, more challenging. This is because the magnitude
+of those motions is even bigger. Figure \ref{fig:UAV123_10fpsDATASET}
+compares the performance of the modified version of {\it E}nKCF and
+other tracking methods. Our tracker outperforms other high-speed
+correlation filter based trackers including KCF, DSST by about
+$15\%$-$20\%$ and showed a precision rate similar to that of SAMF. On
+the other hand, it does decent job in scale estimation. It ranks as
+second in AUC while running about $150$ faster than the MUSTER
+tracker.
+
+\begin{figure}[!h]
+\centering
+\begin{tabular}{cc}
+\includegraphics[width=3.30cm]{./figures/pr_uav123_10fps.eps}
+\includegraphics[width=3.55cm]{./figures/sr_uav123_10fps.eps}\\
+\end{tabular}
+\caption{Comparison of a modified {\it E}nKCF's performance with those
+  of the state-of-the-art tracking algorithms on the UAV123$\_$10fps
+  dataset where the original UAV123 data was temporally downsampled.}
+\label{fig:UAV123_10fpsDATASET}
+\end{figure}
+
 \textbf{Evaluation with Deep Features} Our focus so far was to build a
 high speed tracker that can run at 30fps on a single-board, embedded
 system. Given this goal, we used HoG and color features in an
@@ -641,7 +731,7 @@ dataset. Utilizing pretrained deep features would not be applicable to
 all the a single-board, embedded system due to their limited
 computational resources. But as these days some of the single-board
 systems offer GPU, we would like to see how much accuracy we can
-achieve by feeding {\it E}nKCF w/ CNN features.
+achieve by feeding {\it E}nKCF w/ conv features as shown in figure~\ref{fig:Filters_CNN}.
 \begin{comment}
 {\it Burak: I'm not sure what you wanted to say with ``Deep Learning
   Features.'' My edit stopped at the above paragraph because I got
@@ -689,57 +779,14 @@ achieve by feeding {\it E}nKCF w/ CNN features.
   choose for the y-axis for one graph, use the same scale to all other
   same graphs.}
 \end{comment}
-There have been many studies on applying a pretrained CNN features to
-tracking-by-detection algorithms. For example,
-\cite{danelljan2015convolutional} used the activations of the first
-and second convolutional layer features of the VGGNet
-\cite{simonyan2014very} for this idea where their experiments showed
-that the first convolutional layer features lead to slightly better
-precision and success rates than the second
-layer. \cite{ma2015hierarchical} proposed a KCF tracker with deeper
-features. Their method employs the third convolutional layer features
-to get the response map. In the next stage, they used the estimation
-of the target's transition from the first stage to use the second
-convolutional layer features. Finally, the first convolutional layer
-features is extracted from the position estimated in the second
-stage. This coarse-to-fine position estimation approach allows to
-utilize more representative features of the object. However, such
-approach requires multiple runs of a KCF at a single frame, increasing
-the run-time complexity. For this reason, we follow a similar approach
-to \cite{danelljan2015convolutional} to embed deep learning features.
-
-Our {\it E}nKCF framework provides us with a flexibility to exploit different
-level of abstractions in different KCFs. The translation filters,
-$R_{t}^{L}$ and $R_{t}^{S}$, considers more than twice bigger area
-than $R_{s}$. Taking this into account, we can assign deeper feature
-encodings to $R_{s}$ as it requires less spatial information than
-$R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the
-fourth convolutional layer features ($26\times26\times128$) to $R_{s}$
-whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of
-the second layer features ($109\times109\times64$). This feature
-assignment is represented as \textit{conv224-VGG} and shown in
-fig.~\ref{fig:Filters_CNN}. Additionally, we assign the second
-convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
-$R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
-\textit{conv224-VGG}. We use the VGGNet as it provides higher spatial
-resolution at the first layers than than AlexNet
-\cite{krizhevsky2012imagenet}.
 
 Figure \ref{fig:UAV123_DATASET_DeepFeatures} shows experimental
-results of utilizing DNN features. Two settings of utilizing the deep
+results of utilizing DNN features on UAV123 Dataset. Two settings of utilizing the deep
 features outperformed the HoG and color features as proposed in {\it
   E}nKCF by about $3\%$ to $5\%$ in precision (20 px) and $2\%$ in
 success rates (AUC). The \textit{conv224-VGG} setting performed
 slightly better than \textit{conv222-VGG} in precision while achieving
 similar success rate (AUC).
-
-\begin{figure}[!h]
-\centering
-\includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
-\caption{The proposed conv224-VGGNet feature extraction framework to use deep features in {\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied Hanning Window
-to avoid distortion due to FFT operation whereas $R_{s}$ is not applied as it would result in target boundary information loss.}
-\label{fig:Filters_CNN}
-\end{figure}
 
 \begin{figure}[t]
 \centering
@@ -779,38 +826,6 @@ to avoid distortion due to FFT operation whereas $R_{s}$ is not applied as it wo
 %\caption{Evaluations of the different combinations of the proposed KCFs in UAV123 dataset. We decouple the re-detection module of the LCT tracker as we focus on the comparison of the multiple correlation filter framework between LCT and  {\it E}nKCF. $R_{t}^{S}$ and $R_{s}$ are used as proposed in
 %\cite{ma2015long}, however, only three scale candidates ($1.02$, $1.00$, $1.00/1.02$) are used to perform realistic comparison. In the original paper, 33 scales with scale factor 1.02 is considered, resulting in low fps ($\leq50$fps).} 
 %\end{table}
-
-\textbf{Performance on UAV123$\_$10fps Dataset} It maybe a slight
-digression from the main idea -- the idea of deploying multiple KCFs
-to make a very fast and effective, single target tracking
-available. We found that, with a slight modification, the proposed
-method can effectively handle tracking of object in fast motion and in
-large camera motion. Specifically we modified {\it E}nKCF by running
-$R_{t}^{L}$ every frame and remove the particle filter instead. We
-tested this modified {\it E}nKCF with another vision of the UAV123 that
-the original dataset was temporally down-sampled at $10$ fps and makes
-the challenging original dataset, because of objects in fast motion
-and large ego-motion, more challenging. This is because the magnitude
-of those motions is even bigger. Figure \ref{fig:UAV123_10fpsDATASET}
-compares the performance of the modified version of {\it E}nKCF and
-other tracking methods. Our tracker outperforms other high-speed
-correlation filter based trackers including KCF, DSST by about
-$15\%$-$20\%$ and showed a precision rate similar to that of SAMF. On
-the other hand, it does decent job in scale estimation. It ranks as
-second in AUC while running about $150$ faster than the MUSTER
-tracker.
-
-\begin{figure}[!h]
-\centering
-\begin{tabular}{cc}
-\includegraphics[width=3.30cm]{./figures/pr_uav123_10fps.eps}
-\includegraphics[width=3.55cm]{./figures/sr_uav123_10fps.eps}\\
-\end{tabular}
-\caption{Comparison of a modified {\it E}nKCF's performance with those
-  of the state-of-the-art tracking algorithms on the UAV123$\_$10fps
-  dataset where the original UAV123 data was temporally downsampled.}
-\label{fig:UAV123_10fpsDATASET}
-\end{figure}
 
 %---------------------------------------------------------------------- 
 \section{Conclusion} \label{sc:Conclusion}
