@@ -287,7 +287,13 @@ $R_{t}^{S}$, \textit{target}+\textit{large background}. We set up {\it
 learning a target's translation should include its background to
 better discriminate the target from its surrounding, and another
 correlation filter should focus on the target itself to estimate the
-right scale of the target as shown in Figure~\ref{fig:Filters}.
+right scale of the target {\it Burak: We only explained two kinds of
+  filters: translation and scale filter. But we do have two filters
+  for target's translation, $R_{t}^{S}$ and $R_{t}^{L}$. Revise the
+  the sentence about translation filter with details.} 
+  {\it YoungWoo : In this paragraph, we mention two of the translation filters and then we say
+  translation filter needs background whereas the scale filter does not.}
+Figure \ref{fig:Filters} shows examples of three filters.
 
 Since Henriques and his colleagues' presented impressive tracking
 results of KCF \cite{henriques2015high} on VOT15
@@ -367,6 +373,113 @@ designed to addresses the drawback of $R_{t}^{L}$ that it may learn
 noisy shape features due to its large search area. In what follows, we
 will detail each part of the KCF.
 
+{\it Burak: This section does NOT connect to the previous section.}
+
+{\it YoungWoo : I placed EnKCF with traditional and deep features section right after EnKCF section. Later, you
+placed them after the Kernelized Correlation Filter section. }
+
+\textbf{{\it E}nKCF with Hand-Crafted Features} 
+We, first, use two complimentary hand-crafted features, fHoG (shape) \cite{felzenszwalb2010object} 
+and color-naming (color) \cite{li2014scale} in the {\it E}nKCF as shown in Figure \ref{fig:Filters}. 
+This version of {\it E}nKCF is dedicated to perform tracking on any embedded systems at
+$30$ fps, particularly on the ones without GPU units.
+
+The translation filter, $R_{t}^{L}$, uses both the fHoG
+\cite{felzenszwalb2010object} and color-naming \cite{van2009learning}
+features to learn the large background area around the target. Figure
+\ref{fig:Filters} (b) shows an example of this translation filter. The
+color features are also used to make the feature vector more
+discriminative. In other words, for the case that the fHoG is the only
+feature, the bigger the area for HoG is the more noises the resulting
+fHoG feature contains. Adding color information to the feature vector
+will make the feature vector more robust to the noises from the
+background around the target. However, this is not the case for the
+translation filter, $R_{t}^{S}$, for capturing a smaller area. This is
+because the translation filter, {\it target + small background}, does
+not contain much of the background area around the target. Figure
+\ref{fig:Filters} (a) shows an example of this translation filter. 
+Finally, both fHoG and color-naming features are used in the scale filter, $R_{s}$, 
+The ROI considered by $R_{s}$ is resized to a smaller template resolution (64 x n) as shown in Figure~\ref{fig:Filters} (c). 
+This leads to less discriminative shape features. To reduce the noise in $R_{s}$, we concatenate color features. 
+The $R_{s}$ estimates the scale by correlating the filter with multiple ROIs as shown in
+alg.~\ref{alg:MKCF}.  This introduces additional operations in the frames $R_{s}$ is used. To reduce the 
+number of operations, we assign a smaller template size to $R_{s}$. This does not degrade the tracking performance
+due to two major reasons: (1) zero padding size and (2) integration of color features.
+This way, we keep the run-time complexity of
+the $R_{S}$ similar to $R_{t}^{L}$ and $R_{t}^{S}$ that only run
+correlation filter on a single ROI. {\it Burak: Why do we need to keep the run-time complexity
+  of $R_{S}$ and $R_{t}^{L}$ the same?} {\it YoungWoo : Because we want $R_{t}^{S}$, $R_{t}^{L}$ and $R_{s}$ to 
+  have similar fps (30fps) to avoid missing frames on an embedded system. We can think of each one as an individual tracker
+  and we do not want one operating at 10fps while others running at 30 fps.} By reducing the template size of $R_{s}$,
+   fluctuating run-time performances among KCFs are avoided which is desired in embedded systems.
+
+\textbf{{\it E}nKCF with Convolutional Neural Network Features} In
+addition to hand-crafted features, we explore deep features to boost
+tracking performance. 
+
+{\it Burak: Did EnKCF w/ deep features really
+  improve the performance -- the performance tested on the same data?
+  or did you just compare the performance numbers?}  
+
+{\it YoungWoo :
+  EnkCF with deep features improved the performance on the same set of
+  data.}  
+
+{\it Burak: If EnKCF w/ deep features improved the performance of
+  EnKCF on the same set of data, why didn't you plot their curves
+  together? And if this is true, we'll have to revise the abstract and
+  introduction as well!}
+  
+  {\it YoungWoo : I compare the EnKCF with all the other trackers that does not use deep features. For this reason
+  it does not make sense to put DeepEnKCF in the same figure (Figure 6). We have a separate section 
+  showing how much improvement we get by using deep features and in this section I plot them in the same figure ( Figure (8) ).}  
+  
+This version of {\it E}nKCF, Deep{\it E}nKCF, on the other hand, is
+devised to make {\it E}nKCF run on high-end embedded systems with GPUs
+installed.
+
+There has been a large volume of studies on utilizing a pre-trained
+CNN features to tracking-by-detection algorithms. For example,
+\cite{danelljan2015convolutional} used the activations of the first
+and second convolutional layer of the VGGNet \cite{simonyan2014very}.
+They report that the first convolutional layer features lead to slightly better precision
+and success rates than the second layer due to lost spatial information this layer. \cite{ma2015hierarchical}
+proposed a KCF tracker integrating features with higher abstraction capacity. 
+Their method first employs the third convolutional layer features to estimate the response map. In
+the next stage, the KCF, concentrating on the second convolutional layer features, is run to update
+transition. The third KCF then works on the transition given by the previous KCF and learns the first convolutional
+layer features to update the transition. This coarse-to-fine approach accommodates
+different levels of abstractions of the object. However, it
+runs multiple KCFs in a sequential fashion, increasing the run-time
+complexity. For this reason, we follow a similar approach to
+\cite{danelljan2015convolutional} to embed deep features in {\it
+  E}nKCF.
+
+Our {\it E}nKCF framework allows us to exploit different level of
+feature encodings with different KCFs. The translation filters,
+$R_{t}^{L}$ and $R_{t}^{S}$, consider at least twice bigger area than
+the scale filter, $R_{s}$. Taking this into account, we can assign deeper feature
+encodings to $R_{s}$ as it learns less spatial information than
+$R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the
+fourth convolutional layer features ($26\times26\times128$) to $R_{s}$
+whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of
+the second layer features ($109\times109\times64$). This feature
+assignment scheme is represented as \textit{conv224-VGG} and shown in
+fig.~\ref{fig:Filters_CNN}. Additionally, we assign the second
+convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
+$R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
+\textit{conv224-VGG}. We use the VGGNet since it provides higher spatial
+resolution at the first several layers than AlexNet
+\cite{krizhevsky2012imagenet}.
+
+\begin{figure}[!h]
+\centering
+\includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
+\caption{The proposed conv224-VGGNet feature extraction framework in Deep{\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied Hanning Window
+to avoid distortion due to FFT operation whereas $R_{s}$ is not filtered as it would result in target boundary information loss.}
+\label{fig:Filters_CNN}
+\end{figure}
+
 \textbf{Kernelized Correlation Filter} The Kernelized Correlation
 Filter is a well-known single target tracking method and its work
 flow has been detailed in other papers
@@ -430,98 +543,16 @@ r(z) = F^{-1}(\hat{k}^{xz} \odot \hat{\alpha})
 where $r$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
 
-\textbf{{\it E}nKCF with Hand-Crafted Features} 
-
-{\it Burak: You need to rewrite this section and the section about
-  deep features! Try to make it concise with short sentences! It is
-  even hard for me to read this section and catch the main idea.}
-
-We, first, use two complimentary hand-crafted features, fHoG (shape) \cite{felzenszwalb2010object} 
-and color-naming (color) \cite{li2014scale} in the {\it E}nKCF as shown in Figure~\ref{fig:Filters}. 
-This version of {\it E}nKCF is dedicated to perform tracking on any embedded systems at
-$30$ fps, particularly on the ones without GPU units.
-
-In particular, the translation filter, $R_{t}^{L}$, employs
-both the fHoG \cite{felzenszwalb2010object} and color-naming
-\cite{van2009learning} features to learn the large background area
-around the target as shown in Figure~\ref{fig:Filters}.b. The color features 
-compensate for the noisier fHoG features due to the large background area considered 
-by $R_{t}^{L}$. {\it Burak: You meant ``the
-  color features are used to compensate for shape features' weakness
-  -- what's weakness?}
+\textbf{Particle Filter for Smoothing Transition among KCFs} 
+{\it Burak: Does what this section explains still hold good? If what
+  this section explains still makes sense, the translation filter,
+  $R_{t}^{L}$ doesn't do a good job. Isn't it? If it's not, revise
+  this section.}
   
-  {\it YoungWoo : The weakness is the more background you include the noisier
-  HoG features become.}
-On the other hand, the color features is not assigned to the small area translation 
-filter,  $R_{t}^{S}$, as it learns more useful fHoG features than $R_{t}^{L}$ due to smaller
-padding size as seen in Figure~\ref{fig:Filters}.a. {\it Burak: color features are not used for $R_{t}^{S}$ because?
-\it YoungWoo : We do not use color features because  $R_{t}^{S}$ concentrates on smaller ROI
-than  $R_{t}^{L}$}. Finally, both fHoG and color-naming features are used in the scale filter, $R_{s}$, 
-since the ROI is resized to a lower template resolution (64 x n) than the translation filters. This leads to 
-less discriminative shape features as in Figure~\ref{fig:Filters}.c. The $R_{s}$ estimates
-the scale by correlating the filter with multiple ROIs as shown in
-alg.~\ref{alg:MKCF}.  This introduces additional operations in the frames $R_{s}$ is used. To reduce the 
-number of operations, we assign a smaller template size to $R_{s}$. This does not degrade the tracking performance
-due to two major reasons: (1) zero padding size and (2) integration of color features.
-This way, we keep the run-time complexity of
-the $R_{S}$ similar to $R_{t}^{L}$ and $R_{t}^{S}$ that only run
-correlation filter on a single ROI. By doing so, fluctuating run-time performances among KCFs are avoided which is
-desired in embedded systems.
-
-\textbf{{\it E}nKCF with Convolutional Neural Network Features} In
-addition to hand-crafted features, we explore deep features to boost
-tracking performance. {\it Burak: Did EnKCF w/ deep features really
-  improve the performance -- the performance tested on the same data?
-  or did you just compare the performance numbers?}
-  {\it YoungWoo : EnkCF with deep features improved the performance on the same set of data.}
-This version of {\it E}nKCF, Deep{\it E}nKCF, on the other hand, is
-devised to make {\it E}nKCF run on high-end embedded systems with GPUs
-installed.
-
-There has been a large volume of studies on utilizing a pre-trained
-CNN features to tracking-by-detection algorithms. For example,
-\cite{danelljan2015convolutional} used the activations of the first
-and second convolutional layer of the VGGNet \cite{simonyan2014very}.
-They report that the first convolutional layer features lead to slightly better precision
-and success rates than the second layer due to lost spatial information this layer. \cite{ma2015hierarchical}
-proposed a KCF tracker integrating features with higher abstraction capacity. 
-Their method first employs the third convolutional layer features to estimate the response map. In
-the next stage, the KCF, concentrating on the second convolutional layer features, is run to update
-transition. The third KCF then works on the transition given by the previous KCF and learns the first convolutional
-layer features to update the transition. This coarse-to-fine approach accommodates
-different levels of abstractions of the object. However, it
-runs multiple KCFs in a sequential fashion, increasing the run-time
-complexity. For this reason, we follow a similar approach to
-\cite{danelljan2015convolutional} to embed deep features in {\it
-  E}nKCF.
-
-Our {\it E}nKCF framework allows us to exploit different level of
-feature encodings with different KCFs. The translation filters,
-$R_{t}^{L}$ and $R_{t}^{S}$, consider at least twice bigger area than
-the scale filter, $R_{s}$. Taking this into account, we can assign deeper feature
-encodings to $R_{s}$ as it learns less spatial information than
-$R_{t}^{L}$ and $R_{t}^{S}$. Hence, we assign the activations of the
-fourth convolutional layer features ($26\times26\times128$) to $R_{s}$
-whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of
-the second layer features ($109\times109\times64$). This feature
-assignment scheme is represented as \textit{conv224-VGG} and shown in
-fig.~\ref{fig:Filters_CNN}. Additionally, we assign the second
-convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
-$R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
-\textit{conv224-VGG}. We use the VGGNet since it provides higher spatial
-resolution at the first several layers than AlexNet
-\cite{krizhevsky2012imagenet}.
-
-\begin{figure}[!h]
-\centering
-\includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
-\caption{The proposed conv224-VGGNet feature extraction framework in Deep{\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied Hanning Window
-to avoid distortion due to FFT operation whereas $R_{s}$ is not filtered as it would result in target boundary information loss.}
-\label{fig:Filters_CNN}
-\end{figure}
-
-\textbf{Particle Filter for Smoothing Transition among KCFs} As
-explained earlier, the {\it E}nKCF updates a target's translation at
+  {\it YoungWoo : I did not understand what $R_{t}^{L}$ has to do with 
+  particle filter}
+  
+As explained earlier, the {\it E}nKCF updates a target's translation at
 every other $k$ frames, particularly for estimating the target's
 scale. Although the strategy of updating every other $k$th frames will
 result in an optimal run-time performance, this may lead any potential
@@ -570,7 +601,7 @@ and UAV123 \footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\
 The OTB100 dataset is comprised of the videos about 100 objects
 whereas UAV123 dataset contains aerial footages of 123 objects.
 We first evaluate the performance of {\it E}nKCF 
-with hand-crafted features as shown in Figure~\ref{fig:Filters}.  
+with hand-crafted features as shown in Figure \ref{fig:Filters}.  
 With this tracker, we aim at developing an object tracking algorithm that ``efficiently'' runs
 on an embedded system, a drone, for example, in ``high speed,'' $\ge
 300$ fps. Given this, we believe that the UAV123 dataset is a good fit in
@@ -582,11 +613,13 @@ applications, it is also important to compare the performance of the
 proposed algorithm with those of the state-of-the-art in a nominal
 dataset for comparison. To this end, we chose the OTB100 dataset that
 contains the videos recorded from smart phones and typical cameras in
-perspective view. Lastly, we tested the proposed algorithm on a
+perspective view. Also, we tested the proposed algorithm on a
 temporally down-sampled version of the UAV123 dataset, called
 UAV123$\_$10fps dataset. What we would like to evaluate using this
 modified dataset is how robust the proposed algorithm is to the
-drastic motions of camera and targets.
+drastic motions of camera and targets. Finally, we evaluate the Deep{\it E}nKCF, 
+{\it E}nKCF with deep features, on the UAV123 dataset to observe how much gain
+we can achieve over hand-crafted features.
 
 \textbf{Finding Optimal Hyper-parameters} Each of three KCFs in {\it
   E}nKCF is designed to address specific challenges in single, target
@@ -630,7 +663,7 @@ threshold.
 %particular, the translation filter, $R_{t}^{L}$, uses both the fast
 %Histograms of Oriented Gradients (fHoG) \cite{felzenszwalb2010object}
 %and color-naming \cite{van2009learning} features to more effectively
-%learn the background around the target as shown in figure~\ref{fig:Filters}. 
+%learn the background around the target as shown in Figure \ref{fig:Filters}. 
 %Through experiments, we found that only fHoG didn't work well to cover a larger ROI; another
 %translation filter, $R_{t}^{S}$, worked well when it used fHoG
 %features only; the scale filter, $R_{s}$ did when it used both fHoG
@@ -773,7 +806,7 @@ dataset. Utilizing pre-trained deep features would not be applicable to
 all the a single-board, embedded system due to their limited
 computational resources. However, as these days some of the single-board
 systems offer GPU, we would like to see how much accuracy we can
-achieve by feeding {\it E}nKCF w/ deep features (Deep{\it E}nKCF) as shown in figure~\ref{fig:Filters_CNN}.
+achieve by feeding {\it E}nKCF w/ deep features (Deep{\it E}nKCF) as shown in Figure \ref{fig:Filters_CNN}.
 \begin{comment}
 {\it Burak: I'm not sure what you wanted to say with ``Deep Learning
   Features.'' My edit stopped at the above paragraph because I got
@@ -894,7 +927,7 @@ average. Our implementation ran at 340 fps for OTB100 and at 416 fps
 for UAV123 data that is faster than DCF (292 fps) for OTB100 and KCF
 (292 fps), DCF (457 fps) for UAV123. Finally, we represented objects with deep
 feature encodings to boost tracking performance by about $5\%$ on embedded systems with GPUs. 
-To further improve the performance, we employed deeper features in the scale filter since it has zero
+We further improved the performance by employing deeper features in the scale filter since it has zero
 padding around the target.
 
 As future work, we investigate a way of re-initializing a target when
