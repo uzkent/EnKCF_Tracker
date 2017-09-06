@@ -281,9 +281,8 @@ background, \textit{target}+\textit{small background} for addressing a
 marginal translation by a target, the second filter, $R_{s}$, focuses
 entirely on learning the target's scale, \textit{target-only}, and the
 last filter, $R_{t}^{L}$, focuses on the target area and its
-background, at least twice, bigger than that of the first filter,
-$R_{t}^{S}$, \textit{target}+\textit{large background}. We set up {\it
-  E}nKCF in this way because, we believe, a correlation filter for
+background bigger than that of the first filter, $R_{t}^{S}$, \textit{target}+\textit{large background}. 
+We set up {\it E}nKCF in this way because, we believe, a correlation filter for
 learning a target's translation should include its background to
 better discriminate the target from its surrounding, and another
 correlation filter should focus on the target itself to estimate the
@@ -293,7 +292,7 @@ right scale of the target {\it Burak: We only explained two kinds of
   the sentence about translation filter with details.} 
   {\it YoungWoo : In this paragraph, we mention two of the translation filters and then we say
   translation filter needs background whereas the scale filter does not.}
-Figure \ref{fig:Filters} shows examples of three filters.
+Figure \ref{fig:Filters} shows examples of three filters used in  {\it E}nKCF.
 
 Since Henriques and his colleagues' presented impressive tracking
 results of KCF \cite{henriques2015high} on VOT15
@@ -371,12 +370,17 @@ estimate the target's translation and recover from any potential
 drifts. Another translation filter, $R_{t}^{S}$, on the other hand, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
 noisy shape features due to its large search area. In what follows, we
-will detail each part of the KCF.
+will detail the {\it E}nKC with hand-crafted features, dedicated to run
+on low-end embedded systems, and deep features, designed to run on
+the systems with GPUs. Later, we will briefly document the fundamental 
+concepts of the KCF and Particle Filter, designed to smooth transitions 
+between KCFs.
 
 {\it Burak: This section does NOT connect to the previous section.}
 
 {\it YoungWoo : I placed EnKCF with traditional and deep features section right after EnKCF section. Later, you
-placed them after the Kernelized Correlation Filter section. }
+placed them after the Kernelized Correlation Filter section. To me, it makes more
+sense to place them right after the EnKCF section.}
 
 \textbf{{\it E}nKCF with Hand-Crafted Features} 
 We, first, use two complimentary hand-crafted features, fHoG (shape) \cite{felzenszwalb2010object} 
@@ -387,25 +391,24 @@ $30$ fps, particularly on the ones without GPU units.
 The translation filter, $R_{t}^{L}$, uses both the fHoG
 \cite{felzenszwalb2010object} and color-naming \cite{van2009learning}
 features to learn the large background area around the target. Figure
-\ref{fig:Filters} (b) shows an example of this translation filter. The
+\ref{fig:Filters}(b) shows an example of this translation filter. The
 color features are also used to make the feature vector more
 discriminative. In other words, for the case that the fHoG is the only
-feature, the bigger the area for HoG is the more noises the resulting
+feature, the bigger the area for HoG is the more noise the resulting
 fHoG feature contains. Adding color information to the feature vector
 will make the feature vector more robust to the noises from the
 background around the target. However, this is not the case for the
-translation filter, $R_{t}^{S}$, for capturing a smaller area. This is
-because the translation filter, {\it target + small background}, does
-not contain much of the background area around the target. Figure
-\ref{fig:Filters} (a) shows an example of this translation filter. 
+translation filter, $R_{t}^{S}$. This is because the translation filter, {\it target + small background}, 
+does not contain much of the background area around the target. Figure
+\ref{fig:Filters}(a) shows an example of this translation filter. 
 Finally, both fHoG and color-naming features are used in the scale filter, $R_{s}$, 
-The ROI considered by $R_{s}$ is resized to a smaller template resolution (64 x n) as shown in Figure~\ref{fig:Filters} (c). 
+The ROI considered by $R_{s}$ is resized to a smaller template resolution (64 x n) as shown in Figure~\ref{fig:Filters}(c). 
 This leads to less discriminative shape features. To reduce the noise in $R_{s}$, we concatenate color features. 
-The $R_{s}$ estimates the scale by correlating the filter with multiple ROIs as shown in
-alg.~\ref{alg:MKCF}.  This introduces additional operations in the frames $R_{s}$ is used. To reduce the 
-number of operations, we assign a smaller template size to $R_{s}$. This does not degrade the tracking performance
-due to two major reasons: (1) zero padding size and (2) integration of color features.
-This way, we keep the run-time complexity of
+The $R_{s}$ estimates the scale by correlating the filter with three candidate ROIs as detailed in
+alg.~\ref{alg:MKCF}.  This increase the complexity from $\mathcal{O}(n\log n)$ to $\mathcal{O}(3(n\log n))$ for $R_{s}$. 
+To reduce the number of operations, we assign a smaller template size to $R_{s}$. 
+This does not degrade the tracking performance due to two reasons: (1) zero padding around the target 
+and (2) integration of color features. This way, we keep the run-time complexity of
 the $R_{S}$ similar to $R_{t}^{L}$ and $R_{t}^{S}$ that only run
 correlation filter on a single ROI. {\it Burak: Why do we need to keep the run-time complexity
   of $R_{S}$ and $R_{t}^{L}$ the same?} {\it YoungWoo : Because we want $R_{t}^{S}$, $R_{t}^{L}$ and $R_{s}$ to 
@@ -570,11 +573,12 @@ y, v_{x}, v_{y} \rbrace$, where $x$ and $y$ are the pixel coordinates
 of the target's centroid, $v_x$ and $v_y$ are the estimated velocity
 along the $x$-axis and $y$-axis. The particle filter predicts, using a
 constant velocity motion model, a target's state by generating a
-predefined number of particles. And then the particle filter uses the
-confidence maps of {\it E}nKCF as observation to update the state. The
-weight of a particle is computed as, $w_{p_{t}}(x_{t},y_{t}) =
-\sum_{i=1}^{N}\sum_{j=1}^{N} y_{R}(x_{t}-i,y_{t}-j)$, where $w_{p}$
-denotes the weight of the particle $p$ at time $t$ and $N$ denotes the
+predefined number of particles. Then it uses the confidence maps of 
+{\it E}nKCF as observation to update the state. The weight of a particle is computed as
+\begin{equation}
+w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{N} y_{R}(x_{t}-i,y_{t}-j), 
+\end{equation}
+where $w_{p}$ denotes the weight of the particle $p$ at time $t$ and $N$ denotes the
 size of the window as that of a confidence map. Alternatively one can
 also use the Euclidean distance of particles to the location of
 maximum response of the confidence map.
@@ -927,8 +931,8 @@ average. Our implementation ran at 340 fps for OTB100 and at 416 fps
 for UAV123 data that is faster than DCF (292 fps) for OTB100 and KCF
 (292 fps), DCF (457 fps) for UAV123. Finally, we represented objects with deep
 feature encodings to boost tracking performance by about $5\%$ on embedded systems with GPUs. 
-We further improved the performance by employing deeper features in the scale filter since it has zero
-padding around the target.
+We further improved the performance by employing deeper features in the scale filter 
+with zero padding around the target.
 
 As future work, we investigate a way of re-initializing a target when
 the target is lost, due to occlusion, illumination change, drastic
