@@ -324,7 +324,7 @@ this observation.
 \caption{Examples of three filters with hand-crafted features; the translation filter,
   \textit{target+small background}, the scale filter,
   \textit{target-only} and another translation filter,
-  \textit{target+large background}, and their Hanning window and
+  \textit{target+large background}, and their hanning window and
   expected Gaussian response.}
 \label{fig:Filters}
 \end{figure}
@@ -478,7 +478,7 @@ resolution at the first several layers than AlexNet
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
-\caption{The proposed conv224-VGGNet feature extraction framework in Deep{\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied Hanning Window
+\caption{The proposed conv224-VGGNet feature extraction framework in Deep{\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied hanning window
 to avoid distortion due to FFT operation whereas $R_{s}$ is not filtered as it would result in target boundary information loss.}
 \label{fig:Filters_CNN}
 \end{figure}
@@ -810,7 +810,8 @@ dataset. Utilizing pre-trained deep features would not be applicable to
 all the a single-board, embedded system due to their limited
 computational resources. However, as these days some of the single-board
 systems offer GPU, we would like to see how much accuracy we can
-achieve by feeding {\it E}nKCF w/ deep features (Deep{\it E}nKCF) as shown in Figure \ref{fig:Filters_CNN}.
+achieve by feeding {\it E}nKCF w/ deep features (Deep{\it E}nKCF) learned by the VGGNet
+as shown in Figure \ref{fig:Filters_CNN}.
 \begin{comment}
 {\it Burak: I'm not sure what you wanted to say with ``Deep Learning
   Features.'' My edit stopped at the above paragraph because I got
@@ -874,7 +875,7 @@ works better for the smaller ROIs.
 \includegraphics[width=3.30cm]{./figures/pr_deep.eps}
 \includegraphics[width=3.40cm]{./figures/sr_deep.eps}\\
 \end{tabular}
-\caption{Comparison of {\it E}nKCF's ({\it hog} + {\it color}) performance with Deep{\it E}nKCF on the UAV123
+\caption{Comparison of {\it E}nKCF's ({\it fhog} + {\it color-naming}) performance with Deep{\it E}nKCF on the UAV123
 dataset.}
 \label{fig:UAV123_DATASET_DeepFeatures}
 \end{figure}
