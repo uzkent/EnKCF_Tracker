@@ -10,7 +10,7 @@
 \usepackage{graphicx}
 \usepackage{amsmath}
 \usepackage{amssymb}
-\usepackage{mathtools} % mathtools builds on and extends amsmath package
+\usepackage{mathtools} % mathtools builds on and exten0))ds amsmath package
 \usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
 \usepackage{comment, url}
 \usepackage[ruled, vlined, linesnumbered]{algorithm2e}
@@ -494,7 +494,7 @@ fact that a circulant matrix can be diagonalized by Discrete Fourier
 transform is the key to reduce the complexity of any tracking method
 based on correlation filter. The off-diagonal elements become zero
 whereas the diagonal elements represent the eigenvalues of the
-circulant matrix. The egienvalues are equal to the DFT transformation
+circulant matrix. The eigenvalues are equal to the DFT transformation
 of the base sample ($x$) elements. The Kernelized Correlation Filter,
 in particular, applies a kernel to $x$ to transform to a more
 discriminative domain. The circulant matrix is then formed by applying
@@ -724,7 +724,7 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 also conducted an experiment to see what combination and deployment
 order of the KCF work best. Table \ref{table:Comparison_to_LCT}
 presents results of this experiment. For this experiment, we removed
-the particle filter. The method at the $2^{nd}$ column fliped the
+the particle filter. The method at the $2^{nd}$ column flipped the
 order of deploying $R_{t}^{L}$ and $R_{t}^{S}$ as presented at Figure
 \ref{Workflows}. The one at the $3^{th}$ column removed $R_{t}^{S}$
 and replaces with $R_{t}^{L}$ whereas the one at the $4^{th}$ column
@@ -743,7 +743,7 @@ and $R_{s}$ in every frame where $R_{t}^{S}$ uses the translation
 estimated by $R_{t}^{L}$ to update translation and $R_{s}$ uses the
 final translation estimation given by $R_{t}^{S}$ to update the scale.
 
-\textbf{Evalution on Particle Filter Contribution} For the $UAV123$
+\textbf{Evaluation on Particle Filter Contribution} For the $UAV123$
 dataset, we also evaluated the performance of the {\it E}nKCF with and
 without the particle filter. In particular, we use 50 sequences
 labeled as no abrupt camera motion in the dataset. To evaluate the
@@ -865,7 +865,7 @@ features outperformed the HoG and color features as proposed in {\it
   E}nKCF by about $3\%$ to $5\%$ in precision (20 px) and $2\%$ in
 success rates (AUC). The \textit{conv224-VGG} setting performed
 slightly better than \textit{conv222-VGG} in precision while achieving
-similar success rate (AUC) indicating that higher level feature absraction
+similar success rate (AUC) indicating that higher level feature abstraction
 works better for the smaller ROIs.
 \begin{figure}[!h]
 \centering
