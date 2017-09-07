@@ -1,5 +1,4 @@
 \documentclass[10pt,twocolumn,letterpaper]{article}
-
 \usepackage{wacv}
 \usepackage{times}
 \usepackage{epsfig}
@@ -114,7 +113,7 @@ In this paper, we propose a single-target tracking algorithm that does
 not require offline training and can run on any embedded or mobile
 platforms. Specifically, we would like to make our algorithm 1) learn
 the appearance model of a target on the fly and 2) run as fast on a
-typical desktop as up to $300-450$ fps, aiming at running, at least,
+typical desktop as up to $300$-$450$ fps, aiming at running, at least,
 faster than 30 fps when it is deployed on a low-end, embedded
 system.\footnote{In general, it would not be easy to compare run-time
   performance of a computer vision algorithm at an Intel or AMD
@@ -343,12 +342,12 @@ The algorithm \ref{alg:MKCF} shows the pseudo-code of {\it E}nKCF.
 The order of running these three KCFs is important because each of
 these filters aims at addressing different challenges; The
 \textit{target+large background} translation filter, $R_{t}^{L}$, is
-applied to the $i$th and $i+1$th image frames, another translation
-filter, $R_{t}^{S}$ is applied to the $i+2$th and $i+3$th image
-frames, and then the scale filter, $R_{s}$ is applied to the $i+4$the
+applied to the $i$th and $i$+$1$th image frames, another translation
+filter, $R_{t}^{S}$ is applied to the $i$+$2$th and $i$+$3$th image
+frames, and then the scale filter, $R_{s}$ is applied to the $i$+$4$the
 image. This order repeats until the end of the image frames. The
 translation filter, $R_{t}^{L}$, is intended to run right after the
-scale filter, $R_s$, runs which is applied at every other $i+4$
+scale filter, $R_s$, runs which is applied at every other $i$+$4$
 frames. We run these filters in this way because we want to minimize
 any drifts that are likely to happen running only $R_{s}$. In
 addition, the filter, $R_{t}^{S}$, is applied to every other two
@@ -386,7 +385,6 @@ will detail the main idea behind the KCF.
   KCF? So, it should EnKCF, KCF, KCF w/ hand-craft features and KCF w/
   deep features. Given this order, two paragraphs before and after
   this didn't connect!}
-<<<<<<< HEAD
 \end{comment}
 
 \textbf{Kernelized Correlation Filter} The Kernelized Correlation
@@ -487,7 +485,7 @@ translation filter, $R_{t}^{S}$. This is because the translation filter, {\it ta
 does not contain much of the background area around the target. Figure
 \ref{fig:Filters}(a) shows an example of this translation filter. 
 Finally, both fHoG and color-naming features are used in the scale filter, $R_{s}$, 
-The ROI considered by $R_{s}$ is resized to a smaller template resolution (64 x n) as shown in Figure~\ref{fig:Filters}(c). 
+The ROI considered by $R_{s}$ is resized to a smaller template resolution ($64\times n$) as shown in Figure~\ref{fig:Filters}(c). 
 This leads to less discriminative shape features. To reduce the noise in $R_{s}$, we concatenate color features. 
 The $R_{s}$ estimates the scale by correlating the filter with three candidate ROIs as detailed in
 alg.~\ref{alg:MKCF}.  This increase the complexity from $\mathcal{O}(n\log n)$ to $\mathcal{O}(3(n\log n))$ for $R_{s}$. 
@@ -538,7 +536,7 @@ tracking performance.
   what's the point to separate them into two graphs?}
   
 {\it YoungWoo : There are three reasons for this: (1) One is CPU and another one is GPU
-implementations, I thought it would be more clear to seperate them, (2) I do not have 
+implementations, I thought it would be more clear to separate them, (2) I do not have 
 results on OTB100 dataset with DeepEnKCF. (3) I believe DeepEnKCF is not the main contribution 
 of this paper, showing them in the same figure with all the trackers might lead the authors to 
 underestimate EnKCF.
@@ -578,7 +576,7 @@ fourth convolutional layer features ($26\times26\times128$) to $R_{s}$
 whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activations of
 the second layer features ($109\times109\times64$). This feature
 assignment scheme is represented as \textit{conv224-VGG} and shown in
-fig.~\ref{fig:Filters_CNN}. Additionally, we assign the second
+Figure~\ref{fig:Filters_CNN}. Additionally, we assign the second
 convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
 $R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
 \textit{conv224-VGG}. We use the VGGNet since it provides higher spatial
@@ -588,8 +586,8 @@ resolution at the first several layers than AlexNet
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.48\textwidth]{./figures/Filters_Details_CNN.pdf}
-\caption{The proposed conv224-VGGNet feature extraction framework in Deep{\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied hanning window
-to avoid distortion due to FFT operation whereas $R_{s}$ is not filtered as it would result in target boundary information loss.}
+\caption{The proposed conv224-VGGNet feature extraction framework in Deep{\it E}nKCF. $R_{t}^{L}$ and $R_{t}^{s}$ are applied an 
+hanning window to avoid distortion due to FFT operation whereas $R_{s}$ is not filtered to avoid target boundary information loss.}
 \label{fig:Filters_CNN}
 \end{figure}
 
@@ -611,7 +609,7 @@ to avoid distortion due to FFT operation whereas $R_{s}$ is not filtered as it w
   they might think those two translation filters do not do their jobs
   well?}
   
-{\it YoungWoo : Particle filter smoothes the translations in between the
+{\it YoungWoo : Particle filter smoothen the translations in between the
 transitions. We want to reduce drifts from scale filter by having $R_{t}^{L}$, and
 we want to reduce drifts from $R_{t}^{L}$ by having $R_{t}^{S}$. The particle filter
 on the other hand aims at reducing the drifts and jumps further by bringing in the 
@@ -861,7 +859,7 @@ second in AUC while running about $150$ faster than the MUSTER
 tracker.
 
 \textbf{Evaluation with Deep Features} Our focus so far was to build a
-high speed tracker that can run at 30fps on a single-board, embedded
+high speed tracker that can run at $30$fps on a single-board, embedded
 system. Given this goal, we used fHoG and color-naming features in an
 efficient way in the proposed {\it E}nKCF. Deep features, on the
 other hand, recently have been used to boost tracking accuracy of the
