@@ -488,7 +488,7 @@ Finally, both fHoG and color-naming features are used in the scale filter, $R_{s
 The ROI considered by $R_{s}$ is resized to a smaller template resolution ($64\times n$) as shown in Figure~\ref{fig:Filters}(c). 
 This leads to less discriminative shape features. To reduce the noise in $R_{s}$, we concatenate color features. 
 The $R_{s}$ estimates the scale by correlating the filter with three candidate ROIs as detailed in
-alg.~\ref{alg:MKCF}.  This increase the complexity from $\mathcal{O}(n\log n)$ to $\mathcal{O}(3(n\log n))$ for $R_{s}$. 
+alg.~\ref{alg:MKCF}.  This increases the complexity from $\mathcal{O}(n\log n)$ to $\mathcal{O}(3(n\log n))$ for $R_{s}$. 
 To reduce the number of operations, we assign a smaller template size to $R_{s}$. 
 This does not degrade the tracking performance due to two reasons: (1) zero padding around the target 
 and (2) integration of color features. This way, we keep the run-time complexity of
