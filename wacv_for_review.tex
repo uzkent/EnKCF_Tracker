@@ -350,7 +350,7 @@ $R_{s}$.
 In summary, the scale filter, $R_{s}$, is designed to directly handle
 the scale change of a target and provides $R_{t}^{L}$ and $R_{t}^{S}$
 with more focused ROIs about the target's translation. On the other
-hands, a translation filter, $R_{t}^{L}$, is designed to look at a
+hand, a translation filter, $R_{t}^{L}$, is designed to look at a
 larger search area to estimate the target's translation and recover
 from any potential drifts. Another translation filter, $R_{t}^{S}$, is
 designed to addresses the drawback of $R_{t}^{L}$ that it may learn
@@ -569,7 +569,7 @@ this feature assignment. Additionally, we assign the second
 convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
 $R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
 \textit{conv224-VGG}. The conv222 setting stands for the assignment of 
-the activations of $2^{th}$, $2^{th}$ and $4^{th}$ convolutional layer features
+the activations of $2^{th}$ convolutional layer features
 of VGGNet to $R_{t}^{L}$, $R_{t}^{S}$ and $R_{s}$. We use the VGGNet 
 since it provides higher spatial resolution at the first several layers than AlexNet
 \cite{krizhevsky2012imagenet}.
@@ -673,14 +673,14 @@ Deep{\it E}nKCF, {\it E}nKCF with deep features, on the UAV123 dataset
 to observe how much gain we can achieve over hand-crafted features.
 
 \textbf{Finding Optimal Hyper-parameters} Each of three KCFs in {\it
-  E}nKCF is designed to address specific challenges in single, target
+  E}nKCF is designed to address specific challenges in single target
 tracking problem. Thus each of them should have different values for
 the optimal parameters. For instance, the primary task of the
 translation filter, $R_{t}^{L}$ is to estimate the translation of a
 target from the previous frame whereas the scale filter, $R_{s}$ and
 the estimated state of the particle filter are primarily used to
 estimate the scale and translation. Because of this, we set the
-learning rates ($\beta$) of individual filters, $R_{t}^{L}$,
+learning rates of individual filters, $R_{t}^{L}$,
 $R_{t}^{S}$, and $R_{s}$ differently as $0.020$, $0.020$ and
 $0.010$. For the kernel of the Gaussian neighboring function, we
 empirically found the optimal values of $\alpha$ as $0.7$, $0.6$, and
@@ -784,14 +784,14 @@ runs. To be precise, the LCT tracker comes with a re-detection module
 for a long-term tracking. In short, we empirically verified that
 \textit{E}nKCF is an optimal way of using multiple KCFs, in terms of
 tracking accuracy and run-time performance. For example, we could
-achieve 4.26\% higher in accuracy by running $R_{R}^{t}$ and $R_{S}$
-at every frame, but this combination wills sacrifice run-time
-performance, slowing down 317 fps. Lastly, we run $R_{L}$, $R_{t}^{S}$
+achieve 4.26\% higher in accuracy by running $R_{t}^{L}$ and $R_{S}$
+at every frame, but this combination decreases run-time
+performance to 317 fps. Lastly, we run $R_{L}$, $R_{t}^{S}$
 and $R_{s}$ in every frame where $R_{t}^{S}$ uses the translation
 estimated by $R_{t}^{L}$ to update translation and $R_{s}$ uses the
 final translation estimation given by $R_{t}^{S}$ to update the scale.
 
-\textbf{Evaluation on Particle Filter Contribution} For the $UAV123$
+\textbf{Evaluation on Particle Filter Contribution} For the UAV123
 dataset, we also evaluated the performance of the {\it E}nKCF with and
 without the particle filter. In particular, we use 50 sequences
 labeled as no abrupt camera motion in the dataset. To evaluate the
@@ -813,19 +813,6 @@ in high-speed trackers. Interestingly, it outperformed another
 correlation filter based tracker, DSST, but performing $5\%$ behind of
 another low-speed scale adaptive SAMF tracker.
 
-\begin{figure}[!h]
-\centering
-\begin{tabular}{cc}
-\tiny\quad\textbf{UAV123$\_$10fps}\\
-\includegraphics[width=3.30cm]{./figures/pr_uav123_10fps.eps}
-\includegraphics[width=3.55cm]{./figures/sr_uav123_10fps.eps}\\
-\end{tabular}
-\caption{Comparison of a modified {\it E}nKCF's performance with those
-  of the state-of-the-art tracking algorithms on the UAV123$\_$10fps
-  dataset where the original UAV123 data was temporally downsampled.}
-\label{fig:UAV123_10fpsDATASET}
-\end{figure}
-
 \textbf{Performance on UAV123$\_$10fps Dataset} It maybe a slight
 digression from the main idea -- the idea of deploying multiple KCFs
 to make a very fast and effective, single target tracking
@@ -844,6 +831,19 @@ correlation filter based trackers including KCF, DSST by about
 $15\%$-$20\%$ and showed a precision rate similar to that of SAMF. On
 the other hand, it does decent job in scale estimation. It ranks as
 second in AUC while running about $150$ faster than MUSTER.
+
+\begin{figure}[!h]
+\centering
+\begin{tabular}{cc}
+\tiny\quad\textbf{UAV123$\_$10fps}\\
+\includegraphics[width=3.30cm]{./figures/pr_uav123_10fps.eps}
+\includegraphics[width=3.55cm]{./figures/sr_uav123_10fps.eps}\\
+\end{tabular}
+\caption{Comparison of a modified {\it E}nKCF's performance with those
+  of the state-of-the-art tracking algorithms on the UAV123$\_$10fps
+  dataset where the original UAV123 data was temporally downsampled.}
+\label{fig:UAV123_10fpsDATASET}
+\end{figure}
 
 \textbf{Evaluation with Deep Features} Our focus so far was to build a
 high speed tracker that can run at $30$fps on a single-board, embedded
@@ -903,7 +903,7 @@ could be also improved with deep convolutional features trained on ImageNet data
 \end{comment}
 
 Figure \ref{fig:UAV123_DATASET_DeepFeatures} shows
-Deep{\it E }nKCF's performance on UAV123 Dataset. Deep{\it
+DeepE{\it n}KCF's performance on UAV123 Dataset. Deep{\it
   E}nKCF outperformed the {\it E}nKCF with hand-crafted features
 by about $3\%$ to $5\%$ in precision (20 px) and $2\%$ in success
 rates (AUC). The \textit{conv224-VGG} setting performed slightly
