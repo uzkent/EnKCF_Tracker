@@ -14,6 +14,7 @@
 \usepackage{comment, url}
 \usepackage[ruled, vlined, linesnumbered]{algorithm2e}
 \newcommand{\forceindent}{\leavevmode{\parindent=1em\indent}}
+\usepackage[hidelinks]{hyperref}
 
 % Include other packages here, before hyperref.
 
@@ -376,7 +377,7 @@ maintains O($nlog(n)$) complexity unlike other kernel algorithms
 leading to O($n^{2}$) or even higher complexities.
 
 The KCF solves essentially the problem of a regression in the form of
-the regularization:
+the regularization (ridge regression):
 \begin{equation}
 E(h) = \frac{1}{2}||y-\sum_{c=1}^{C}h_{c}*x_{c}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||h_{c}||^{2}
 \label{eq:Closedform_RidgeReg}
@@ -387,7 +388,7 @@ template for the given channel. The parameter $c$ enabled one to
 integrate features in multiple channels, such as HoG and color, in
 this setup \cite{henriques2015high,galoogahi2013multi}. A closed-form
 solution for Equation \ref{eq:Closedform_RidgeReg} exists. To make the
-closed-form solution less complex, an element-wise, multiplication in
+closed-form solution less complex, an element-wise multiplication in
 frequency domain was proposed for $\hat{w}$:
 \begin{equation}
 \hat{w} = \hat{x}^{*}*\hat{y}(\hat{x}^{*}*\hat{x}+\lambda)^{-1}.
@@ -475,7 +476,7 @@ resolution ($64\times n$) as shown in Figure~\ref{fig:Filters}(c).
 This leads to less discriminative shape features. To reduce the noise
 in $R_{s}$, we concatenate color features.  The $R_{s}$ estimates the
 scale by correlating the filter with three candidate ROIs as detailed
-in alg.~\ref{alg:MKCF}.  This increases the complexity from
+in algorithm~\ref{alg:MKCF}.  This increases the complexity from
 $\mathcal{O}(n\log n)$ to $\mathcal{O}(3(n\log n))$ for $R_{s}$.  To
 reduce the number of operations, we assign a smaller template size to
 $R_{s}$.  This does not degrade the tracking performance due to two
@@ -848,7 +849,7 @@ second in AUC while running about $150$ faster than MUSTER.
 high speed tracker that can run at $30$fps on a single-board, embedded
 system. To this end, we used two conventional features, fHoG and
 color-naming for the {\it E}nKCF. At the same time, we observed that
-the feature vectors learned from DNN have been used to improve the
+the feature vectors learned from CNN have been used to improve the
 performance of the trackers based on KCF \cite{ma2015hierarchical,
   danelljan2015convolutional}, and some of the single-board, embedded
 systems have GPUs. We believe that the performance of the {\it E}nKCF
