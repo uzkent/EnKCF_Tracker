@@ -301,7 +301,7 @@ every $k$ frame. It intuitively makes sense to alternatively use
 multiple KCFs with different purposes because the appearance of a
 target does not change drastically over consecutive image frames. For
 most case, even it looks the appearance changes, learning a
-correlation filter over consecutive frames would not be much different
+correlation filter over consecutive frames would not be substantially different
 from the one learned using the image few or $k$ frames later. Figure
 \ref{fig:Filters_Comparison} shows examples supporting this
 observation.
@@ -860,7 +860,7 @@ second in AUC while running about $150$ faster than MUSTER.
 high speed tracker that can run at $30$fps on a single-board, embedded
 system. To this end, we used two conventional features, fHoG and
 color-naming for the {\it E}nKCF. At the same time, we observed that
-the feature vectors learned from CNN have been used to improve the
+the feature vectors learned from a CNN have been used to improve the
 performance of the trackers based on KCF \cite{ma2015hierarchical,
   danelljan2015convolutional}, and some of the single-board, embedded
 systems have GPUs. We believe that the performance of the {\it E}nKCF
@@ -939,7 +939,7 @@ why DeepEnKCF didn't perform a way better than EnKCF, 3) why did conv224-VGG per
 \includegraphics[width=3.30cm]{./figures/pr_deep.eps}
 \includegraphics[width=3.40cm]{./figures/sr_deep.eps}\\
 \end{tabular}
-\caption{Comparison of {\it E}nKCF's ({\it fhog} + {\it color-naming}) performance with Deep{\it E}nKCF on the UAV123
+\caption{Comparison of {\it E}nKCF's ({\it fHoG} + {\it color-naming}) performance with Deep{\it E}nKCF on the UAV123
 dataset.}
 \label{fig:UAV123_DATASET_DeepFeatures}
 \end{figure}
@@ -986,7 +986,9 @@ and dynamic maneuvers of a target. The way we ran three KCFs is
 optimal in a sense that efficiently handled the scale change and
 effectively learned the translation of the target. We also developed a
 Bayes filter, particle filter, to smooth the transition between three
-KCFs. Two public datasets were used to evaluate the performance of the
+KCFs. In particular, the particle filter estimated the target’s pixel 
+coordinates using evolution of the target’s motion observed over frames.
+Two public datasets were used to evaluate the performance of the
 proposed algorithm and found, on average, the performance of the
 proposed algorithm is better than those of the existing ones over 5\%
 on precision at 20 pixels and 10-20\% on AUC on average. Our
