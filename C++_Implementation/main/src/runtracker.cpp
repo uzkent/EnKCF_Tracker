@@ -171,13 +171,6 @@ int main(int argc, char* argv[])
    std::uniform_int_distribution<int> dist2(0,1000);
 
    // Read the Video
-#ifdef _AutelDATASET_
-   cv::VideoCapture capt;
-   std::string path = szDataFile;
-   std::string vName = prDataFile;
-   std::string fullPath = path.append(vName+".mp4");
-   capt.open(fullPath);
-#endif
    int nFrames = 0;
    int fontFace = cv::FONT_HERSHEY_SCRIPT_SIMPLEX;
    int thickness = 2;
@@ -199,12 +192,6 @@ char ch;
    int firstFrame;
    file >> firstFrame;
    std::cout << firstFrame << std::endl;
-#endif
-
-#ifdef _AutelDATASET_
-   std::string temp;
-   int temp2;
-   float gX, gY, gtX, gtY, gbX, gbY, gWidth, gHeight;
 #endif
 
 #ifdef _UAV123_DATASET_
@@ -248,15 +235,6 @@ char ch;
    }
 #endif
 
-#ifdef _AutelDATASET_
-    int ID;
-    while(groundTruth >> ID >> gtX >> gtY >> gbX >> gbY >> temp2 >> temp2 >> temp2 >> temp2 >> temp){
-	gWidth = abs(gtX - gbX);
-	gHeight = abs(gtY - gbY);
-	gX = gtX;
-	gY = gtY;
-#endif
-
 #ifdef _VOT15_DATASET_
    while(groundTruth >> g1X >> ch >> g1Y >> ch >> g2X >> ch >> g2Y >> ch >> g3X >> ch >> g3Y >> ch >> g4X >> ch >> g4Y)
    {
@@ -287,19 +265,11 @@ char ch;
 #endif
       frame = cv::imread(szDataFile+ss.str()+".jpg");
 
-
 #ifdef _VOT15_DATASET_     
       ss << std::setfill('0') << std::setw(8) << nFrames+1;
 #endif
       using std::default_random_engine; // Initiate the random device at each step
       using std::uniform_int_distribution;
-
-#ifdef _AutelDATASET_
-      capt >> frame;  // Read Next Frame
-      if (frame.rows < 10){
-         break;
-      }
-#endif
 
       ///
       /// PERFORM TRACKING
@@ -313,10 +283,6 @@ char ch;
 
 #ifdef _OTB100_DATASET_
 	Obs[0] = gX; Obs[1] = gY; Obs[2] = gWidth; Obs[3] = gHeight;
-#endif
-
-#ifdef _AutelDATASET_
-        Obs[0] = gX; Obs[1] = gY; Obs[2] = gWidth; Obs[3] = gHeight;
 #endif
 
 #ifdef _VOT15_DATASET_
@@ -419,20 +385,12 @@ char ch;
         float eucDistance = pow(pow(((float) gX + (float) gWidth/2.0) - ((float) result.x + (float) result.width/2.0),2) + pow(((float) gY + (float) gHeight/2.0) - ((float) result.y + (float) result.height/2.0),2),0.5);
 #endif
 
-#ifdef _AutelDATASET_
-        float eucDistance = pow(pow(((float) gX + (float) gWidth/2.0) - ((float) result.x + (float) result.width/2.0),2) + pow(((float) gY + (float) gHeight/2.0) - ((float) result.y + (float) result.height/2.0),2),0.5);
-#endif
-
 #ifdef _VOT15_DATASET_
         float eucDistance = pow(pow((boundRect.x + boundRect.width/2.0) - (result.x + result.width/2),2) + pow((boundRect.y+boundRect.height/2.0) - (result.y + result.height/2.0),2),0.5);
 #endif
 
         // Compute the Success Overlap by Intersection / Union
 #ifdef _UAV123_DATASET_
-        cv:Rect gtRect(gX,gY,gWidth,gHeight);
-#endif
-
-#ifdef _AutelDATASET_
         cv:Rect gtRect(gX,gY,gWidth,gHeight);
 #endif
 
