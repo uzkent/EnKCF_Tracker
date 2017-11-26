@@ -257,7 +257,7 @@ computation.
      // \textit{Translation Estimation - Correlation Filter} \\
 	Crop the ROI for the $R_{t}^{L}$ (Condition 2), or $R_{t}^{S}$ (Condition 3) given $(x_{t},y_{t})$ and estimate new position as $\mathbf{(x_{t},y_{t})}$ = $\mathbf{\textit{max}(y_{R_{t}})}$\\
 	// \textit{Scale Estimation - Correlation Filter}\\
-	Scale pool for $R_{s}$ : $S = \lbrace1.05,1.0,1/1.05\rbrace$,\\
+	Scale pool for $R_{s}$ : $\mathbf{S} = \lbrace1.05,1.0,1/1.05\rbrace$,\\
 	Crop the ROI for the $R_{s}^{i}$ (Condition 1) and estimate scale factor, $\mathbf{\alpha}$ = $\mathbf{\underset{i\in S}{\textit{argmax}}(PSR(y_{R_{s}^{i}}))}$, and new scale $\mathbf{s_{t} = \alpha * s_{t-1}}$,\\ 
 	Skip it for $R_{t}^{L}$ and $R_{t}^{S}$ ($\mathbf{s_{t}}$=$\mathbf{s_{t-1}}$)\\
 	// \textit{Update Translation - Particle Filter}\\
@@ -293,16 +293,14 @@ translation filter with smaller padding size, $R_{t}^{S}$, to better
 localize the position of the target after the frames we only run
 $R_{t}^{L}$.
 
-Our approach is similar to that of \cite{ma2015long} in that more than
-one KCF is used to address the challenges of single target
-tracking. But ours is different from their approach because we do not
-use those multiple KCFs together at every frame, but alternatively at
-every $k$ frame. It intuitively makes sense to alternatively use
+Our approach is similar to that of \cite{ma2015long} which employs more than
+multiple KCFs sequentially in every frame to address the challenges of single target
+tracking. However, ours is different from their approach because we operate multiple KCFs
+in an alternating manner. It intuitively makes sense to alternatively use
 multiple KCFs with different purposes because the appearance of a
 target does not change drastically over consecutive image frames. For
-most case, even it looks the appearance changes, learning a
-correlation filter over consecutive frames would not be substantially different
-from the one learned using the image few or $k$ frames later. Figure
+most cases, learning a correlation filter over consecutive frames would not be substantially different
+from the one updated with smaller frequency. Figure
 \ref{fig:Filters_Comparison} shows examples supporting this
 observation.
 
@@ -829,8 +827,8 @@ another low-speed scale adaptive SAMF tracker.
 digression from the main idea -- the idea of deploying multiple KCFs
 to make a very fast and effective, single target tracking
 available. We found that, with a slight modification, the proposed
-method can effectively handle tracking of object in fast motion and in
-large camera motion. Specifically, we modified {\it E}nKCF by running
+method can effectively handle large displacement of objects in successive frames due to object
+and camera motion. Specifically, we modified {\it E}nKCF by running
 $R_{t}^{L}$ every frame and remove the particle filter instead. We
 tested this modified {\it E}nKCF with another vision of the UAV123 that
 the original dataset was temporally down-sampled at $10$ fps and makes
@@ -987,12 +985,12 @@ and dynamic maneuvers of a target. The way we ran three KCFs is
 optimal in a sense that efficiently handled the scale change and
 effectively learned the translation of the target. We also developed a
 Bayes filter, particle filter, to smooth the transition between three
-KCFs. In particular, the particle filter estimated the target’s pixel 
-coordinates using evolution of the target’s motion observed over frames.
+KCFs. In particular, the particle filter estimated the target's pixel 
+coordinates using the evolution of the target's motion observed over frames.
 Two public datasets were used to evaluate the performance of the
-proposed algorithm and found, on average, the performance of the
-proposed algorithm is better than those of the existing ones over 5\%
-on precision at 20 pixels and 10-20\% on AUC on average. Our
+proposed algorithm and it was found that, on average, the performance of the
+proposed algorithm is better than other high-speed trackers over 5\%
+on precision at 20 pixels and 10-20\% on AUC. Our
 implementation ran at 340 fps for OTB100 and at 416 fps for UAV123
 data that is faster than DCF (292 fps) for OTB100 and KCF (292 fps),
 DCF (457 fps) for UAV123. Finally, we encoded objects with deep
