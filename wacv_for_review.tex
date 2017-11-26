@@ -139,7 +139,7 @@ system.\footnote{In general, it would not be easy to compare run-time
 \label{Workflows}
 \end{figure*}
 
-One of the dominant frameworks for online, object tracking is the
+One of the dominant frameworks for online object tracking is the
 correlation filter that essentially solves a single-target tracking
 problem as a regression problem in the frequency domain. This
 framework assumes that a target location is given at the beginning
@@ -179,8 +179,8 @@ Another way of handling the scale change for the correlation filter
 based approach is to estimate a correct scale at a location where a
 target highly likely appears \cite{zhang2014fast} -- estimate a
 target's translation first and estimate a correct scale afterward. In
-particular, Zhang and his colleagues use the MOSSE tracker to estimate
-a target's translation. And then they attempted to update the scale of
+particular, Zhang and his colleagues use the MOSSE tracker \cite{bolme2010visual} to 
+estimate the target's translation. And then they attempted to update the scale of
 the target by further analyzing image, sub-regions with high
 confidence. This is based on an assumption that the scale of a target
 would not change much over two consecutive frames. Similarly, Ma and
@@ -401,23 +401,23 @@ $x_{c}$ represents the learned correlation filter and training
 template for the given channel. The parameter $c$ enabled one to
 integrate features in multiple channels, such as HoG and color, in
 this setup \cite{henriques2015high,galoogahi2013multi}. A closed-form
-solution for Equation \ref{eq:Closedform_RidgeReg} exists. To make the
-closed-form solution less complex, an element-wise multiplication in
+solution for Equation \ref{eq:Closedform_RidgeReg} exists. To simplify the
+closed-form solution, an element-wise multiplication in
 frequency domain was proposed for $\hat{w}$:
 \begin{equation}
 \hat{w} = \hat{x}^{*}*\hat{y}(\hat{x}^{*}*\hat{x}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
 \end{equation}
-A non-linear version of this closed-form solution is proposed to make
-it more robust to any geometric and photometric variations
+A non-linear version of this closed-form solution is proposed to increase robustness
+to any geometric and photometric variations
 \cite{henriques2015high}. In particular, the diagonalized Fourier
 domain dual form solution is expressed as
 \begin{equation}
 \hat{\alpha} = \hat{y}(\hat{k}^{xx}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
 \end{equation}
-where $\hat{k}^{xx}$ represents the first row of the kernel matrix $K$
-known as \textit{gram matrix} and it is expressed as
+where $\lambda$ represents the regularization weight whereas $\hat{k}^{xx}$ denotes
+ the first row of the kernel matrix $K$ known as \textit{gram matrix} and it is expressed as
 \begin{equation}
 k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\hat{x}_{c}^{*}\odot \hat{x}_{c}^{'})))
 \label{eq:GaussianCorrelationSingleChannel}
@@ -425,8 +425,8 @@ k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}
 An early version based on this formulation used grayscale feature
 ($C=1$) to learn the solution vector $w$ and multi-channel features
 such as HoG and Color showed improved accuracy
-\cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. Specifically,
-one can execute an object detection using this kernelized correlation
+\cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. 
+Specifically, one can execute an object detection task using this kernelized correlation
 filter with multi-channel features as
 \begin{equation}
 r(z) = F^{-1}(\hat{k}^{xz} \odot \hat{\alpha})
@@ -463,23 +463,23 @@ information makes the feature vector for the translation filter,
 $R_{t}^{L}$, more robust to noise and more discriminative. Figure
 \ref{fig:Filters}(b) shows an example of this translation filter. But,
 this is not the case for the small area, translation filter,
-$R_{t}^{S}$, because this translation filter does not contain much of
-the background area around the target. Figure \ref{fig:Filters}(a)
+$R_{t}^{S}$, because it does not contain much of
+the background area around the target. For this reason, the $R_{t}^{S}$ only
+employs the fHoG features. Figure \ref{fig:Filters}(a)
 shows an example of this translation filter. Lastly, we use both fHoG
 and color-naming features again for the scale filter,
-$R_{s}$. Although we are using the same feature representations for
-the scale filter learning relatively smaller area just around the
-target, the reason of using two feature sets is slightly different in
-that the area to learn is too small for the fHoG to represent the area
-well. In addition, the scale filter, explained earlier in the
+$R_{s}$. By assigning fHoG and color-naming features, we ensure
+that the likelihood of inaccurate scale estimation is reduced in comparison to the scale filter
+with only fHoG features. This is more important in our case as the scale filter is operated in every 5 frames
+in the proposed tracker. Also, the scale filter, explained earlier in the
 algorithm \ref{alg:MKCF}, estimates the scale of a target by
 correlating it with three candidate ROIs. This search may increase the
 run-time complexity of the scale filter from $\mathcal{O}(n\log n)$ to
 $\mathcal{O}(3(n\log n))$. To ensure actual filtering operations
 practical, we use a smaller template size (i.e., 64$\times n$) for the
 scale filter, $R_{s}$. The smaller template size does not degrade the
-tracking performance neither because of 1) zero padding around the
-target and 2) use of color feature.
+tracking performance because of 1) zero padding around the
+target (smaller ROI) and 2) use of color-naming features.
 \begin{comment}
 The ROI considered by $R_{s}$ is resized to a smaller template
 resolution ($64\times n$) as shown in Figure~\ref{fig:Filters}(c).
@@ -635,9 +635,9 @@ $x$-axis and $y$-axis. The particle filter predicts, using a constant
 velocity motion model, a target's next state by generating a predefined
 number of particles. Then it uses the confidence maps of {\it E}nKCF
 as observation to update the state. The weight of a particle is
-computed as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{N} y_{R}(x_{t}-i,y_{t}-j)$,
-where $w_{p}$ denotes the weight of the particle $p$ at time $t$ and $N$ denotes the
-size of the window as that of a confidence map. 
+computed as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{M} y_{R}(x_{t}-i,y_{t}-j)$,
+where $w_{p}$ denotes the weight of the particle $p$ at time $t$, and $N$ and $M$ denote the
+size of rows and columns of the confidence map. 
 %Alternatively one can
 %also use the Euclidean distance of particles to the location of
 %maximum response of the confidence map.
@@ -738,8 +738,9 @@ trackers are ranked based on area under curve (AUC) scores. The
 tracking algorithms under the comparison include ones in high-speed
 ($\geq$300 fps): KCF \cite{henriques2015high}, CSK
 \cite{henriques2012exploiting}, DCF \cite{henriques2015high}, MOSSE
-\cite{bolme2010visual,henriques2015high}, and STC \cite{zhang2014fast}
-and ones in relatively lower-speed ($\geq$50): SAMF
+\cite{bolme2010visual}, and STC \cite{zhang2014fast}
+and ones in relatively lower-speed ($\geq$50): ECO \cite{DanelljanCVPR2017}, 
+CCOT \cite{DanelljanECCV2016}, SCT \cite{Choi_2016_CVPR}, SAMF
 \cite{li2014scale}, DSST \cite{danelljan2014accurate}, Struck
 \cite{hare2012efficient}, MUSTER \cite{hong2015multi}, TLD
 \cite{kalal2012tracking}, and OAB \cite{zhang2012robust}. Figure
