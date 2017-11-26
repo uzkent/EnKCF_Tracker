@@ -204,7 +204,7 @@ increasing run-time performance. Figure \ref{Workflows} illustrates
 the work-flow of the {\it E}nKCF.
 
 The contribution of this paper is a novel, single-target tracking
-algorithm running in a very high-speed, $\geq 300$ fps that deploys an
+algorithm running in a very high-speed ($\geq300$ fps), that deploys an
 ensemble of KCFs, in turn, to more effectively address the scale
 variance and the dynamic maneuver of a target while preserving
 run-time performance as high as possible. We also developed a Bayes
@@ -383,21 +383,21 @@ transform is the key to reduce the complexity of any tracking method
 based on correlation filter. The off-diagonal elements become zero
 whereas the diagonal elements represent the eigenvalues of the
 circulant matrix. The eigenvalues are equal to the DFT transformation
-of the base sample ($x$) elements. The Kernelized Correlation Filter,
-in particular, applies a kernel to $x$ to transform to a more
+of the base sample ($\mathbf{x}$) elements. The Kernelized Correlation Filter,
+in particular, applies a kernel to $\mathbf{x}$ to transform to a more
 discriminative domain. The circulant matrix is then formed by applying
-cyclic shifts on the kernelized $x$. Such kernelization operation
+cyclic shifts on the kernelized $\mathbf{x}$. Such kernelization operation
 maintains O($nlog(n)$) complexity unlike other kernel algorithms
 leading to O($n^{2}$) or even higher complexities.
 
 The KCF solves essentially the problem of a regression in the form of
 the regularization (ridge regression):
 \begin{equation}
-E(h) = \frac{1}{2}||y-\sum_{c=1}^{C}h_{c}*x_{c}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||h_{c}||^{2}
+E(h) = \frac{1}{2}||\mathbf{y}-\sum_{c=1}^{C}\mathbf{h_{c}}*\mathbf{x_{c}}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||\mathbf{h_{c}}||^{2}
 \label{eq:Closedform_RidgeReg}
 \end{equation}
-where $y$ represents the desired continuous response whereas $h$ and
-$x_{c}$ represents the learned correlation filter and training
+where $\mathbf{y}$ represents the desired continuous response whereas $\mathbf{h}$ and
+$\mathbf{x_{c}}$ represents the learned correlation filter and training
 template for the given channel. The parameter $c$ enabled one to
 integrate features in multiple channels, such as HoG and color, in
 this setup \cite{henriques2015high,galoogahi2013multi}. A closed-form
@@ -405,7 +405,7 @@ solution for Equation \ref{eq:Closedform_RidgeReg} exists. To simplify the
 closed-form solution, an element-wise multiplication in
 frequency domain was proposed for $\hat{w}$:
 \begin{equation}
-\hat{w} = \hat{x}^{*}*\hat{y}(\hat{x}^{*}*\hat{x}+\lambda)^{-1}.
+\mathbf{\hat{w}} = \mathbf{\hat{x}^{*}}*\mathbf{\hat{y}}(\mathbf{\hat{x}^{*}}*\mathbf{\hat{x}}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
 \end{equation}
 A non-linear version of this closed-form solution is proposed to increase robustness
@@ -413,25 +413,25 @@ to any geometric and photometric variations
 \cite{henriques2015high}. In particular, the diagonalized Fourier
 domain dual form solution is expressed as
 \begin{equation}
-\hat{\alpha} = \hat{y}(\hat{k}^{xx}+\lambda)^{-1}
+\mathbf{\hat{\alpha}} = \mathbf{\hat{y}}(\mathbf{\hat{k}^{xx}}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
 \end{equation}
-where $\lambda$ represents the regularization weight whereas $\hat{k}^{xx}$ denotes
- the first row of the kernel matrix $K$ known as \textit{gram matrix} and it is expressed as
+where $\lambda$ represents the regularization weight whereas $\mathbf{\hat{k}^{xx}}$ denotes
+ the first row of the kernel matrix $\mathbf{K}$ known as \textit{gram matrix} and it is expressed as
 \begin{equation}
-k^{xx^{'}} = exp(-\dfrac{1}{\alpha^{2}}(||x||^{2}+||x^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\hat{x}_{c}^{*}\odot \hat{x}_{c}^{'})))
+\mathbf{k^{xx^{'}}} = exp(-\dfrac{1}{\alpha^{2}}(||\mathbf{x}||^{2}+||\mathbf{x}^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\mathbf{\hat{x}_{c}}^{*}\odot \mathbf{\hat{x}_{c}}^{'})))
 \label{eq:GaussianCorrelationSingleChannel}
 \end{equation}
 An early version based on this formulation used grayscale feature
-($C=1$) to learn the solution vector $w$ and multi-channel features
+($C=1$) to learn the solution vector $\mathbf{w}$ and multi-channel features
 such as HoG and Color showed improved accuracy
 \cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. 
 Specifically, one can execute an object detection task using this kernelized correlation
 filter with multi-channel features as
 \begin{equation}
-r(z) = F^{-1}(\hat{k}^{xz} \odot \hat{\alpha})
+\mathbf{r(z)} = F^{-1}(\mathbf{\hat{k}^{xz}} \odot \mathbf{\hat{\alpha}})
 \end{equation}
-where $r$ denotes the correlation response at all cyclic shifts of the
+where $\mathbf{r}$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
 
 In the following sections, we will detail two different types of
@@ -627,15 +627,15 @@ later frames. To prevent such potential drifts, we developed a Bayes
 filter that incorporates a target's motion to smooth any intermediate
 outputs from individual KCFs. In particular, we use a particle filter
 to estimate the target's image coordinate based on the {\it E}nKCF's
-outputs. The state in this paper, $X_t$, represents a target's pixel
-coordinates and its velocity, $X_t = \lbrace x, y, v_{x}, v_{y}
+outputs. The state in this paper, $\mathbf{X_t}$, represents the target's pixel
+coordinates and its velocity, $\mathbf{X_t} = \lbrace x, y, v_{x}, v_{y}
 \rbrace$, where $x$ and $y$ are the pixel coordinates of the target's
 centroid, $v_x$ and $v_y$ are the velocity estimated along the
 $x$-axis and $y$-axis. The particle filter predicts, using a constant
 velocity motion model, a target's next state by generating a predefined
 number of particles. Then it uses the confidence maps of {\it E}nKCF
 as observation to update the state. The weight of a particle is
-computed as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{M} y_{R}(x_{t}-i,y_{t}-j)$,
+computed as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{M} \mathbf{y_{R}}(x_{t}-i,y_{t}-j)$,
 where $w_{p}$ denotes the weight of the particle $p$ at time $t$, and $N$ and $M$ denote the
 size of rows and columns of the confidence map. 
 %Alternatively one can
@@ -702,7 +702,7 @@ can achieve over hand-crafted features.
        performance and accuracy. To keep the level of variance among
        the particles reasonable, we performed the re-sampling only
        when the \textit{efficient number of samples}, ($ \hat{N}_{eff}
-       \approx (\sum_{p=1}^{P}w_{p}^{2})^{-1} $), is lower than a
+       \approx (\sum_{p=1}^{P}\mathbf{w}_{p}^{2})^{-1} $), is lower than a
        pre-defined threshold.
 
 \begin{figure*}[h]
