@@ -62,28 +62,28 @@ applications running on embedded systems. This is primarily because
 most of embedded systems come with an image acquisition pipeline, and
 a tremendous amount of progresses on computer vision research has been
 made for the past few decades. However, to successfully deploy a
-computer vision algorithm on any existing embedded systems, a vision
+computer vision algorithm on any existing embedded system, a vision
 algorithm needs to satisfy, at least, two criteria with the assumption
 of reasonably good performance: minimal, manual intervention after
 deployment and small footprint of consuming computational
-resources. Kept these criteria in mind, to develop a single, target
-tracking system, we propose an ensemble of the kernelized correlation
-filters (KCF), we call {\it E}nKCF. This committee of KCFs is
+resources. Keeping these criterias in mind, we propose an ensemble of the 
+kernelized correlation filters (KCF), called {\it E}nKCF, to develop a single target
+tracking system. This committee of KCFs is
 specifically designed to address the scale-change and dynamic maneuver
-of the target over frames. In particular, to guarantee a high-speed,
+of the target over frames. In particular, to guarantee a high-speed
 run-time performance, we deploy each of KCFs in turn, instead of
 applying multiple KCFs on each frame. To minimize any potential drifts
 between individual KCFs' transition, we developed a Bayes
 filter. Experimental results showed that the performance of ours are,
 on average, 70.10\% for precision at 20 pixels, 53.00\% for success
 rate for OTB100 data, and 54.50\% and 40.2\% for UAV123 data. These
-results showed that our method is better than existing ones over 5\%
-on precision on 20 pixels and 10-20\% on AUC on average. Moreover our
+results showed that our method is better than other high-speed trackers over 5\%
+on precision on 20 pixels and 10-20\% on AUC on average. Moreover, our
 implementation ran at 340 fps for OTB100 and at 416 fps for UAV123
-data that is faster than DCF (292 fps) for OTB100 and KCF (292 fps),
-DCF (457 fps) for UAV123. To increase flexibility of the proposed {\it
-  E}nKCF running on various single-board computers, particularly, ones
-with GPUs, we explored different levels of deep features.
+dataset that is faster than DCF (292 fps) for OTB100 and KCF (292 fps) 
+for UAV123. To increase flexibility of the proposed {\it E}nKCF running on 
+various single-board computers, particularly ones
+with GPUs, we explored different levels of deep convolutional features.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
