@@ -88,6 +88,7 @@ with GPUs, we explored different levels of deep convolutional features.
 
 %%%%%%%%% BODY TEXT
 \section{Introduction}
+\label{introduction}
 A recent advancement of air/ground/water unmanned vehicle technologies
 has increased interests on deploying intelligent algorithms to
 existing embedded and mobile platforms. Among those technologies,
@@ -741,17 +742,18 @@ and ones in relatively lower-speed ($\geq$50): ECO \cite{DanelljanCVPR2017},
 CCOT \cite{DanelljanECCV2016}, SCT \cite{Choi_2016_CVPR}, SAMF
 \cite{li2014scale}, DSST \cite{danelljan2014accurate}, Struck
 \cite{hare2012efficient}, MUSTER \cite{hong2015multi}, TLD
-\cite{kalal2012tracking}, and OAB \cite{zhang2012robust}. Figure
-\ref{fig:UAV123_DATASET} shows the results on the UAV123 dataset. {\it
-  E}nKCF outperformed most of the high-speed tracking methods by
+\cite{kalal2012tracking}, and OAB \cite{zhang2012robust}. The ECO and CCOT trackers
+originally uses deep convolutional features. For the sake of fair comparison, we employ fHoG
+and color-naming features similar to our study. Figure \ref{fig:UAV123_DATASET} shows 
+the results on the UAV123 dataset. {\it  E}nKCF outperformed most of the high-speed tracking methods by
 $3\%$-$15\%$ at 20 pixels precision. Three algorithms, SAMF, DSST, and
-Struck did about 5\% better than ours in accuracy, but 10-20 times
-slower. For the scale adaptation, {\it E}nKCF did second best in terms
-of AUC for the success rate plot. It outperformed other tracking
-methods in high-speed by about $20\%$-$25\%$ in AUC. In addition, it
-performed even better than those algorithms that are slow, but a
-slightly better in precision. For example, for AUC, {\it E}nKCF
-outperformed Struck and DSST by $5\%$ and $10\%$ while running at more
+Struck did about $5\%$ better than ours in accuracy, but 10-20 times
+slower. The more recent trackers, ECO and CCOT, on the other hand, outperforms
+{\it  E}nKCF by $15\%$ while running at 10-15 times slower speed. 
+For the scale adaptation, {\it E}nKCF did fourth best in terms
+of AUC for the success rate plot. It outperformed other high-speed trackers
+ by about $20\%$-$25\%$ in AUC. In addition, it performed even better than some of the lower-speed trackers. 
+For example, for AUC, {\it E}nKCF outperformed Struck and DSST by $5\%$ and $10\%$ while running at more
 than $10$ and $30$ times faster.
 
 \begin{table*}[!h]
@@ -814,18 +816,17 @@ camera motion, the integration of particle filter into the {\it E}nKCF
 as shown in Figure \ref{Workflows} further improved the results.
 
 \textbf{Performance on OTB100 Dataset} Figure \ref{fig:UAV123_DATASET}
-shows the results on the OTB100 dataset. Same as with UAV123 dataset,
-we observed a similar performance. In particular, {\it E}nKCF showed a
-good performance for handling the scale changes. It was the third best
-and the second fastest tracking algorithm. For the precision metric,
-{\it E}nKCF performed slightly better than most of tracking algorithms
-in high-speed trackers. Interestingly, it outperformed another
+shows the results on the OTB100 dataset. The relative performance of {\it E}nKCF 
+is similar to the UAV123 dataset. In particular, it performed reasonably at approximating target scale. 
+It was the fifth best and the second fastest tracking algorithm. Among the other high-speed trackers,
+it delivers the highest precision and success rates. Interestingly, it outperformed another
 correlation filter based tracker, DSST, but performing $5\%$ behind of
-another low-speed scale adaptive SAMF tracker.
+another low-speed scale adaptive SAMF tracker. Finally, the ECO, and CCOT achieve $15\%$-$20\%$ higher
+precision and success rates than ours while operating at 10-20 times slower rates.
 
 \textbf{Performance on UAV123$\_$10fps Dataset} It maybe a slight
 digression from the main idea -- the idea of deploying multiple KCFs
-to make a very fast and effective, single target tracking
+to make a very fast and effective single target tracking
 available. We found that, with a slight modification, the proposed
 method can effectively handle large displacement of objects in successive frames due to object
 and camera motion. Specifically, we modified {\it E}nKCF by running
@@ -834,13 +835,24 @@ tested this modified {\it E}nKCF with another vision of the UAV123 that
 the original dataset was temporally down-sampled at $10$ fps and makes
 the challenging original dataset, because of objects in fast motion
 and large ego-motion, more challenging. This is because the magnitude
-of those motions is even bigger. Figure \ref{fig:UAV123_10fpsDATASET}
+of those motions is even bigger. Also, we can observe the sensitivity of 
+the state-of-the-art lower speed trackers to the video frame rate b
+y running them on this downsampled dataset. Figure \ref{fig:UAV123_10fpsDATASET}
 compares the performance of the modified version of {\it E}nKCF and
 other tracking methods. Our tracker outperforms other high-speed
 correlation filter based trackers including KCF, DSST by about
 $15\%$-$20\%$ and showed a precision rate similar to that of SAMF. On
 the other hand, it does decent job in scale estimation. It ranks as
-second in AUC while running about $150$ faster than MUSTER.
+fourth in AUC while running about 10 to 100 times faster than the top three trackers.
+
+In the lower frame rate scenarios (10 fps), the ECO and CCOT's precision rates drop about
+$10\%$ worse than the original frame rate scenarios. We believe that this is an indicator of
+how good of a performance we can expect from these trackers on low-end hardware. The projected
+frame rates of the ECO and CCOT on a low-end hardware are $\simeq$1.5 and $\simeq$0.3 by using our 
+convention described in section~\ref{introduction}. In this case, it would be reasonable to expect these
+trackers to perform drastically worse on such hardware whereas the {\it E}nKCF can still perform similarly
+due to its real-time speed on a low-end hardware. Our observations are also supported by \cite{mueller2017context}
+that evaluates the correlation filter-driven trackers at variable frame rates matching their operation rates.
 
 \begin{figure}[!h]
 \centering
