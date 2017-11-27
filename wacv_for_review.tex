@@ -259,13 +259,13 @@ computation.
 	// \textit{Scale Estimation - Correlation Filter}\\
 	Scale pool for $R_{s}$ : $\mathbf{S} = \lbrace1.05,1.0,1/1.05\rbrace$,\\
 	Crop the ROI for the $R_{s}^{i}$ (Condition 1) and estimate scale factor, $\mathbf{\alpha}$ = $\mathbf{\underset{i\in S}{\textit{argmax}}(PSR(y_{R_{s}^{i}}))}$, and new scale $\mathbf{s_{t} = \alpha * s_{t-1}}$,\\ 
-	Skip it for $R_{t}^{L}$ and $R_{t}^{S}$ ($\mathbf{s_{t}}$=$\mathbf{s_{t-1}}$)\\
+	Skip it for $R_{t}^{L}$ (Condition 2) and $R_{t}^{S}$ (Condition 3), $\mathbf{s_{t}}$=$\mathbf{s_{t-1}}$\\
 	// \textit{Update Translation - Particle Filter}\\
 	Do Importance Re-sampling (if necessary) and compute the 
 	mean of posterior pdf $\mathbf{(x_{t},y_{t})}$\\
 	// \textit{Model Update}\\
-	Update $R_{t}^{S}$,\\
-	Update $R_{t}^{L}$\\
+	Update $R_{t}^{S}$ (Condition 3),\\
+	Update $R_{t}^{L}$ (Condition 2),\\
 	\uIf{$PSR(y_{R_{s}}) \geq T_{R_{s}}$}{
 		Update $R_{s}$ (Condition 1)}
   \label{endfor}
@@ -546,12 +546,12 @@ underestimate EnKCF.
 \end{comment} 
 
 There has been a large volume of studies on utilizing a pre-trained
-CNN features to tracking-by-detection algorithms. For example,
+CNN features in tracking-by-detection algorithms. For example,
 \cite{danelljan2015convolutional} used the activations of the first
 and second convolutional layer of the VGGNet \cite{simonyan2014very}.
 They report that the first convolutional layer features lead to
 slightly better precision and success rates than the second layer due
-to lost spatial information this layer. \cite{ma2015hierarchical}
+to increased translational invariance in this layer. \cite{ma2015hierarchical}
 proposed a KCF tracker integrating features with higher abstraction
 capacity.  Their method first employs the third convolutional layer
 features to estimate the response map. In the next stage, the KCF,
