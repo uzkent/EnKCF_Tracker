@@ -185,7 +185,7 @@ target's translation first and then estimate correct scale. For
 example, Zhang and his colleagues used the MOSSE tracker
 \cite{bolme2010visual} to estimate the target's translation. And then
 they attempted to update the scale of the target by further analyzing
-image, sub-regions in high confidence. Their method is based on an
+image sub-regions in high confidence. Their method is based on an
 assumption that the scale of a target would not change much over two
 consecutive frames. Similarly, Ma and his colleagues used two KCFs to
 learn the translation and scale of a target separately
@@ -262,7 +262,6 @@ high run-time performance and small-footprint.
 	// \textit{Scale Estimation - Correlation Filter}\\
 	Scale pool for $R_{s}$ : $\mathbf{S} = \lbrace1.05,1.0,1/1.05\rbrace$,\\
 	Crop the ROI for the $R_{s}^{i}$ (Condition 1) and estimate scale factor, $\mathbf{\alpha}$ = $\mathbf{\underset{i\in S}{\textit{argmax}}(PSR(y_{R_{s}^{i}}))}$, and new scale $\mathbf{s_{t} = \alpha * s_{t-1}}$,\\ 
-	Skip it for $R_{t}^{L}$ (Condition 2) and $R_{t}^{S}$ (Condition 3), $\mathbf{s_{t}}$=$\mathbf{s_{t-1}}$\\
 	// \textit{Update Translation - Particle Filter}\\
 	Do Importance Re-sampling (if necessary) and compute the 
 	mean of posterior pdf $\mathbf{(x_{t},y_{t})}$\\
@@ -346,7 +345,7 @@ these filters aims at addressing different challenges. A translation
 filter, $R_{t}^{L}$, is applied to the $i$th and $i$+$1$th image
 frames, another translation filter, $R_{t}^{S}$ is applied to the
 $i$+$2$th and $i$+$3$th image frames, and then the scale filter,
-$R_{s}$ is applied to the $i$+$4$the image. This order repeats until
+$R_{s}$ is applied to the $i$+$4$th image. This order repeats until
 the last image is presented. Note that the translation filter,
 $R_{t}^{L}$, is intended to run right after the scale filter, $R_s$,
 runs which is applied at every other $i$+$4$ frames. We run these
@@ -396,43 +395,53 @@ the regularization (ridge regression):
 E(h) = \frac{1}{2}||\mathbf{y}-\sum_{c=1}^{C}\mathbf{h_{c}}*\mathbf{x_{c}}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||\mathbf{h_{c}}||^{2}
 \label{eq:Closedform_RidgeReg}
 \end{equation}
-where $\mathbf{y}$ represents the desired continuous response whereas $\mathbf{h}$ and
-$\mathbf{x_{c}}$ represents the learned correlation filter and training
-template for the given channel. The parameter $c$ enabled one to
-integrate features in multiple channels, such as HoG and color, in
-this setup \cite{henriques2015high,galoogahi2013multi}. A closed-form
-solution for Equation \ref{eq:Closedform_RidgeReg} exists. To simplify the
+where we seek for $\mathbf{h}$ that minimizes $E$ given the desired 
+continuous response, $\mathbf{y}$, and the training template $\mathbf{x}$. 
+The parameter $c$ enables one to integrate features in the form of 
+multiple channels, such as HoG and color, in this setup \cite{henriques2015high,galoogahi2013multi}. 
+A closed-form solution for Equation \ref{eq:Closedform_RidgeReg} exists. To simplify the
 closed-form solution, an element-wise multiplication in
-frequency domain was proposed for $\hat{w}$:
+frequency domain was proposed to learn the frequency domain correspondence of $\mathbf{h}$, $\mathbf{\hat{w}}$:
 \begin{equation}
 \mathbf{\hat{w}} = \mathbf{\hat{x}^{*}}*\mathbf{\hat{y}}(\mathbf{\hat{x}^{*}}*\mathbf{\hat{x}}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
 \end{equation}
-A non-linear version of this closed-form solution is proposed to increase robustness
+A non-linear version of $\mathbf{\hat{w}}$, $\mathbf{\hat{\alpha}}$ , is proposed to increase robustness
 to any geometric and photometric variations
-\cite{henriques2015high}. In particular, the diagonalized Fourier
+\cite{henriques2015high}. In particular, the diagonalized non-linear Fourier
 domain dual form solution is expressed as
 \begin{equation}
 \mathbf{\hat{\alpha}} = \mathbf{\hat{y}}(\mathbf{\hat{k}^{xx}}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
 \end{equation}
 where $\lambda$ represents the regularization weight whereas $\mathbf{\hat{k}^{xx}}$ denotes
- the first row of the kernel matrix $\mathbf{K}$ known as \textit{gram matrix} and it is expressed as
+ the first row of the kernel matrix $\mathbf{K}$ known as \textit{gram matrix} and is expressed as
 \begin{equation}
-\mathbf{k^{xx^{'}}} = exp(-\dfrac{1}{\alpha^{2}}(||\mathbf{x}||^{2}+||\mathbf{x}^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\mathbf{\hat{x}_{c}}^{*}\odot \mathbf{\hat{x}_{c}}^{'})))
+\mathbf{k^{xx^{'}}} = exp(-\dfrac{1}{\alpha^{2}}(||\mathbf{x}||^{2}+||\mathbf{x}^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\mathbf{\hat{x}_{c}}^{*}\odot \mathbf{\hat{x}_{c}}^{'}))).
 \label{eq:GaussianCorrelationSingleChannel}
 \end{equation}
 An early version based on this formulation used grayscale feature
-($C=1$) to learn the solution vector $\mathbf{w}$ and multi-channel features
+($C=1$) to learn the solution vector $\mathbf{w}$ and integrating multi-channel features
 such as HoG and Color showed improved accuracy
 \cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}. 
-Specifically, one can execute an object detection task using this kernelized correlation
-filter with multi-channel features as
+In the detection phase,  the learned correlation filter is correlated with the first row of the gram matrix,
+$\mathbf{k^{xz^{'}}}$, which contains the similarity values between the learned feature template $\mathbf{x}$
+and the new test template $\mathbf{z}$. This can be formulated as
 \begin{equation}
 \mathbf{r(z)} = F^{-1}(\mathbf{\hat{k}^{xz}} \odot \mathbf{\hat{\alpha}})
 \end{equation}
 where $\mathbf{r}$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
+
+In practice, the solution vector, $\mathbf{\hat{\alpha}}$, and 
+the feature template matrix, $\mathbf{x}$, are accumulated over time
+to integrate temporal information as
+\begin{align}
+ \mathbf{\hat{\alpha}_{t}} =  (1 - \beta)  \mathbf{\hat{\alpha}_{t-1}} +  \beta \mathbf{\hat{\alpha}_{t}} \\
+  \mathbf{x_{t}} =  (1 - \beta)  \mathbf{x_{t-1}} + \beta  \mathbf{x_{t}}
+\end{align}
+
+where $\beta$ is the learning rate and mostly tuned to a small value.
 
 In the following sections, we will detail two different types of
 features used in {\it E}nKCF : (1) hand-crafted features (fHoG +
@@ -705,7 +714,12 @@ outperformed other high-speed trackers by about $20\%$-$25\%$ in
 AUC. In addition, it performed even better than some of the
 lower-speed trackers.  For example, for AUC, {\it E}nKCF outperformed
 Struck and DSST by $5\%$ and $10\%$ while running at more than $10$
-and $30$ times faster.
+and $30$ times faster. We believe that there can be two reasons why {\it E}nKCF
+outperforms the DSST that updates the scale every frame searching over
+33 scale ratios. (1) The DSST uses a 1-D scale filter whereas ours applies a 2-D scale
+filter. This might reduce the spatial information learned in the scale filter. (2) The
+DSST scale filter originally employs only fHoG features whereas ours combines
+both fHoG and color-naming features.
 
 \begin{table*}[!h]
 \smaller
@@ -801,7 +815,7 @@ scale estimation. It ranks as fourth in AUC while running about $10$
 to $100$ times faster than the top three trackers.
 
 On the lower frame rate dataset ($10$ fps), the ECO and CCOT's
-precision rates drop about $10\%$ worse than the original dataset. We
+precision rates drop about $10\%$ than the original dataset. We
 believe that this is an indicator of how good of a performance can be
 expected from these trackers on a limited hardware. The projected
 frame rates of the ECO and CCOT on a low-end hardware are $\simeq$1.5
