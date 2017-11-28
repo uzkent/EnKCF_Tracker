@@ -60,30 +60,31 @@ Institution2\\
 Computer vision technologies are very attractive for practical
 applications running on embedded systems. This is primarily because
 most of embedded systems come with an image acquisition pipeline, and
-a tremendous amount of progresses on computer vision research has been
+a tremendous amount of progress on computer vision research has been
 made for the past few decades. However, to successfully deploy a
 computer vision algorithm on any existing embedded system, a vision
 algorithm needs to satisfy, at least, two criteria with the assumption
 of reasonably good performance: minimal, manual intervention after
 deployment and small footprint of consuming computational
-resources. Keeping these criterias in mind, we propose an ensemble of the 
-kernelized correlation filters (KCF), called {\it E}nKCF, to develop a single target
-tracking system. This committee of KCFs is
-specifically designed to address the scale-change and dynamic maneuver
-of the target over frames. In particular, to guarantee a high-speed
-run-time performance, we deploy each of KCFs in turn, instead of
-applying multiple KCFs on each frame. To minimize any potential drifts
-between individual KCFs' transition, we developed a Bayes
-filter. Experimental results showed that the performance of ours are,
-on average, 70.10\% for precision at 20 pixels, 53.00\% for success
-rate for OTB100 data, and 54.50\% and 40.2\% for UAV123 data. These
-results showed that our method is better than other high-speed trackers over 5\%
-on precision on 20 pixels and 10-20\% on AUC on average. Moreover, our
-implementation ran at 340 fps for OTB100 and at 416 fps for UAV123
-dataset that is faster than DCF (292 fps) for OTB100 and KCF (292 fps) 
-for UAV123. To increase flexibility of the proposed {\it E}nKCF running on 
-various single-board computers, particularly ones
-with GPUs, we explored different levels of deep convolutional features.
+resources. To develop a single-target tracking algorithm that
+satisfies these criteria, we propose an ensemble of the kernelized
+correlation filters (KCF), we call it {\it E}nKCF. A committee of KCFs
+is specifically designed to address the scale-change and dynamic
+maneuver of the target over frames. In particular, to guarantee a
+high-speed run-time performance, we deploy each of KCFs in turn,
+instead of applying multiple KCFs to each frame. To minimize any
+potential drifts between individual KCFs' transition, we developed a
+Bayes filter. Experimental results showed that the performance of ours
+is, on average, 70.10\% for precision at 20 pixels, 53.00\% for
+success rate for OTB100 data, and 54.50\% and 40.2\% for UAV123
+data. The results showed that our method is better than other
+high-speed trackers over 5\% on precision on 20 pixels and 10-20\% on
+AUC on average. Moreover, our implementation ran at 340 fps for OTB100
+and at 416 fps for UAV123 dataset that is faster than DCF (292 fps)
+for OTB100 and KCF (292 fps) for UAV123. To increase flexibility of
+the proposed {\it E}nKCF running on various single-board computers,
+particularly ones with GPUs, we also explored different levels of deep
+convolutional features.
 \end{abstract}
 
 %%%%%%%%% BODY TEXT
@@ -118,25 +119,25 @@ the appearance model of a target on the fly and 2) run as fast on a
 typical desktop as up to $300$-$450$ fps, aiming at running, at least,
 faster than 30 fps when it is deployed on a low-end, embedded
 system.\footnote{In general, it would not be easy to compare run-time
-  performance of a computer vision algorithm at an Intel or AMD
-  processor running on a desktop or a laptop and at that (e.g., ARM)
-  of a single-board, embedded system. This is primarily due to the
-  difference in their architectures and available computing
-  resources. To derive these numbers (300 and 30 fps), we assume that
-  there is roughly, at least, an 1/10th scale down of computational
-  resources from a typical PC to an embedded system. We found such a
-  scale-down in computation based on exemplar processors, e.g.,
-  Intel's i7 quad-core vs ARMv8 dual-core.}
+  performance of a computer vision algorithm running on an Intel or
+  AMD desktop or a laptop and on that (e.g., ARM) of a single-board,
+  embedded system. This is primarily due to the difference in their
+  architectures and available computing resources. To derive these
+  numbers (``300'' and ``30'' fps), we assume that there is roughly an
+  1/10th scale down of computational resources from a typical PC to an
+  embedded system. We found such a scale-down in computation based on
+  exemplar processors, e.g., Intel's i7 quad-core vs ARMv8 dual-core.}
 
 \begin{figure*}[!h]
 \centering
 \begin{tabular}{cc}
 \includegraphics[width=14.00cm]{./figures/Workflow_MKCF+PF.pdf}\\
 \end{tabular}
-\caption{The work-flow of the proposed single-target tracking
-  algorithm, {\it E}nKCF. We show the first seven frames of tracking
-  where the first frame is the initialization frame. Afterward, the
-  order of deploying three KCFs is repeating.}
+\caption{The workflow of the {\it E}nKCF. The first frame is used to
+  initialize the tracking algorithm and a particle filter. For the
+  next six frames, each of three KCF is deployed in turn to estimate
+  the translation and scale change of a target. Afterward, the order
+  of deploying three KCFs is repeating.}
 \label{Workflows}
 \end{figure*}
 
@@ -150,28 +151,29 @@ regression problem, a set of negative examples is collected around the
 initial, target bounding box and represented as a form of the
 circulant matrix \cite{henriques2015high}. One can optimally solve
 this regression problem using a ridge regression in a closed
-form. However, this solution involves in expensive matrix operations
-$\mathcal{O}(n^{3})$. The correlation filter offers a less complex
-solution, $\mathcal{O}(n\log n)$ over element-wise multiplication in a
-frequency domain \cite{bolme2010visual,henriques2015high}. Thank to
-this reformulation, an object tracking pipeline based on the
-correlation filter can run very efficiently and be even easily
-implemented. In fact, an extension of a linear correlation filter, the
-kernelized correlation filter with multi-channel features
-\cite{henriques2015high} showed impressive object tracking results and
-outperformed other state-of-the-art, online tracking algorithms in
-terms of run-time and tracking accuracy. However, a vanilla form of
-such an online tracker is prone to drift, and fails to track a target
-over a long period of time \cite{henriques2015high}. This is primarily
-due to the dilemma of stability-plasticity in updating appearance
-model, where the appearance model will be overfitted to only the
-images used to train, unless a compromise on the frequency of updating
-the model is carefully implemented \cite{santner2010prost}. For
-example, one may handle a target's scale variation by just
-concatenating multiple correlation filters including KCF and running
-them on each frame. Alternatively one could think of scanning the
-region of interest (ROI) with a list of templates in predefined scale
-ratios to find the target in appropriate scale
+form. However, this solution has to deal with expensive matrix
+operations $\mathcal{O}(n^{3})$. The correlation filter offers a less
+complex solution, $\mathcal{O}(n\log n)$ over element-wise
+multiplication in a frequency domain
+\cite{bolme2010visual,henriques2015high}. Thank to this reformulation,
+an object tracking pipeline based on the correlation filter can run
+very efficiently and be even easily implemented. In fact, an extension
+of a linear correlation filter, the kernelized correlation filter with
+multi-channel features \cite{henriques2015high} showed impressive
+object tracking results and outperformed other state-of-the-art,
+online tracking algorithms in terms of run-time and tracking
+accuracy. However, a vanilla form of such an online tracker is prone
+to drift, and fails to track a target over a long period of time
+\cite{henriques2015high}. This is primarily due to the dilemma of
+stability-plasticity in updating appearance model, where the
+appearance model will be overfitted to only the images used to train,
+unless a compromise on the frequency of updating the model is
+carefully implemented \cite{santner2010prost}. For example, one may
+handle a target's scale variation by just concatenating multiple
+correlation filters including KCF and running them on each
+frame. Alternatively one could think of scanning the region of
+interest (ROI) with a list of templates in predefined scale ratios to
+find the target in appropriate scale
 \cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. However,
 these approaches will drastically reduce run-time performance because
 they are proposed to run multiple KCF on each frame.
@@ -179,18 +181,19 @@ they are proposed to run multiple KCF on each frame.
 Another way of handling the scale change for the correlation filter
 based approach is to estimate a correct scale at a location where a
 target highly likely appears \cite{zhang2014fast} -- estimate a
-target's translation first and estimate a correct scale afterward. In
-particular, Zhang and his colleagues use the MOSSE tracker \cite{bolme2010visual} to 
-estimate the target's translation. And then they attempted to update the scale of
-the target by further analyzing image, sub-regions with high
-confidence. This is based on an assumption that the scale of a target
-would not change much over two consecutive frames. Similarly, Ma and
-his colleagues used two KCFs to learn the translation and scale of a
-target separately \cite{ma2015long}. In particular, a KCF is used to
-learn the translation of the target and its background. Given this,
-another KCF is used to learn the target area to estimate a new scale
-of the target. However, because of running more than a KCF on each
-frame, this method degrades its run-time performance (i.e., $\leq 50
+target's translation first and then estimate correct scale. For
+example, Zhang and his colleagues used the MOSSE tracker
+\cite{bolme2010visual} to estimate the target's translation. And then
+they attempted to update the scale of the target by further analyzing
+image, sub-regions in high confidence. Their method is based on an
+assumption that the scale of a target would not change much over two
+consecutive frames. Similarly, Ma and his colleagues used two KCFs to
+learn the translation and scale of a target separately
+\cite{ma2015long}. In particular, a KCF is used to learn the
+translation of the target and its background. Given this, another KCF
+is used to learn the target area to estimate a new scale of the
+target. However, because of running more than a KCF on each frame,
+this method degrades its run-time performance (i.e., $\leq 50
 fps$). Our method is motivated by this idea -- the idea of deploying
 multiple KCFs to address the issues of single target tracking: scale
 and translation, but in a more efficient way. To maximize run-time
@@ -199,36 +202,35 @@ every frame, we deploy three KCFs in turn:
 \textit{target}+\textit{small background} translation filter
 ($R_{t}^{S}$), \textit{target-only} scale filter ($R_{s}$) and
 \textit{target}+\textit{large background} translation filter
-($R_{t}^{L}$). By doing so, our method aims at addressing a scale
+($R_{t}^{L}$). By doing so, our method aims at addressing scale
 change and estimate target's motion efficiently while maintaining or
 increasing run-time performance. Figure \ref{Workflows} illustrates
-the work-flow of the {\it E}nKCF.
+the workflow of the {\it E}nKCF.
 
 The contribution of this paper is a novel, single-target tracking
-algorithm running in a very high-speed ($\geq300$ fps), that deploys an
-ensemble of KCFs, in turn, to more effectively address the scale
-variance and the dynamic maneuver of a target while preserving
-run-time performance as high as possible. We also developed a Bayes
-filter to minimize any potential drifts while transiting one KCF to
-another. In addition, we explore deep features with varying levels of
-abstraction in the proposed {\it E}nKCF to improve tracking
-performance and increase its flexibility being deployed on high-end,
-single-board computer with GPUs.
+algorithm running in a very high-speed ($\geq300$ fps). In particular,
+to effectively address the changes in scale and translation of a
+target, the proposed algorithm deploys each of three, special-purpose
+KCFs in turn. Because of such a deployment strategy, the run-time
+performance of the proposed algorithm perserves high. To minimize any
+potential drifts while switching KCFs, we developed a Bayes filter. In
+addition, to increase the flexibility of the proposed algorithm's
+usage, we explore deep features with varying levels of abstraction for
+the proposed {\it E}nKCF to improve performance.
 
 %---------------------------------------------------------------------- 
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
 %---------------------------------------------------------------------- 
-
 We propose a novel way of utilizing a multiple of the KCFs
 \cite{henriques2015high} to effectively handle scale variations and
 dynamic maneuvers of a target. To maintain or improve the run-time
 performance of the original KCF (e.g., $\ge$ 300), we deploy three
 KCFs in turn, instead of applying them on the same image frame
-together. Each of these KCFs is designed to address specific
-challenges: scale and translation. By alternating their deployments,
-our algorithm will improve the performance of the original KCF while
-preserving the efficient nature and small-footprint of the KCF
-computation.
+together. Each of these KCFs is designed to address the challenge of
+single-target tracking -- variance in scale and translation. By
+deploying each of three KCFs in turn, our algorithm will improve the
+performance of the original KCF while preserving the original KCF's
+high run-time performance and small-footprint.
 
 \begin{algorithm*}[h]
 \small
@@ -277,33 +279,32 @@ computation.
 
 The proposed algorithm, {\it E}nKCF, learns three KCFs in turn: The
 first filter, $R_{t}^{S}$, focuses on learning the target area and its
-background, \textit{target}+\textit{small background} for addressing a
-marginal translation by a target, the second filter, $R_{s}$, focuses
-entirely on learning the target's scale, \textit{target-only}, and the
-last filter, $R_{t}^{L}$, focuses on the target area and its
-background bigger than that of the first filter, $R_{t}^{S}$,
-\textit{target}+\textit{large background}. We set up {\it E}nKCF in
-this way because, we believe, a correlation filter for learning a
-target's translation should include the background of the target to
-better discriminate it from its surrounding, and another correlation
-filter should focus on the target itself to estimate the right scale
-of the target. By setting a transition filter with larger padding
-size, $R_{t}^{L}$, we can recover from potential drifts after the
-frames we only run the scale filter. Additionally, we design a
-translation filter with smaller padding size, $R_{t}^{S}$, to better
-localize the position of the target after the frames we only run
-$R_{t}^{L}$.
+background for addressing a marginal translation by a target, the
+second filter, $R_{s}$, focuses entirely on learning the target's
+scale, and the last filter, $R_{t}^{L}$, focuses on the target area
+and its background bigger than that of the first filter,
+$R_{t}^{S}$. We set up {\it E}nKCF in this way so that a correlation
+filter for learning a target's translation could include the
+background of the target to better discriminate it from its
+surrounding, and another correlation filter could focus on the target
+itself to estimate the right scale of the target. In particular, a
+transition filter with larger padding size, $R_{t}^{L}$ will enable
+{\it E}nKCF to recover from potential drifts after a scale filter is
+applied to the input images. Whereas another translation filter with
+smaller padding size, $R_{t}^{S}$ will help {\it E}nKCF to better
+localize the position of the target after a translation filter is
+applied.
 
-Our approach is similar to that of \cite{ma2015long} which employs more than
-multiple KCFs sequentially in every frame to address the challenges of single target
-tracking. However, ours is different from their approach because we operate multiple KCFs
-in an alternating manner. It intuitively makes sense to alternatively use
-multiple KCFs with different purposes because the appearance of a
-target does not change drastically over consecutive image frames. For
-most cases, learning a correlation filter over consecutive frames would not be substantially different
-from the one updated with smaller frequency. Figure
-\ref{fig:Filters_Comparison} shows examples supporting this
-observation.
+Our approach is similar to that of \cite{ma2015long} which
+sequentially applied more than one KCF to every frame, but different
+in that we operate multiple KCFs in an alternating manner. It
+intuitively makes sense to alternatively use multiple KCFs with
+different purposes because the appearance of a target does not change
+drastically over consecutive images. In other words, for most cases,
+learning a correlation filter over consecutive frames would not be
+substantially different from the one updated with smaller
+frequency. Figure \ref{fig:Filters_Comparison} shows examples
+supporting this observation.
 
 \begin{comment}
 Since Henriques and his colleagues' presented impressive tracking
@@ -341,23 +342,23 @@ this observation.
 
 The algorithm \ref{alg:MKCF} shows the pseudo-code of {\it E}nKCF.
 The order of running these three KCFs is important because each of
-these filters aims at addressing different challenges. The
-\textit{target+large background} translation filter, $R_{t}^{L}$, is
-applied to the $i$th and $i$+$1$th image frames, another translation
-filter, $R_{t}^{S}$ is applied to the $i$+$2$th and $i$+$3$th image
-frames, and then the scale filter, $R_{s}$ is applied to the
-$i$+$4$the image. This order repeats until the end of the image
-frames. The translation filter, $R_{t}^{L}$, is intended to run right
-after the scale filter, $R_s$, runs which is applied at every other
-$i$+$4$ frames. We run these filters in this way because we want to
-minimize any drifts that are likely to happen running only $R_{s}$. In
-addition, the filter, $R_{t}^{S}$, is applied to every other two
-frames before $R_{s}$ and right after two consecutive frames running
-$R_{t}^{L}$. By repeating this order of learning KCFs, we can
-integrate more discriminative shape features that cannot be learned
-just by $R_{t}^{L}$. The filter, $R_{t}^{L}$, uses shape and color
-information together to recover from any potential drifts -- drifts
-could happen only looking the target's scale by the filter, $R_{s}$.
+these filters aims at addressing different challenges. A translation
+filter, $R_{t}^{L}$, is applied to the $i$th and $i$+$1$th image
+frames, another translation filter, $R_{t}^{S}$ is applied to the
+$i$+$2$th and $i$+$3$th image frames, and then the scale filter,
+$R_{s}$ is applied to the $i$+$4$the image. This order repeats until
+the last image is presented. Note that the translation filter,
+$R_{t}^{L}$, is intended to run right after the scale filter, $R_s$,
+runs which is applied at every other $i$+$4$ frames. We run these
+filters in this way because we want to minimize any drifts that are
+likely to happen running only $R_{s}$. In addition, the filter,
+$R_{t}^{S}$, is applied to every other two frames before $R_{s}$ and
+right after two consecutive frames running $R_{t}^{L}$. By repeating
+this order of learning three KCFs, we can integrate more
+discriminative shape features that cannot be learned just by
+$R_{t}^{L}$. The filter, $R_{t}^{L}$, uses shape and color information
+together to recover from any potential drifts -- drifts could happen
+only looking the target's scale by the filter, $R_{s}$.
 
 In summary, the scale filter, $R_{s}$, is designed to directly handle
 the scale change of a target and provides other translation filters
@@ -371,8 +372,8 @@ search area. In what follows, we will detail the main idea behind the
 KCF.
 
 \textbf{Kernelized Correlation Filter} The Kernelized Correlation
-Filter is a well-known single target tracking method and its work
-flow has been detailed in other papers
+Filter is a well-known single target tracking method and its workflow
+has been detailed in other papers
 \cite{henriques2012exploiting,henriques2015high}. This section briefly
 goes over the parts of the KCF relevant to this study. Its
 computational efficiency is derived from the correlation filter
@@ -382,12 +383,12 @@ transform is the key to reduce the complexity of any tracking method
 based on correlation filter. The off-diagonal elements become zero
 whereas the diagonal elements represent the eigenvalues of the
 circulant matrix. The eigenvalues are equal to the DFT transformation
-of the base sample ($\mathbf{x}$) elements. The Kernelized Correlation Filter,
-in particular, applies a kernel to $\mathbf{x}$ to transform to a more
-discriminative domain. The circulant matrix is then formed by applying
-cyclic shifts on the kernelized $\mathbf{x}$. Such kernelization operation
-maintains O($nlog(n)$) complexity unlike other kernel algorithms
-leading to O($n^{2}$) or even higher complexities.
+of the base sample ($\mathbf{x}$) elements. The Kernelized Correlation
+Filter, in particular, applies a kernel to $\mathbf{x}$ to transform
+to a more discriminative domain. The circulant matrix is then formed
+by applying cyclic shifts on the kernelized $\mathbf{x}$. Such
+kernelization operation maintains O($nlog(n)$) complexity unlike other
+kernel algorithms leading to O($n^{2}$) or even higher complexities.
 
 The KCF solves essentially the problem of a regression in the form of
 the regularization (ridge regression):
@@ -462,58 +463,29 @@ information makes the feature vector for the translation filter,
 $R_{t}^{L}$, more robust to noise and more discriminative. Figure
 \ref{fig:Filters}(b) shows an example of this translation filter. But,
 this is not the case for the small area, translation filter,
-$R_{t}^{S}$, because it does not contain much of
-the background area around the target. For this reason, the $R_{t}^{S}$ only
-employs the fHoG features. Figure \ref{fig:Filters}(a)
-shows an example of this translation filter. Lastly, we use both fHoG
-and color-naming features again for the scale filter,
-$R_{s}$. By assigning fHoG and color-naming features, we ensure
-that the likelihood of inaccurate scale estimation is reduced in comparison to the scale filter
-with only fHoG features. This is more important in our case as the scale filter is operated in every 5 frames
-in the proposed tracker. Also, the scale filter, explained earlier in the
-algorithm \ref{alg:MKCF}, estimates the scale of a target by
-correlating it with three candidate ROIs. This search may increase the
-run-time complexity of the scale filter from $\mathcal{O}(n\log n)$ to
-$\mathcal{O}(3(n\log n))$. To ensure actual filtering operations
-practical, we use a smaller template size (i.e., 64$\times n$) for the
-scale filter, $R_{s}$. The smaller template size does not degrade the
-tracking performance because of 1) zero padding around the
-target (smaller ROI) and 2) use of color-naming features.
-\begin{comment}
-The ROI considered by $R_{s}$ is resized to a smaller template
-resolution ($64\times n$) as shown in Figure~\ref{fig:Filters}(c).
-This leads to less discriminative shape features. To reduce the noise
-in $R_{s}$, we concatenate color features.  The $R_{s}$ estimates the
-scale by correlating the filter with three candidate ROIs as detailed
-in algorithm~\ref{alg:MKCF}.  This increases the complexity from
-$\mathcal{O}(n\log n)$ to $\mathcal{O}(3(n\log n))$ for $R_{s}$.  To
-reduce the number of operations, we assign a smaller template size to
-$R_{s}$.  This does not degrade the tracking performance due to two
-reasons: (1) zero padding around the target and (2) integration of
-color features. This way, we keep the run-time complexity of the
-$R_{S}$ similar to $R_{t}^{L}$ and $R_{t}^{S}$ that only run
-correlation filter on a single ROI. By reducing the template size of
-$R_{s}$, fluctuating run-time performances among $R_{s}$ and,
-$R_{t}^{L}$ and $R_{t}^{S}$, are avoided which is desired in embedded
-systems.
+$R_{t}^{S}$, because it does not contain much of the background area
+around the target. For this reason, the $R_{t}^{S}$ only employs the
+fHoG features. Figure \ref{fig:Filters}(a) shows an example of this
+translation filter. Lastly, we use both fHoG and color-naming features
+again for the scale filter, $R_{s}$. By assigning fHoG and
+color-naming features, we ensure that the likelihood of inaccurate
+scale estimation is reduced in comparison to the scale filter with
+only fHoG features. This is more important in our case as the scale
+filter is operated in every 5 frames in the proposed tracker. Also,
+the scale filter, explained earlier in the algorithm \ref{alg:MKCF},
+estimates the scale of a target by correlating it with three candidate
+ROIs. This search may increase the run-time complexity of the scale
+filter from $\mathcal{O}(n\log n)$ to $\mathcal{O}(3(n\log n))$. To
+ensure actual filtering operations practical, we use a smaller
+template size (i.e., 64$\times n$) for the scale filter, $R_{s}$. The
+smaller template size does not degrade the tracking performance
+because of 1) zero padding around the target (smaller ROI) and 2) use
+of color-naming features.
 
-{\it Burak: Why do we need to keep the run-time complexity
-  of $R_{S}$ and $R_{t}^{L}$ the same?} 
-
-{\it YoungWoo : Because we want $R_{t}^{S}$, $R_{t}^{L}$ and $R_{s}$
-  to have similar fps (30fps) to avoid missing frames on an embedded
-  system. We can think of each one as an individual tracker and we do
-  not want one operating at 10fps while others running at 30 fps.}
-
-{\it Burak: What you told me is purely empirical which is fine. But
-  you'll have to tell the readers why we wanted to keep the run-time
-  complexity of those filters same!}
-\end{comment}
-
-\textbf{{\it E}nKCF with Convolutional Neural Network Features} In
-addition to hand-crafted features, we explore deep features to boost
-tracking performance. This version of {\it E}nKCF, Deep{\it E}nKCF is
-designed to make {\it E}nKCF run on high-end embedded systems with GPUs
+\textbf{{\it E}nKCF with Deep Convolutional Features} In addition to
+hand-crafted features, we explore deep features to boost tracking
+performance. This version of {\it E}nKCF, Deep{\it E}nKCF is designed
+to make {\it E}nKCF run on high-end embedded systems with GPUs
 installed.
 \begin{comment}
 {\it Burak: Did EnKCF w/ deep features really
@@ -552,36 +524,36 @@ CNN features in tracking-by-detection algorithms. For example,
 and second convolutional layer of the VGGNet \cite{simonyan2014very}.
 They report that the first convolutional layer features lead to
 slightly better precision and success rates than the second layer due
-to increased translational invariance in this layer. \cite{ma2015hierarchical}
-proposed a KCF tracker integrating features with higher abstraction
-capacity.  Their method first employs the third convolutional layer
-features to estimate the response map. In the next stage, the KCF,
-concentrating on the second convolutional layer features, is run to
-update transition. The third KCF then works on the transition given by
-the previous KCF and learns the first convolutional layer features to
-update the transition. This coarse-to-fine approach accommodates
-different levels of abstractions of the object. However, it runs
-multiple KCFs in a sequential fashion, increasing the run-time
-complexity. For this reason, we follow a similar approach to
-\cite{danelljan2015convolutional} to embed deep features in {\it
-  E}nKCF. Our {\it E}nKCF framework enables us to exploit different
-level of feature encodings with different KCFs. The translation
-filters, $R_{t}^{L}$ and $R_{t}^{S}$, consider at least twice bigger
-area than the scale filter, $R_{s}$. Given this, we can assign deeper
-feature encodings to $R_{s}$ as it learns less spatial information
-than $R_{t}^{L}$ and $R_{t}^{S}$. Thus we assign the activations of
-the fourth convolutional layer features ($26\times26\times128$) to
-$R_{s}$ whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the
-activations of the second layer features
+to increased translational invariance in this
+layer. \cite{ma2015hierarchical} proposed a KCF tracker integrating
+features with higher abstraction capacity.  Their method first employs
+the third convolutional layer features to estimate the response
+map. In the next stage, the KCF, concentrating on the second
+convolutional layer features, is run to update transition. The third
+KCF then works on the transition given by the previous KCF and learns
+the first convolutional layer features to update the transition. This
+coarse-to-fine approach accommodates different levels of abstractions
+of the object. However, it runs multiple KCFs in a sequential fashion,
+increasing the run-time complexity. For this reason, we follow an
+approach similar to \cite{danelljan2015convolutional}, in order to
+embed deep features in {\it E}nKCF. Our {\it E}nKCF algorithm enables
+us to exploit different level of feature encodings with different
+KCFs. The translation filters, $R_{t}^{L}$ and $R_{t}^{S}$, consider
+at least twice bigger area than the scale filter, $R_{s}$. Given this,
+we can assign deeper feature encodings to $R_{s}$ as it learns less
+spatial information than $R_{t}^{L}$ and $R_{t}^{S}$. Thus we assign
+the activations of the fourth convolutional layer features
+($26\times26\times128$) to $R_{s}$ whereas $R_{t}^{L}$ and $R_{t}^{S}$
+are assigned the activations of the second layer features
 ($109\times109\times64$). Figure \ref{fig:Filters_CNN} illustrates
 this feature assignment. Additionally, we assign the second
 convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
 $R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
-\textit{conv224-VGG}. The conv222 setting stands for the assignment of 
-the activations of $2^{th}$ convolutional layer features
-of VGGNet to $R_{t}^{L}$, $R_{t}^{S}$ and $R_{s}$. We use the VGGNet 
-since it provides higher spatial resolution at the first several layers than AlexNet
-\cite{krizhevsky2012imagenet}.
+\textit{conv224-VGG}. The conv222 setting stands for the assignment of
+the activations of $2^{th}$ convolutional layer features of VGGNet to
+$R_{t}^{L}$, $R_{t}^{S}$ and $R_{s}$. We use the VGGNet since it
+provides higher spatial resolution at the first several layers than
+AlexNet \cite{krizhevsky2012imagenet}.
 
 \begin{figure}[!h]
 \centering
@@ -626,20 +598,19 @@ later frames. To prevent such potential drifts, we developed a Bayes
 filter that incorporates a target's motion to smooth any intermediate
 outputs from individual KCFs. In particular, we use a particle filter
 to estimate the target's image coordinate based on the {\it E}nKCF's
-outputs. The state in this paper, $\mathbf{X_t}$, represents the target's pixel
-coordinates and its velocity, $\mathbf{X_t} = \lbrace x, y, v_{x}, v_{y}
-\rbrace$, where $x$ and $y$ are the pixel coordinates of the target's
-centroid, $v_x$ and $v_y$ are the velocity estimated along the
-$x$-axis and $y$-axis. The particle filter predicts, using a constant
-velocity motion model, a target's next state by generating a predefined
-number of particles. Then it uses the confidence maps of {\it E}nKCF
-as observation to update the state. The weight of a particle is
-computed as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{M} \mathbf{y_{R}}(x_{t}-i,y_{t}-j)$,
-where $w_{p}$ denotes the weight of the particle $p$ at time $t$, and $N$ and $M$ denote the
-size of rows and columns of the confidence map. 
-%Alternatively one can
-%also use the Euclidean distance of particles to the location of
-%maximum response of the confidence map.
+outputs. The state in this paper, $\mathbf{X_t}$, represents the
+target's pixel coordinates and its velocity, $\mathbf{X_t} = \lbrace
+x, y, v_{x}, v_{y} \rbrace$, where $x$ and $y$ are the pixel
+coordinates of the target's centroid, $v_x$ and $v_y$ are the velocity
+estimated along the $x$-axis and $y$-axis. The particle filter
+predicts, using a constant velocity motion model, a target's next
+state by generating a predefined number of particles. Then it uses the
+confidence maps of {\it E}nKCF as observation to update the state. The
+weight of a particle is computed as, $w_{p_{t}}(x_{t},y_{t}) =
+\sum_{i=1}^{N}\sum_{j=1}^{M} \mathbf{y_{R}}(x_{t}-i,y_{t}-j)$, where
+$w_{p}$ denotes the weight of the particle $p$ at time $t$, and $N$
+and $M$ denote the size of rows and columns of the confidence map.
+
 \begin{comment}
 We chooses some particles based on their importance to estimate the
 target's next state, i.e., its pixel coordinates as $\hat{X}_{t} =
