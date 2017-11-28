@@ -635,8 +635,8 @@ velocity motion model, a target's next state by generating a predefined
 number of particles. Then it uses the confidence maps of {\it E}nKCF
 as observation to update the state. The weight of a particle is
 computed as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{M} \mathbf{y_{R}}(x_{t}-i,y_{t}-j)$,
-where $w_{p}$ denotes the weight of the particle $p$ at time $t$, and $N$ and $M$ denote the
-size of rows and columns of the confidence map. 
+where $w_{p}$ denotes the weight of the particle $p$ at time $t$, and 
+$N$ and $M$ represent the number of rows and columns of the confidence map. 
 %Alternatively one can
 %also use the Euclidean distance of particles to the location of
 %maximum response of the confidence map.
@@ -655,19 +655,17 @@ from uniform initial distribution to keep variance high enough.
 %----------------------------------------------------------------------
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
-We evaluate, using the object tracking benchmark datasets, the
-performance of the proposed algorithm {\it E}nKCF and its variants.
-Particularly, we choose two publicly, available datasets:
+We evaluate the performance of the proposed algorithm {\it E}nKCF and its variants 
+using the object tracking benchmark datasets. Particularly, we choose two publicly available datasets:
 OTB100\footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
-and
-UAV123\footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}.
-The OTB100 dataset is comprised of the videos about 100 objects
+and UAV123\footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}.
+The OTB100 dataset is comprised of the videos of 100 objects
 whereas UAV123 dataset contains aerial footages of 123 objects.  We
-first evaluate the performance of {\it E}nKCF with two hand-crafted
-features, fHoG and color-naming.  With this version, we would like to
+first test the {\it E}nKCF with two hand-crafted
+features, fHoG and color-naming.  With this version, our goal is to
 have an object tracking algorithm that ``efficiently'' runs on an
-embedded system, a drone, for example, in ``high speed,'' $\ge 30$
-fps. Given this, we believe that the UAV123 dataset is a good fit in
+embedded system, a drone, in ``high speed,'' $\ge 30$
+fps. Given this goal, we believe that the UAV123 dataset is a good fit in
 evaluating the performance of the proposed algorithm. In addition, in
 the UAV123 dataset, there are many challenging, realistic scenes,
 e.g., abrupt scale/illumination changes. Although we are primarily
@@ -681,8 +679,8 @@ down-sampled version of the UAV123 dataset, called UAV123$\_$10fps
 dataset. What we would like to evaluate using this modified dataset is
 how robust the proposed algorithm is to the drastic motions of camera
 and targets. Finally, we evaluate the Deep{\it E}nKCF, {\it E}nKCF
-with deep features, on the UAV123 dataset to observe how much gain we
-can achieve over hand-crafted features.
+with deep convolutional features, on the UAV123 dataset to observe how much gain we
+can achieve over the hand-crafted features.
 
 \textbf{Finding Optimal Hyper-parameters} As each of three KCFs in
        {\it E}nKCF is designed to address specific challenges in
@@ -730,7 +728,7 @@ can achieve over hand-crafted features.
 
 \textbf{Performance on UAV123 Dataset} We used the precision and
 success rate to compare the performance of the proposed algorithm with
-those of the state-of-the-art, online algorithms for high speed
+those of the state-of-the-art, online algorithms for high and low speed
 tracking. For the precision, we rank the trackers based on the
 precision numbers at 20 pixels whereas in the success rate plots,
 trackers are ranked based on area under curve (AUC) scores. The
@@ -743,9 +741,9 @@ CCOT \cite{DanelljanECCV2016}, SCT \cite{Choi_2016_CVPR}, SAMF
 \cite{li2014scale}, DSST \cite{danelljan2014accurate}, Struck
 \cite{hare2012efficient}, MUSTER \cite{hong2015multi}, TLD
 \cite{kalal2012tracking}, and OAB \cite{zhang2012robust}. The ECO and CCOT trackers
-originally uses deep convolutional features. For the sake of fair comparison, we employ fHoG
-and color-naming features similar to our study. Figure \ref{fig:UAV123_DATASET} shows 
-the results on the UAV123 dataset. {\it  E}nKCF outperformed most of the high-speed tracking methods by
+originally uses deep convolutional features, however, for the sake of fair comparison, we employ fHoG
+and color-naming features similar to our tracker. Figure \ref{fig:UAV123_DATASET} shows 
+the results on the UAV123 dataset. The {\it  E}nKCF outperformed other high-speed trackers by
 $3\%$-$15\%$ at 20 pixels precision. Three algorithms, SAMF, DSST, and
 Struck did about $5\%$ better than ours in accuracy, but 10-20 times
 slower. The more recent trackers, ECO and CCOT, on the other hand, outperforms
@@ -777,24 +775,24 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 \end{table*}
 
 \textbf{Finding Optimal Combination and Deployment Order of Multiple
-  KCFs} In addition to the comparison with other tracking methods, we
+  KCFs} In addition to comparison with other trackers, we
 also conducted an experiment to see what combination and deployment
 order of the KCF work best. Table \ref{table:Comparison_to_LCT}
 presents results of this experiment. For this experiment, we did not
-use the particle filter to evaluate which order would work best,
+use the particle filter to evaluate which order would work best
 without any extra components. The method at the $2^{nd}$ column
 flipped the order of deploying $R_{t}^{L}$ and $R_{t}^{S}$. The one at
 the $3^{th}$ column removed $R_{t}^{S}$ and replaces with $R_{t}^{L}$
 whereas the one at the $4^{th}$ column removes $R_{t}^{L}$. The
 methods marked with ``*'' ran the filters on every frame in the listed
-order. The methods at the $7^{th}$ and $8^{th}$ columns ran a
-translation and a scale filter on every frame which is very similar to
-the way the LCT tracker \cite{ma2015long} runs.\footnote{To be
+order. The trackers at the $7^{th}$ and $8^{th}$ columns ran a
+translation and a scale filter on every frame which is similar to
+the LCT tracker \cite{ma2015long}.\footnote{To be
   precise, the LCT tracker comes with a re-detection module for a
   long-term tracking.} In short, we empirically verified that
 \textit{E}nKCF is an optimal way of using multiple KCFs, in terms of
 tracking accuracy and run-time performance. For example, we could
-achieve 4.26\% higher in accuracy by running $R_{t}^{L}$ and $R_{S}$
+achieve $4.26\%$ higher in accuracy by running $R_{t}^{L}$ and $R_{S}$
 at every frame, but this combination decreases run-time performance to
 317 fps. Lastly, we run $R_{L}$, $R_{t}^{S}$ and $R_{s}$ in every
 frame where $R_{t}^{S}$ uses the translation estimated by $R_{t}^{L}$
@@ -831,23 +829,21 @@ available. We found that, with a slight modification, the proposed
 method can effectively handle large displacement of objects in successive frames due to object
 and camera motion. Specifically, we modified {\it E}nKCF by running
 $R_{t}^{L}$ every frame and remove the particle filter instead. We
-tested this modified {\it E}nKCF with another vision of the UAV123 that
-the original dataset was temporally down-sampled at $10$ fps and makes
-the challenging original dataset, because of objects in fast motion
-and large ego-motion, more challenging. This is because the magnitude
-of those motions is even bigger. Also, we can observe the sensitivity of 
-the state-of-the-art lower speed trackers to the video frame rate b
-y running them on this downsampled dataset. Figure \ref{fig:UAV123_10fpsDATASET}
-compares the performance of the modified version of {\it E}nKCF and
+tested this modified {\it E}nKCF on the temporally downsampled version of the UAV123 dataset, called 
+UAV123$\_$10fps dataset. The downsampling operation makes the already challenging original dataset, 
+because of objects in fast motion and large ego-motion, more challenging. This is because the magnitude
+of those motions is even bigger. Also, we can measure the sensitivity of 
+the state-of-the-art lower speed trackers to the smaller video frame rates. 
+Figure \ref{fig:UAV123_10fpsDATASET} compares the performance of the modified version of {\it E}nKCF and
 other tracking methods. Our tracker outperforms other high-speed
 correlation filter based trackers including KCF, DSST by about
 $15\%$-$20\%$ and showed a precision rate similar to that of SAMF. On
 the other hand, it does decent job in scale estimation. It ranks as
-fourth in AUC while running about 10 to 100 times faster than the top three trackers.
+fourth in AUC while running about $10$ to $100$ times faster than the top three trackers.
 
-In the lower frame rate scenarios (10 fps), the ECO and CCOT's precision rates drop about
-$10\%$ worse than the original frame rate scenarios. We believe that this is an indicator of
-how good of a performance we can expect from these trackers on low-end hardware. The projected
+On the lower frame rate dataset ($10$ fps), the ECO and CCOT's precision rates drop about
+$10\%$ worse than the original dataset. We believe that this is an indicator of
+how good of a performance can be expected from these trackers on a limited hardware. The projected
 frame rates of the ECO and CCOT on a low-end hardware are $\simeq$1.5 and $\simeq$0.3 by using our 
 convention described in section~\ref{introduction}. In this case, it would be reasonable to expect these
 trackers to perform drastically worse on such hardware whereas the {\it E}nKCF can still perform similarly
@@ -868,14 +864,12 @@ that evaluates the correlation filter-driven trackers at variable frame rates ma
 \end{figure}
 
 \textbf{Evaluation with Deep Features} Our focus so far was to build a
-high speed tracker that can run at $30$fps on a single-board, embedded
-system. To this end, we used two conventional features, fHoG and
-color-naming for the {\it E}nKCF. At the same time, we observed that
-the feature vectors learned from a CNN have been used to improve the
-performance of the trackers based on KCF \cite{ma2015hierarchical,
-  danelljan2015convolutional}, and some of the single-board, embedded
-systems have GPUs. We believe that the performance of the {\it E}nKCF
-could be also improved with deep convolutional features trained on ImageNet dataset.
+high speed tracker that can run at $30$fps on a single-board low-end 
+embedded system. To this end, we used two conventional features, fHoG and
+color-naming for the {\it E}nKCF. To further boost the tracking accuracy, we replace
+the conventional features with deep convolutional features similar to \cite{ma2015hierarchical,
+  danelljan2015convolutional}. However, this performance boost comes with the cost
+  of running the {\it E}nKCF on an embedded system with GPUs.
 \begin{comment}
 {\it Burak: I'm not sure what you wanted to say with ``Deep Learning
   Features.'' My edit stopped at the above paragraph because I got
@@ -924,7 +918,7 @@ could be also improved with deep convolutional features trained on ImageNet data
   same graphs.}
 \end{comment}
 
-Figure \ref{fig:UAV123_DATASET_DeepFeatures} shows DeepE{\it n}KCF's
+Figure \ref{fig:UAV123_DATASET_DeepFeatures} shows the DeepE{\it n}KCF's
 performance on UAV123 dataset. Deep{\it E}nKCF outperformed the {\it
   E}nKCF with hand-crafted features by about $3\%$ to $5\%$ in
 precision (20 px) and $2\%$ in success rates (AUC). The
@@ -936,7 +930,7 @@ VGGNet pre-trained on millions of images, we can better represent the
 low level features of the object than hand-crafted features in
 challenging cases such as low contrast ROIs. However, we believe that
 the contribution of the deep features is limited by two factors: (1)
-low spatial resolution in deeper layers and (2) lost targets due to
+increased translational invariance in deeper layers and (2) lost targets due to
 large target and camera motion in the UAV123 dataset.
 
 \begin{comment}
@@ -994,18 +988,18 @@ resource consumption. To make an object tracking algorithm meet these
 practical requirements, we proposed an extension of KCF that
 essentially deploys three KCFs, in turn, to address the scale change
 and dynamic maneuvers of a target. The way we ran three KCFs is
-optimal in a sense that efficiently handled the scale change and
+optimal in a sense that it efficiently handled the scale change and
 effectively learned the translation of the target. We also developed a
-Bayes filter, particle filter, to smooth the transition between three
-KCFs. In particular, the particle filter estimated the target's pixel 
-coordinates using the evolution of the target's motion observed over frames.
+Bayes filter to smooth the transition between three
+KCFs, especially the transition between the scale and large ROI translation filter. 
 Two public datasets were used to evaluate the performance of the
 proposed algorithm and it was found that, on average, the performance of the
 proposed algorithm is better than other high-speed trackers over 5\%
 on precision at 20 pixels and 10-20\% on AUC. Our
 implementation ran at 340 fps for OTB100 and at 416 fps for UAV123
-data that is faster than DCF (292 fps) for OTB100 and KCF (292 fps),
-DCF (457 fps) for UAV123. Finally, we encoded objects with deep
+data that is faster than DCF (292 fps) for OTB100 and KCF (292 fps) 
+for UAV123. Such operation rate tracker can potentially run at real-time
+on a low-end embedded system. Finally, we encoded objects with deep
 features to boost tracking performance by $5\%$ on embedded systems
 with GPUs.
 
