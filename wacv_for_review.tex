@@ -191,7 +191,7 @@ consecutive frames. Similarly, Ma and his colleagues used two KCFs to
 learn the translation and scale of a target separately
 \cite{ma2015long}. In particular, a KCF is used to learn the
 translation of the target and its background. Given this, another KCF
-is used to learn the target area to estimate a new scale of the
+is used to learn the target area to estimate the new scale of the
 target. However, because of running more than a KCF on each frame,
 this method degrades its run-time performance (i.e., $\leq 50
 fps$). Our method is motivated by this idea -- the idea of deploying
@@ -215,18 +215,18 @@ KCFs in turn. Because of such a deployment strategy, the run-time
 performance of the proposed algorithm perserves high. To minimize any
 potential drifts while switching KCFs, we developed a Bayes filter. In
 addition, to increase the flexibility of the proposed algorithm's
-usage, we explore deep features with varying levels of abstraction for
-the proposed {\it E}nKCF to improve performance.
+usage, we explore deep convolutional features with varying levels of abstraction to boost 
+tracking performance.
 
 %---------------------------------------------------------------------- 
 \section{{\it E}nKCF: Ensemble of Kernelized Correlation Filters}
 %---------------------------------------------------------------------- 
-We propose a novel way of utilizing a multiple of the KCFs
+We propose a novel way of utilizing an ensemble of the KCFs
 \cite{henriques2015high} to effectively handle scale variations and
 dynamic maneuvers of a target. To maintain or improve the run-time
 performance of the original KCF (e.g., $\ge$ 300), we deploy three
 KCFs in turn, instead of applying them on the same image frame
-together. Each of these KCFs is designed to address the challenge of
+together. Each of these KCFs is designed to address the challenges of
 single-target tracking -- variance in scale and translation. By
 deploying each of three KCFs in turn, our algorithm will improve the
 performance of the original KCF while preserving the original KCF's
@@ -289,8 +289,8 @@ surrounding, and another correlation filter could focus on the target
 itself to estimate the right scale of the target. In particular, a
 transition filter with larger padding size, $R_{t}^{L}$ will enable
 {\it E}nKCF to recover from potential drifts after a scale filter is
-applied to the input images. Whereas another translation filter with
-smaller padding size, $R_{t}^{S}$ will help {\it E}nKCF to better
+applied to the input images. On the other hand, another translation filter with
+smaller padding size, $R_{t}^{S}$, will help {\it E}nKCF to better
 localize the position of the target after a translation filter is
 applied.
 
@@ -357,16 +357,15 @@ this order of learning three KCFs, we can integrate more
 discriminative shape features that cannot be learned just by
 $R_{t}^{L}$. The filter, $R_{t}^{L}$, uses shape and color information
 together to recover from any potential drifts -- drifts could happen
-only looking the target's scale by the filter, $R_{s}$.
+due to only scale filter operation in certain frames.
 
 In summary, the scale filter, $R_{s}$, is designed to directly handle
-the scale change of a target and provides other translation filters
-$R_{t}^{L}$ and $R_{t}^{S}$ with more focused ROIs about the target's
-translation. On the other hand, a translation filter, $R_{t}^{L}$, is
-designed to look at a larger search area to estimate the target's
-translation and recover from any potential drifts. Another translation
-filter, $R_{t}^{S}$, is designed to addresses the drawback of
-$R_{t}^{L}$ that it may learn noisy shape features due to its large
+the scale change of a target and provides the translation filters
+, $R_{t}^{L}$ and $R_{t}^{S}$, more accurate ROIs. On the other hand, 
+a translation filter, $R_{t}^{L}$, is designed to look at a larger search 
+area to estimate the target's translation and recover from any potential 
+drifts. Another translation filter, $R_{t}^{S}$, is designed to address the drawback of
+$R_{t}^{L}$ that it may learn noisy shape features due to its relatively larger
 search area. In what follows, we will detail the main idea behind the
 KCF.
 
@@ -433,6 +432,7 @@ and the new test template $\mathbf{z}$. This can be formulated as
 where $\mathbf{r}$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
 
+\begin{comment}
 In practice, the solution vector, $\mathbf{\hat{\alpha}}$, and 
 the feature template matrix, $\mathbf{x}$, are accumulated over time
 to integrate temporal information as
@@ -442,6 +442,7 @@ to integrate temporal information as
 \end{align}
 
 where $\beta$ is the learning rate and mostly tuned to a small value.
+\end{comment}
 
 In the following sections, we will detail two different types of
 features used in {\it E}nKCF : (1) hand-crafted features (fHoG +
@@ -452,7 +453,7 @@ conventional hand-crafted features, fHoG (shape)
 \cite{felzenszwalb2010object} and color-naming (color)
 \cite{li2014scale}. Figure \ref{fig:Filters} shows examples of these
 features. This setup of the {\it E}nKCF is designed to perform
-tracking on any embedded systems at $30$ fps, ones without GPUs.
+tracking at $30$ fps on low-end embedded systems without GPUs.
 \begin{figure}[!h]
 \centering
 \includegraphics[width=0.47\textwidth]{./figures/Filters_Details.pdf}
@@ -465,16 +466,15 @@ tracking on any embedded systems at $30$ fps, ones without GPUs.
 \end{figure}
 
 We use both fHoG \cite{felzenszwalb2010object} and color-naming
-\cite{van2009learning} for the large area, translation filter,
+\cite{van2009learning} for the large area translation filter,
 $R_{t}^{L}$. This is because the fHoG applied to relatively larger
-area tends to be noisy and less discriminative and adding color
-information makes the feature vector for the translation filter,
-$R_{t}^{L}$, more robust to noise and more discriminative. Figure
-\ref{fig:Filters}(b) shows an example of this translation filter. But,
-this is not the case for the small area, translation filter,
-$R_{t}^{S}$, because it does not contain much of the background area
-around the target. For this reason, the $R_{t}^{S}$ only employs the
-fHoG features. Figure \ref{fig:Filters}(a) shows an example of this
+area tends to be noisier and less discriminative and adding color
+information makes the feature vector for the translation filter 
+more discriminative. Figure \ref{fig:Filters}(b) shows an example of 
+this translation filter. But, this is not the case for the small area 
+translation filter, $R_{t}^{S}$, because it contains relatively smaller background area. 
+For this reason, the $R_{t}^{S}$ only employs the fHoG features. 
+Figure \ref{fig:Filters}(a) shows an example of this
 translation filter. Lastly, we use both fHoG and color-naming features
 again for the scale filter, $R_{s}$. By assigning fHoG and
 color-naming features, we ensure that the likelihood of inaccurate
@@ -492,7 +492,7 @@ because of 1) zero padding around the target (smaller ROI) and 2) use
 of color-naming features.
 
 \textbf{{\it E}nKCF with Deep Convolutional Features} In addition to
-hand-crafted features, we explore deep features to boost tracking
+hand-crafted features, we explore deep convolutional features to boost tracking
 performance. This version of {\it E}nKCF, Deep{\it E}nKCF is designed
 to make {\it E}nKCF run on high-end embedded systems with GPUs
 installed.
