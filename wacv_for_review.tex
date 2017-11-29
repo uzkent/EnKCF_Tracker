@@ -599,32 +599,31 @@ we want to reduce drifts from $R_{t}^{L}$ by having $R_{t}^{S}$. The particle fi
 on the other hand aims at reducing the drifts and jumps further by bringing in the 
 motion information.}
 \end{comment}  
-As explained earlier, the {\it E}nKCF updates a target's translation
-at every other $k$ frames, particularly for estimating the target's
-scale. Although the strategy of updating every other $k$th frames will
-result in an optimal run-time performance, this may lead drifts at the
-later frames. To prevent such potential drifts, we developed a Bayes
+As explained earlier, the {\it E}nKCF updates the target's scale
+at every other $k$ frames. Although the strategy of updating every other 
+$k$th frames will result in an optimal run-time performance, this may lead 
+drifts at the later frames. To prevent such potential drifts, we developed a Bayes
 filter that incorporates a target's motion to smooth any intermediate
 outputs from individual KCFs. In particular, we use a particle filter
 to estimate the target's image coordinate based on the {\it E}nKCF's
-outputs. The state in this paper, $\mathbf{x_t}$, represents the
-target's pixel coordinates and its velocity, $\mathbf{X_t} = \lbrace
+outputs. The state in this paper, $\mathbf{X_{t}}$, represents the
+target's pixel coordinates and its velocity, $\mathbf{X_{t}} = \lbrace
 x, y, v_{x}, v_{y} \rbrace$, where $x$ and $y$ are the pixel
-coordinates of the target's centroid, $v_x$ and $v_y$ are the velocity
+coordinates of the target's centroid, $v_x$ and $v_y$ are the velocities
 estimated along the $x$-axis and $y$-axis. The particle filter
-predicts, using a constant velocity motion model, a target's next
+predicts, using a constant velocity motion model, the target's next
 state by generating a predefined number of particles. Then it uses the
-confidence maps of {\it E}nKCF as observation to update the state. The
-weight of a particle is computed as, $w_{p_{t}}(x_{t},y_{t}) =
+confidence maps of {\it E}nKCF as observation to update its state. The
+particle weight is computed as, $w_{p_{t}}(x_{t},y_{t}) =
 \sum_{i=1}^{N}\sum_{j=1}^{M} \mathbf{y_{R}}(x_{t}-i,y_{t}-j)$, where
 $w_{p}$ denotes the weight of the particle $p$ at time $t$, and $N$
-and $M$ denote the size of rows and columns of the confidence map.
+and $M$ denote the number of rows and columns of the confidence map.
 
 %----------------------------------------------------------------------
 \section{Experiments} \label{sc:Experiments}
 %---------------------------------------------------------------------- 
-We evaluate the performance of the proposed algorithm {\it E}nKCF and
-its variants using the object tracking benchmark
+We evaluate the performance of the proposed {\it E}nKCF tracker and
+its variants on the object tracking benchmark
 datasets. Particularly, we choose two publicly available datasets:
 OTB100\footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
 and
@@ -663,7 +662,7 @@ achieve over the hand-crafted features.
        $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$. We set the scale filter
        update threshold, $T_{R_{s}}$, to 4, peak-to-sidelobe (PSR)
        ratio. The padding size for the correlation filters is tuned to
-       $3$ for $R_{t}^{L}$, $2.50$ for $R_{t}^{S}$, and $1$ for
+       $2$ for $R_{t}^{L}$, $1.50$ for $R_{t}^{S}$, and $0$ for
        $R_{s}$. For our particle filter implementation, we empirically
        set the number of particles to $1,000$ to balance the run-time
        performance and accuracy. To keep the level of variance among
@@ -687,15 +686,15 @@ achieve over the hand-crafted features.
 
 \textbf{Performance on UAV123 Dataset} We used the precision and
 success rate to compare the performance of the proposed algorithm with
-those of the state-of-the-art, online algorithms for high and low
-speed tracking. For the precision, we rank the trackers based on the
-precision numbers at 20 pixels whereas in the success rate plots,
-trackers are ranked based on area under curve (AUC) scores. The
+those of the state-of-the-art high-speed and low-speed trackers. 
+For the precision, we rank the trackers based on the precision numbers 
+at 20 pixels whereas in the success rate plots, trackers are ranked based 
+on area under curve (AUC) scores. The
 tracking algorithms under the comparison include ones in high-speed
 ($\geq$300 fps): KCF \cite{henriques2015high}, CSK
 \cite{henriques2012exploiting}, DCF \cite{henriques2015high}, MOSSE
 \cite{bolme2010visual}, and STC \cite{zhang2014fast} and ones in
-relatively lower-speed ($\geq$50): ECO \cite{DanelljanCVPR2017}, CCOT
+relatively lower-speed ($\leq$50): ECO \cite{DanelljanCVPR2017}, CCOT
 \cite{DanelljanECCV2016}, SCT \cite{Choi_2016_CVPR}, SAMF
 \cite{li2014scale}, DSST \cite{danelljan2014accurate}, Struck
 \cite{hare2012efficient}, MUSTER \cite{hong2015multi}, TLD
