@@ -93,7 +93,11 @@ flew for video recording, an unmanned air vehicle (UAV) equipped with
 an object or feature following function would make it more useful for
 the application of monitoring/surveillance/surveying on private
 properties/wild-life/crop, video recording on sports/movies/events,
-many others.
+many others. To this end, in this paper, we propose a single-target
+tracking algorithm that does not require offline training and can run
+in high-speed. Specifically, we would like to have our algorithm 1)
+learn the appearance model of a target on the fly and 2) run on a
+typical desktop as fast as $300$-$450$ fps.
 
 \begin{figure*}[!h]
 \centering
@@ -104,12 +108,6 @@ many others.
   target can be drastically changed in a few frames.}
 \label{ResultsIntroduction}
 \end{figure*}
-
-In this paper, we propose a single-target tracking algorithm that does
-not require offline training and can run in high-speed. Specifically, 
-we would like to have our algorithm 1) learn
-the appearance model of a target on the fly and 2) run on a
-typical desktop as fast as $300$-$450$ fps.
 
 \begin{figure*}[!h]
 \centering
@@ -131,32 +129,31 @@ framework assumes that a target location is given at the beginning
 like any other online tracking algorithms
 \cite{smeulders2014survey}. Given this positive example for the
 regression problem, a set of negative examples is collected around the
-initial target bounding box and represented as a form of the
-circulant matrix \cite{henriques2015high}. One can optimally solve
-this regression problem using a ridge regression in a closed
-form. However, this solution has to deal with expensive matrix
-operations $\mathcal{O}(n^{3})$. The correlation filter offers a less
-complex solution, $\mathcal{O}(n\log n)$ over element-wise
-multiplication in a frequency domain
-\cite{bolme2010visual,henriques2015high}. Thank to this reformulation,
-an object tracking pipeline based on the correlation filter can run
-very efficiently and be even easily implemented. In fact, an extension
-of a linear correlation filter, the kernelized correlation filter with
-multi-channel features \cite{henriques2015high} showed impressive
-object tracking results and outperformed other state-of-the-art,
-online tracking algorithms in terms of run-time and tracking
-accuracy. However, a vanilla form of such an online tracker is prone
-to drift, and fails to track a target over a long period of time
-\cite{henriques2015high}. This is primarily due to the dilemma of
-stability-plasticity in updating appearance model, where the
-appearance model will be overfitted to only the images used to train,
-unless a compromise on the frequency of updating the model is
-carefully implemented \cite{santner2010prost}. For example, one may
-handle a target's scale variation by just concatenating multiple
-correlation filters including KCF and running them on each
-frame. Alternatively one could think of scanning the region of
-interest (ROI) with a list of templates in predefined scale ratios to
-find the target in appropriate scale
+initial target bounding box and represented as a form of the circulant
+matrix \cite{henriques2015high}. One can optimally solve this
+regression problem using a ridge regression in a closed form. However,
+this solution has to deal with expensive matrix operations
+$\mathcal{O}(n^{3})$. The correlation filter offers a less complex
+solution, $\mathcal{O}(n\log n)$ over element-wise multiplication in a
+frequency domain \cite{bolme2010visual,henriques2015high}. Thank to
+this reformulation, an object tracking pipeline based on the
+correlation filter can run very efficiently and be even easily
+implemented. In fact, an extension of a linear correlation filter, the
+kernelized correlation filter with multi-channel features
+\cite{henriques2015high} showed impressive object tracking results and
+outperformed other state-of-the-art, online tracking algorithms in
+terms of run-time and tracking accuracy. However, a vanilla form of
+such an online tracker is prone to drift, and fails to track a target
+over a long period of time \cite{henriques2015high}. This is primarily
+due to the dilemma of stability-plasticity in updating appearance
+model, where the appearance model will be overfitted to only the
+images used to train, unless a compromise on the frequency of updating
+the model is carefully implemented \cite{santner2010prost}. For
+example, one may handle a target's scale variation by just
+concatenating multiple correlation filters including KCF and running
+them on each frame. Alternatively one could think of scanning the
+region of interest (ROI) with a list of templates in predefined scale
+ratios to find the target in appropriate scale
 \cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. However,
 these approaches would drastically reduce run-time performance because
 multiple KCFs run on each frame.
@@ -577,12 +574,12 @@ features over the conventional features like fHoG and color-naming.
 \end{figure*}
 
 \textbf{Performance on UAV123 Dataset} We used the precision and
-success rates to compare the performance of the proposed algorithm with
-those of the state-of-the-art tracking algorithms. For the precision,
-we rank the trackers based on the precision numbers at 20 pixels
-whereas in the success rate plots, they are ranked based on the area under
-curve (AUC) scores. The tracking algorithms under the comparison
-include ones in high-speed ($\geq$300 fps): KCF
+success rates to compare the performance of the proposed algorithm
+with those of the state-of-the-art tracking algorithms. For the
+precision, we rank the trackers based on the precision numbers at 20
+pixels whereas in the success rate plots, they are ranked based on the
+area under curve (AUC) scores. The tracking algorithms under the
+comparison include ones in high-speed ($\geq$300 fps): KCF
 \cite{henriques2015high}, CSK \cite{henriques2012exploiting}, DCF
 \cite{henriques2015high}, MOSSE \cite{bolme2010visual}, and STC
 \cite{zhang2014fast} and ones in relatively lower-speed ($\leq$50):
@@ -594,25 +591,27 @@ ECO \cite{DanelljanCVPR2017}, CCOT \cite{DanelljanECCV2016}, SCT
 convolutional features, however, to perform fair comparison, we employ
 fHoG and color-naming features similar to our tracker. Figure
 \ref{fig:UAV123_DATASET} shows the results on the UAV123 dataset. The
-{\it E}nKCF outperformed other high-speed trackers by $3\%$-$15\%$
-at 20 pixels precision. In particular, three algorithms, SAMF,
-DSST, and Struck did about $5\%$ better than ours in accuracy, but
-10-20 times slower. The more recent trackers, ECO and CCOT, on the
-other hand, outperforms {\it E}nKCF by $15\%$ while running at
-10-15 times slower. For the scale adaptation, {\it E}nKCF did
-fourth best in terms of AUC for the success rate plot. It
-outperformed other high-speed trackers by about $20\%$-$25\%$ in
-AUC. In addition, it performed even better than some of the
-lower-speed trackers.  For example, for AUC, {\it E}nKCF
-outperformed Struck and DSST by $5\%$ and $10\%$ while running at
-more than $10$ and $30$ times faster. 
-\textit{YoungWoo : Does the following part make sense to you?}
-The DSST assigns a 1-D scale filter and searches over 33 candidates in the scale pool whereas the {\it E}nKCF
-uses a 2-D scale filter and 3 candidates. Although the DSST searches for the scale in a larger search space, the {\it E}nKCF
-achieves higher AUC. We believe this can be due to two reasons. First, the DSST's 1-D scale filter lacks spatial information about
-the target. Second, the DSST scale filter employs only fHoG whereas the {\it E}nKCF uses both color-naming and fHoG features
-in the scale filter.
-
+    {\it E}nKCF outperformed other high-speed trackers by $3\%$-$15\%$
+    at 20 pixels precision. In particular, three algorithms, SAMF,
+    DSST, and Struck did about $5\%$ better than ours in accuracy, but
+    10-20 times slower. The more recent trackers, ECO and CCOT, on the
+    other hand, outperforms {\it E}nKCF by $15\%$ while running at
+    10-15 times slower. For the scale adaptation, {\it E}nKCF did
+    fourth best in terms of AUC for the success rate plot. It
+    outperformed other high-speed trackers by about $20\%$-$25\%$ in
+    AUC. In addition, it performed even better than some of the
+    lower-speed trackers.  For example, for AUC, {\it E}nKCF
+    outperformed Struck and DSST by $5\%$ and $10\%$ while running at
+    more than $10$ and $30$ times faster. For the DSST, we believe our
+    algorithm outperformed it because, first of all, the DSST uses a
+    1-D scale filter and searches the target's scale over 33
+    candidates in a scale pool whereas our algorithm uses a 2-D scale
+    filter with 3 candidate scales. Learning a 2-D filter would result
+    in learning more spatial information. Second of all, the DSST use
+    only fHoG whereas our algorithm uses both fHoG and color-naming
+    features. Learning more features, not for always, but would
+    provide better understanding on the ROI.
+    
 \begin{table*}[!h]
 \smaller
 \begin{center}
@@ -679,31 +678,40 @@ than ours while operating at 10-20 times slower rates.
 
 \textbf{Performance on UAV123$\_$10fps Dataset} We were curious about
 how the frame rate of a testing video would affect the performance of
-a tracking algorithm. To this end, we use the temporarily down-sampled version
-of the UAV123, called UAV123$\_$10fps dataset. We believe the downsampling
-would make the original UAV123 data more challenging because the
-displacements of the moving objects become even bigger. To tackle this challenge, we 
-slightly modified the proposed algorithm -- ran $R_{t}^{L}$ every frame and
-removed the particle filter due to larger ego-motion. Figure \ref{fig:UAV123_10fpsDATASET}
-shows the performance of the modified version of {\it E}nKCF and other
-tracking methods. The precision rates of the ECO and CCOT dropped
-about $10\%$ in comparison to the original UAV123 dataset. Our tracker
-outperforms other high-speed correlation filter based trackers
-including KCF, DSST by about $15\%$-$20\%$ and showed a precision rate
-similar to that of SAMF. It ranks as fourth in AUC while running about
-$10$ to $100$ times faster than the top three trackers. 
-\textit{YoungWoo : I did not get this part clearly. How sensitive the frame rate 
-or how sensitive the tracker is
-?} It was interesting to observe how sensitive the frame rate is to the
-performance of the state-of-the-art tracking algorithms, and, with a
-slight modification, the proposed method effectively handled large
-displacement of objects in successive frames. 
-\textit{YoungWoo : I also believe that we should emphasize how the state-of-the-art
-trackers perform in lower frame rates. And I believe this is what this paper \cite{mueller2017context}
-says. They rank the trackers by evaluating them on videos matching their fps. I was thinking of running 
-ECO and CCOT in UAV123 in 5 fps videos and mention how they degrade with respect to the decreasing fps.
-I believe this is our contribution and we should emphasize it.}
-
+a tracking algorithm. To this end, we use the temporarily down-sampled
+version of the UAV123, called UAV123$\_$10fps dataset. We believe the
+downsampling would make the original UAV123 data more challenging
+because the displacements of the moving objects become even bigger. To
+tackle this challenge, we slightly modified the proposed algorithm --
+ran $R_{t}^{L}$ every frame and removed the particle filter due to
+larger ego-motion. Figure \ref{fig:UAV123_10fpsDATASET} shows the
+performance of the modified version of {\it E}nKCF and other tracking
+methods. The precision rates of the ECO and CCOT dropped about $10\%$
+in comparison to the original UAV123 dataset. Our tracker outperforms
+other high-speed correlation filter based trackers including KCF, DSST
+by about $15\%$-$20\%$ and showed a precision rate similar to that of
+SAMF. It ranks as fourth in AUC while running about $10$ to $100$
+times faster than the top three trackers. It was interesting to
+observe how sensitive the performance of the state-of-the-art tracking
+algorithms is the frame rate, and, with a slight modification, the
+proposed method effectively handled large displacement of objects in
+successive frames.
+\begin{comment}
+\textit{YoungWoo : I also believe that we should
+  emphasize how the state-of-the-art trackers perform in lower frame
+  rates. And I believe this is what this paper
+  \cite{mueller2017context} says. They rank the trackers by evaluating
+  them on videos matching their fps. I was thinking of running ECO and
+  CCOT in UAV123 in 5 fps videos and mention how they degrade with
+  respect to the decreasing fps.  I believe this is our contribution
+  and we should emphasize it.
+  
+  Burak: To be honest with you, it's a cheating -- we modified our
+  algorithm to make it work better, but didn't do anything or
+  modifications to other algorithms. Yes, all other algorithms didn't
+  perform well on a low frame rate, but it was a unfair comparison. So
+  I wouldn't think it's a contribution.  }
+\end{comment}
 \begin{figure}[!h]
 \centering
 \begin{tabular}{cc}
@@ -764,15 +772,14 @@ for real-world applications is economically and practically very
 attractive. Among other practical considerations, it would be
 desirable if such computer vision algorithms require no offline
 training and operate at high-speed. To develop a single-target
-tracking algorithm to meet these features, we proposed an extension
-of KCF that applies three KCFs, in turn, to address the variations in
+tracking algorithm to meet these features, we proposed an extension of
+KCF that applies three KCFs, in turn, to address the variations in
 scale and translation of moving objects. We also developed a particle
 filter to smooth the transition between three KCFs, especially the
 transition between the scale and large ROI translation filter. Through
-experiments, it was found that the way the {\it E}nKCF deployed three KCFs
-was optimal and the particle filter contributed to boost the
-performance in the existence of noise. 
-We used two public datasets to evaluate the performance
+experiments, we found that the way the {\it E}nKCF deployed three KCFs
+was optimal, and the particle filter contributed to increase the
+performance.  We used two public datasets to evaluate the performance
 of the proposed algorithm and other state-of-the-art tracking
 algorithms, and found that, on average, the performance of the
 proposed algorithm is better than other high-speed trackers over 5\%
@@ -783,9 +790,13 @@ we explored the idea of utilizing deep features for the proposed
 algorithm and found that the deep features helped the proposed
 algorithm boost the performance by $10\%$.
 
-As future work, we would like to investigate a way of re-initializing
-a target when the target is lost, due to occlusion, illumination
-change, drastic camera motion, etc.
+Although the proposed algorithm showed a promising result tested with
+challenging data, we believe the corner case analysis has not been
+extensively done yet. As future work, we would like to thoroughly
+study when and what conditions our algorithm would fail to track
+moving objects. In addition, we also would like to investigate a way
+of re-initializing a target when the target is lost, due to occlusion,
+illumination change, drastic camera motion, etc.
 
 {\small
 \bibliographystyle{ieee}
