@@ -638,7 +638,7 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
   KCFs} In addition to performance comparison with other trackers, we
 also conducted an experiment to see what combination and deployment
 order of the KCF work best. Table \ref{table:Comparison_to_LCT}
-presents results of this experiment. For the fair comparison, we did
+presents results of this experiment. To achieve fair comparison, we did
 not use the particle filter. The combination presented at the $2^{nd}$
 column switched the order of deploying $R_{t}^{L}$ and
 $R_{t}^{S}$. The one at the $3^{th}$ column removed $R_{t}^{S}$ and
@@ -651,7 +651,7 @@ every frame which is similar to the LCT tracker
   a re-detection module for a long-term tracking.} This experiment
 empirically verified that \textit{E}nKCF is an optimal way of using
 multiple KCFs, in terms of both tracking accuracy and run-time
-performance. For example, we could achieve $4.26\%$ higher in accuracy
+performance. For example, one could achieve $4.26\%$ higher in accuracy
 by running $R_{t}^{L}$ and $R_{S}$ at every frame, but this
 combination decreases run-time performance to 317 fps. 
 
@@ -682,9 +682,9 @@ how the frame rate of a testing video would affect the performance of
 a tracking algorithm. To this end, we use the temporarily down-sampled version
 of the UAV123, called UAV123$\_$10fps dataset. We believe the downsampling
 would make the original UAV123 data more challenging because the
-displacements of the moving objects become even bigger. To tackle this challenge, w
-e slightly modified the proposed algorithm -- ran $R_{t}^{L}$ every frame and
-removed the particle filter. Figure \ref{fig:UAV123_10fpsDATASET}
+displacements of the moving objects become even bigger. To tackle this challenge, we 
+slightly modified the proposed algorithm -- ran $R_{t}^{L}$ every frame and
+removed the particle filter due to larger ego-motion. Figure \ref{fig:UAV123_10fpsDATASET}
 shows the performance of the modified version of {\it E}nKCF and other
 tracking methods. The precision rates of the ECO and CCOT dropped
 about $10\%$ in comparison to the original UAV123 dataset. Our tracker
@@ -698,6 +698,11 @@ or how sensitive the tracker is
 performance of the state-of-the-art tracking algorithms, and, with a
 slight modification, the proposed method effectively handled large
 displacement of objects in successive frames. 
+\textit{YoungWoo : I also believe that we should emphasize how the state-of-the-art
+trackers perform in lower frame rates. And I believe this is what this paper \cite{mueller2017context}
+says. They rank the trackers by evaluating them on videos matching their fps. I was thinking of running 
+ECO and CCOT in UAV123 in 5 fps videos and mention how they degrade with respect to the decreasing fps.
+I believe this is our contribution and we should emphasize it.}
 
 \begin{figure}[!h]
 \centering
@@ -745,7 +750,8 @@ due to large target and camera motion in the UAV123 dataset.
 \includegraphics[width=3.60cm]{./figures/pr_deep.eps}
 \includegraphics[width=3.70cm]{./figures/sr_deep.eps}\\
 \end{tabular}
-\caption{Comparison of {\it E}nKCF's ({\it fHoG} + {\it color-naming}) performance with Deep{\it E}nKCF on the UAV123
+\caption{Comparison of {\it E}nKCF's ({\it fHoG} + {\it color-naming}) 
+performance with Deep{\it E}nKCF on the UAV123
 dataset.}
 \label{fig:UAV123_DATASET_DeepFeatures}
 \end{figure}
