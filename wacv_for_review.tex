@@ -392,6 +392,14 @@ formulated as
 \end{equation}
 where $\mathbf{r}$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
+\begin{comment}
+As a common practice, to integrate further temporal information into tracker, we
+update the correlation filter and the appearance model as below.
+\begin{align}
+\mathbf{\hat{\alpha}_{t}} = (1-\beta) \mathbf{\hat{\alpha}_{t-1}} + \beta \mathbf{\hat{\alpha}_{t}} \\
+\mathbf{x_{t}} = (1-\beta) \mathbf{x_{t-1}} + \beta \mathbf{x_{t}}.
+\end{align}
+\end{comment}
 
 In the following sections, we will detail two different types of
 features used in {\it E}nKCF: hand-crafted features (fHoG +
