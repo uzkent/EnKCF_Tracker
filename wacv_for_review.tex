@@ -12,6 +12,7 @@
 \usepackage{mathtools} % mathtools builds on and exten0))ds amsmath package
 \usepackage{algpseudocode}	% http://ctan.org/pkg/algorithmicx% Include other packages here, before hyperref.
 \usepackage{comment, url}
+\usepackage{bm}
 \usepackage[ruled, vlined, linesnumbered]{algorithm2e}
 \newcommand{\forceindent}{\leavevmode{\parindent=1em\indent}}
 \usepackage[hidelinks]{hyperref}
@@ -236,19 +237,19 @@ high run-time performance and small-footprint.
 \Begin($\text{track($x_{t-1},y_{t-1},s_{t-1}$) }$)
 {
  	// \textit{Translation Estimation - Particle Filter} \\
-	Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $\mathbf{(x_{t},y_{t},s_{t-1})}$ \\
+	Transit Particle Filter to the frame $t$ and compute the mean of prior pdf $(x_{t},y_{t},s_{t-1})$ \\
      // \textit{Translation Estimation - Correlation Filter} \\
-	Crop the ROI for the $R_{t}^{L}$ (Condition 2), or $R_{t}^{S}$ (Condition 3) given $(x_{t},y_{t})$ and estimate new position as $\mathbf{(x_{t},y_{t})}$ = $\mathbf{\textit{max}(y_{R_{t}})}$\\
+	Crop the ROI for the $R_{t}^{L}$ (Condition 2), or $R_{t}^{S}$ (Condition 3) given $(x_{t},y_{t})$ and estimate new position as $(x_{t},y_{t})$ = $\mathbf{\textit{max}(y_{R_{t}})}$\\
 	// \textit{Scale Estimation - Correlation Filter}\\
 	Scale pool for $R_{s}$ : $\mathbf{S} = \lbrace1.05,1.0,1/1.05\rbrace$,\\
-	Crop the ROI for the $R_{s}^{i}$ (Condition 1) and estimate scale factor, $\mathbf{\alpha}$ = $\mathbf{\underset{i\in S}{\textit{argmax}}(PSR(y_{R_{s}^{i}}))}$, and new scale $\mathbf{s_{t} = \alpha * s_{t-1}}$,\\ 
+	Crop the ROI for the $R_{s}^{i}$ (Condition 1) and estimate scale factor, $\mathbf{\alpha}$ = $\underset{i\in S}{\textit{argmax}}(PSR(\boldsymbol{y_{R_{s}^{i}}}))$, and new scale $s_{t} = \alpha * s_{t-1}$,\\ 
 	// \textit{Update Translation - Particle Filter}\\
 	Do Importance Re-sampling (if necessary) and compute the 
-	mean of posterior pdf $\mathbf{(x_{t},y_{t})}$\\
+	mean of posterior pdf $(x_{t},y_{t})$\\
 	// \textit{Model Update}\\
 	Update $R_{t}^{S}$ (Condition 3),\\
 	Update $R_{t}^{L}$ (Condition 2),\\
-	\uIf{$PSR(y_{R_{s}}) \geq T_{R_{s}}$}{
+	\uIf{$PSR(\boldsymbol{y_{R_{s}}}) \geq T_{R_{s}}$}{
 		Update $R_{s}$ (Condition 1)}
   \label{endfor}
   \Return{($x_{t},y_{t},s_{t}$)}
@@ -271,7 +272,7 @@ transition filter with larger padding size, $R_{t}^{L}$ will enable
 {\it E}nKCF to recover from potential drifts after a scale filter is
 applied to the input images. On the other hand, another translation
 filter with smaller padding size, $R_{t}^{S}$, will help {\it E}nKCF
-to better localize the position of the target after a translation
+to better localize the position of the target after the large ROI translation
 filter is applied.
 
 Our approach is similar to that of \cite{ma2015long} which
@@ -338,68 +339,71 @@ transform is the key to reduce the complexity of any tracking method
 based on correlation filter. The off-diagonal elements become zero
 whereas the diagonal elements represent the eigenvalues of the
 circulant matrix. The eigenvalues are equal to the DFT transformation
-of the base sample ($\mathbf{x}$) elements. The Kernelized Correlation
-Filter, in particular, applies a kernel to $\mathbf{x}$ to transform
+of the base sample ($\boldsymbol{x}$) elements. The Kernelized Correlation
+Filter, in particular, applies a kernel to $\boldsymbol{x}$ to transform
 to a more discriminative domain. The circulant matrix is then formed
-by applying cyclic shifts on the kernelized $\mathbf{x}$. Such
+by applying cyclic shifts on the kernelized $\boldsymbol{x}$. Such
 kernelization operation maintains O($nlog(n)$) complexity unlike other
 kernel algorithms leading to O($n^{2}$) or even higher complexities.
 
 The KCF solves essentially the problem of a regression in the form of
 the regularization (ridge regression):
 \begin{equation}
-E(h) = \frac{1}{2}||\mathbf{y}-\sum_{c=1}^{C}\mathbf{h_{c}}*\mathbf{x_{c}}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||\mathbf{h_{c}}||^{2}
+E(h) = \frac{1}{2}||\boldsymbol{y}-\sum_{c=1}^{C}\boldsymbol{h_{c}}*\boldsymbol{x_{c}}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||\boldsymbol{h_{c}}||^{2}
 \label{eq:Closedform_RidgeReg}
 \end{equation}
-where we seek for $\mathbf{h}$ that minimizes $E$ given the desired
-continuous response, $\mathbf{y}$, and the training template
-$\mathbf{x}$.  The parameter $c$ enables one to integrate features in
+where we seek for $\boldsymbol{h}$ that minimizes $E$ given the desired
+continuous response, $\boldsymbol{y}$, and the training template
+$\boldsymbol{x}$.  The parameter $c$ enables one to integrate features in
 the form of multiple channels, such as HoG and color, in this setup
 \cite{henriques2015high,galoogahi2013multi}.  A closed-form solution
 for Equation \ref{eq:Closedform_RidgeReg} exists. To simplify the
 closed-form solution, an element-wise multiplication in frequency
 domain was proposed to learn the frequency domain correspondence of
-$\mathbf{h}$, $\mathbf{\hat{w}}$:
+$\boldsymbol{h}$, $\boldsymbol{\hat{w}}$:
 \begin{equation}
-\mathbf{\hat{w}} = \mathbf{\hat{x}^{*}}*\mathbf{\hat{y}}(\mathbf{\hat{x}^{*}}*\mathbf{\hat{x}}+\lambda)^{-1}.
+\boldsymbol{\hat{w}} = \boldsymbol{\hat{x}^{*}}*\boldsymbol{\hat{y}}(\boldsymbol{\hat{x}^{*}}*\boldsymbol{\hat{x}}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
 \end{equation}
-A non-linear version of $\mathbf{\hat{w}}$, $\mathbf{\hat{\alpha}}$ , is proposed to increase robustness
+A non-linear version of $\boldsymbol{\hat{w}}$, $\boldsymbol{\hat{\alpha}}$ , is proposed to increase robustness
 to any geometric and photometric variations
 \cite{henriques2015high}. In particular, the diagonalized non-linear Fourier
 domain dual form solution is expressed as
 \begin{equation}
-\mathbf{\hat{\alpha}} = \mathbf{\hat{y}}(\mathbf{\hat{k}^{xx}}+\lambda)^{-1}
+\boldsymbol{\hat{\alpha}} = \boldsymbol{\hat{y}}(\boldsymbol{\hat{k}^{xx}}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
 \end{equation}
-where $\lambda$ represents the regularization weight whereas $\mathbf{\hat{k}^{xx}}$ denotes
- the first row of the kernel matrix $\mathbf{K}$ known as \textit{gram matrix} and is expressed as
+where $\lambda$ represents the regularization weight whereas $\boldsymbol{\hat{k}^{xx}}$ denotes
+ the first row of the kernel matrix $\boldsymbol{K}$ known as \textit{gram matrix} and is expressed as
 \begin{equation}
-\mathbf{k^{xx^{'}}} = exp(-\dfrac{1}{\alpha^{2}}(||\mathbf{x}||^{2}+||\mathbf{x}^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\mathbf{\hat{x}_{c}}^{*}\odot \mathbf{\hat{x}_{c}}^{'}))).
+\boldsymbol{k^{xx^{'}}} = exp(-\dfrac{1}{\alpha^{2}}(||\boldsymbol{x}||^{2}+||\boldsymbol{x}^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\boldsymbol{\hat{x}_{c}}^{*}\odot \boldsymbol{\hat{x}_{c}}^{'}))).
 \label{eq:GaussianCorrelationSingleChannel}
 \end{equation}
 An early version based on this formulation used grayscale feature
-($C=1$) to learn the solution vector $\mathbf{w}$ and integrating
+($C=1$) to learn the solution vector $\boldsymbol{w}$ and integrating
 multi-channel features such as HoG and Color showed improved accuracy
 \cite{henriques2015high,galoogahi2013multi,tang2015multi,ma2015long,bibi2015multi}.
 In the detection phase, the learned correlation filter is correlated
-with the first row of the gram matrix, $\mathbf{k^{xz^{'}}}$, which
+with the first row of the gram matrix, $\boldsymbol{k^{xz^{'}}}$, which
 contains the similarity values between the learned feature template
-$\mathbf{x}$ and the new test template $\mathbf{z}$. This can be
+$\boldsymbol{x}$ and the new test template $\boldsymbol{z}$. This can be
 formulated as
 \begin{equation}
-\mathbf{r(z)} = F^{-1}(\mathbf{\hat{k}^{xz}} \odot \mathbf{\hat{\alpha}})
+\boldsymbol{r(z)} = F^{-1}(\boldsymbol{\hat{k}^{xz}} \odot \boldsymbol{\hat{\alpha}})
 \end{equation}
-where $\mathbf{r}$ denotes the correlation response at all cyclic shifts of the
+where $\boldsymbol{r}$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
-\begin{comment}
+
+%\begin{comment}
+\textit{YoungWoo : I added the following equations about the update scheme of the KCF.}
 As a common practice, to integrate further temporal information into tracker, we
 update the correlation filter and the appearance model as below.
 \begin{align}
-\mathbf{\hat{\alpha}_{t}} = (1-\beta) \mathbf{\hat{\alpha}_{t-1}} + \beta \mathbf{\hat{\alpha}_{t}} \\
-\mathbf{x_{t}} = (1-\beta) \mathbf{x_{t-1}} + \beta \mathbf{x_{t}}.
+\boldsymbol{\hat{\alpha}_{t}} = (1-\beta) \boldsymbol{\hat{\alpha}_{t-1}} + \beta \boldsymbol{\hat{\alpha}_{t}} \\
+\boldsymbol{\hat{x}_{t}} = (1-\beta) \boldsymbol{\hat{x}_{t-1}} + \beta \boldsymbol{\hat{x}_{t}}
 \end{align}
-\end{comment}
+%\end{comment}
+where $\beta$ represents the learning rate tuned to a small value in practice.
 
 In the following sections, we will detail two different types of
 features used in {\it E}nKCF: hand-crafted features (fHoG +
@@ -507,9 +511,9 @@ drifts at the later frames. To prevent such potential drifts, we
 developed a Bayes filter that incorporates a target's motion to smooth
 any intermediate outputs from individual KCFs. In particular, we use a
 particle filter to estimate the target's image coordinate based on the
-{\it E}nKCF's outputs. The state in this paper, $\mathbf{X_{t}}$,
+{\it E}nKCF's outputs. The state in this paper, $\boldsymbol{X_{t}}$,
 represents the target's pixel coordinates and its velocity,
-$\mathbf{X_{t}} = \lbrace x, y, v_{x}, v_{y} \rbrace$, where $x$ and
+$\boldsymbol{X_{t}} = \lbrace x, y, v_{x}, v_{y} \rbrace$, where $x$ and
 $y$ are the pixel coordinates of the target's centroid, $v_x$ and
 $v_y$ are the velocities estimated along the $x$-axis and
 $y$-axis. The particle filter predicts, using a constant velocity
@@ -517,7 +521,7 @@ motion model, the target's next state by generating a predefined
 number of particles. Then it uses the confidence maps of {\it E}nKCF
 as observation to update its state. The particle weight is computed
 as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{M}
-\mathbf{y_{R}}(x_{t}-i,y_{t}-j)$, where $w_{p}$ denotes the weight of
+\boldsymbol{y_{R}}(x_{t}-i,y_{t}-j)$, where $w_{p}$ denotes the weight of
 the particle $p$ at time $t$, and $N$ and $M$ denote the number of
 rows and columns of the confidence map.
         
@@ -552,7 +556,7 @@ color-naming.
 \textbf{Finding Optimal Hyper-parameters} As each of three KCFs in
        {\it E}nKCF is designed to address specific challenges in
        single target tracking problem, the optimal parameters for
-       individual KCFs should be different. We set the learning rates
+       individual KCFs should be different. We set the learning rates ($\beta$)
        of individual filters, $R_{t}^{L}$, $R_{t}^{S}$, and $R_{s}$ as
        $0.020$, $0.020$ and $0.010$. For the kernel of the Gaussian
        neighboring function, we empirically found the optimal values
@@ -566,17 +570,17 @@ color-naming.
        performance and accuracy. To keep the level of variance among
        the particles reasonable, we performed the re-sampling only
        when the \textit{efficient number of samples}, ($ \hat{N}_{eff}
-       \approx (\sum_{p=1}^{P}\mathbf{w}_{p}^{2})^{-1} $), is lower
+       \approx (\sum_{p=1}^{P}\boldsymbol{w}_{p}^{2})^{-1} $), is lower
        than a pre-defined threshold.
 
 \begin{figure*}[h]
 \centering
 \begin{tabular}{ccc}
 \tiny\quad\textbf{UAV123}\hspace{.37\linewidth}\textbf{OTB100}\\
-\includegraphics[width=3.30cm]{./figures/pr_uav123.eps}
-\includegraphics[width=3.55cm]{./figures/sr_uav123.eps}
-\includegraphics[width=3.30cm]{./figures/pr_otb100.eps}
-\includegraphics[width=3.55cm]{./figures/sr_otb100.eps}\\
+\includegraphics[width=3.80cm]{./figures/pr_uav123.eps}
+\includegraphics[width=4.10cm]{./figures/sr_uav123.eps}
+\includegraphics[width=3.80cm]{./figures/pr_otb100.eps}
+\includegraphics[width=4.10cm]{./figures/sr_otb100.eps}\\
 \end{tabular}
 \caption{Comparison of {\it E}nKCF's performance with other trackers on the UAV123 and OTB100 datasets.}
 \label{fig:UAV123_DATASET}
@@ -616,9 +620,11 @@ fHoG and color-naming features similar to our tracker. Figure
     1-D scale filter and searches the target's scale over 33
     candidates in a scale pool whereas our algorithm uses a 2-D scale
     filter with 3 candidate scales. Learning a 2-D filter resulted in
-    learning more spatial information. Second of all, the DSST use
+    learning more spatial information. Second of all, the DSST uses
     only fHoG whereas our algorithm uses both fHoG and color-naming
-    features. Learning more features, not always, but provided a
+    features. \textit{YoungWoo : is this sentence not confusing? Maybe, Learning 
+    more features provided a better understanding of the ROI?} 
+    Learning more features, not always, but provided a
     better understanding on the ROI.
     
 \begin{table*}[!h]
@@ -645,7 +651,7 @@ FPS & \color{red} 416 & \color{blue}412 & 370 & \color{green}425 & 365 & 384 & 1
 \textbf{Finding Optimal Combination and Deployment Order of Multiple
   KCFs} In addition to performance comparison with other trackers, we
 also conducted an experiment to see what combination and deployment
-order of the KCF work best. Table \ref{table:Comparison_to_LCT}
+order of the KCF works best. Table \ref{table:Comparison_to_LCT}
 presents results of this experiment. To achieve fair comparison, we did
 not use the particle filter. The combination presented at the $2^{nd}$
 column switched the order of deploying $R_{t}^{L}$ and
@@ -710,8 +716,8 @@ successive frames.
 \centering
 \begin{tabular}{cc}
 \tiny\quad\textbf{UAV123$\_$10fps}\\
-\includegraphics[width=3.32cm]{./figures/pr_uav123_10fps.eps}
-\includegraphics[width=3.30cm]{./figures/sr_uav123_10fps.eps}\\
+\includegraphics[width=4.02cm]{./figures/pr_uav123_10fps.eps}
+\includegraphics[width=4.00cm]{./figures/sr_uav123_10fps.eps}\\
 \end{tabular}
 \caption{Comparison of a modified {\it E}nKCF's performance with those
   of the state-of-the-art tracking algorithms on a lower frame rate
@@ -787,7 +793,8 @@ algorithm boost the performance by $10\%$.
 Although the proposed algorithm showed a promising result tested with
 challenging data, we believe the corner case analysis has not been
 extensively done yet. As future work, we would like to thoroughly
-study when and what conditions our algorithm would fail to track
+study \textit{YoungWoo : should it not be under which conditions?} 
+when and what conditions our algorithm would fail to track
 moving objects. In addition, we also would like to investigate a way
 of re-initializing a target when the target is lost, due to occlusion,
 illumination change, drastic camera motion, etc.
