@@ -370,10 +370,10 @@ to any geometric and photometric variations
 \cite{henriques2015high}. In particular, the diagonalized non-linear Fourier
 domain dual form solution is expressed as
 \begin{equation}
-\boldsymbol{\hat{\alpha}} = \boldsymbol{\hat{y}}(\boldsymbol{\hat{k}^{xx}}+\lambda)^{-1}
+\boldsymbol{\hat{\alpha}} = \boldsymbol{\hat{y}}(\boldsymbol{\hat{k}^{xx^{'}}}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
 \end{equation}
-where $\lambda$ represents the regularization weight whereas $\boldsymbol{\hat{k}^{xx}}$ denotes
+where $\lambda$ represents the regularization weight whereas $\boldsymbol{\hat{k}^{xx^{'}}}$ denotes
  the first row of the kernel matrix $\boldsymbol{K}$ known as \textit{gram matrix} and is expressed as
 \begin{equation}
 \boldsymbol{k^{xx^{'}}} = exp(-\dfrac{1}{\alpha^{2}}(||\boldsymbol{x}||^{2}+||\boldsymbol{x}^{'}||^{2}-2F^{-1}(\sum^{C}_{c}\boldsymbol{\hat{x}_{c}}^{*}\odot \boldsymbol{\hat{x}_{c}}^{'}))).
@@ -389,13 +389,12 @@ contains the similarity values between the learned feature template
 $\boldsymbol{x}$ and the new test template $\boldsymbol{z}$. This can be
 formulated as
 \begin{equation}
-\boldsymbol{r(z)} = F^{-1}(\boldsymbol{\hat{k}^{xz}} \odot \boldsymbol{\hat{\alpha}})
+\boldsymbol{r(z)} = F^{-1}(\boldsymbol{\hat{k}^{xz^{'}}} \odot \boldsymbol{\hat{\alpha}})
 \end{equation}
 where $\boldsymbol{r}$ denotes the correlation response at all cyclic shifts of the
 first row of the kernel matrix.
 
 %\begin{comment}
-\textit{YoungWoo : I added the following equations about the update scheme of the KCF.}
 As a common practice, to integrate further temporal information into tracker, we
 update the correlation filter and the appearance model as below.
 \begin{align}
@@ -470,7 +469,7 @@ map. In the next stage, the KCF, concentrating on the second
 convolutional layer features, is run to update transition. The third
 KCF then works on the transition given by the previous KCF and learns
 the first convolutional layer features to update the transition. This
-coarse-to-fine approach accommodates different levels of abstractions
+coarse-to-fine translation estimation approach accommodates different levels of abstractions
 of the object. However, it runs multiple KCFs in a sequential fashion,
 increasing the run-time complexity. For this reason, we follow an
 approach similar to \cite{danelljan2015convolutional}, in order to
@@ -535,18 +534,18 @@ evaluate the performance of the proposed algorithm in terms of the
 goal of this paper, we need data with challenging variations in scale
 and translation. To this end, we chose the UAV123
 data\footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}
-that contains 123 video sequences of moving objects captured from
+that contains 123 video sequences of objects captured from
 low-altitude UAVs. Because of the nature of the video acquisition --
 the targets and the camera are moving together, this data pose a great
-deal of challenges as the scale and position of the targets can be
-drastically changed in a few frames. To verify that our algorithm is
+deal of challenges as the scale and position of the targets change drastically
+in most of the sequences . To verify that our algorithm is
 useful not only for the image data with such extreme challenges but
 also for the one with nominal difficulties in single-object tracking,
 we also used the OTB100
 data\footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
 that contains the videos recorded from smart phones and typical
-cameras in perspective view. In addition, we use a temporarily
-down-sampled the UAV123 data to check how robust our algorithm is to
+cameras in perspective view. In addition, we use the temporarily
+down-sampled UAV123 dataset to check how robust our algorithm is to
 drastic motions of camera and moving targets. Lastly, we evaluate the
 proposed algorithm with deep convolutional features on the UAV123
 dataset to investigate how much performance gain we can achieve in
@@ -576,7 +575,7 @@ color-naming.
 \begin{figure*}[h]
 \centering
 \begin{tabular}{ccc}
-\tiny\quad\textbf{UAV123}\hspace{.37\linewidth}\textbf{OTB100}\\
+\tiny\textbf{UAV123}\hspace{.43\linewidth}\textbf{OTB100}\\
 \includegraphics[width=3.80cm]{./figures/pr_uav123.eps}
 \includegraphics[width=4.10cm]{./figures/sr_uav123.eps}
 \includegraphics[width=3.80cm]{./figures/pr_otb100.eps}
@@ -622,10 +621,8 @@ fHoG and color-naming features similar to our tracker. Figure
     filter with 3 candidate scales. Learning a 2-D filter resulted in
     learning more spatial information. Second of all, the DSST uses
     only fHoG whereas our algorithm uses both fHoG and color-naming
-    features. \textit{YoungWoo : is this sentence not confusing? Maybe, Learning 
-    more features provided a better understanding of the ROI?} 
-    Learning more features, not always, but provided a
-    better understanding on the ROI.
+    features. Learning complementary features such as color and shape provided a 
+    better understanding of the ROI.
     
 \begin{table*}[!h]
 \smaller
@@ -793,9 +790,8 @@ algorithm boost the performance by $10\%$.
 Although the proposed algorithm showed a promising result tested with
 challenging data, we believe the corner case analysis has not been
 extensively done yet. As future work, we would like to thoroughly
-study \textit{YoungWoo : should it not be under which conditions?} 
-when and what conditions our algorithm would fail to track
-moving objects. In addition, we also would like to investigate a way
+study under what conditions our algorithm would fail to track 
+objects. In addition, we also would like to investigate a way
 of re-initializing a target when the target is lost, due to occlusion,
 illumination change, drastic camera motion, etc.
 
