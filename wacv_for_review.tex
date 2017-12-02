@@ -156,7 +156,7 @@ region of interest (ROI) with a list of templates in predefined scale
 ratios to find the target in appropriate scale
 \cite{henriques2015high,tang2015multi,ma2015long,bibi2015multi,li2014scale}. However,
 these approaches would drastically reduce run-time performance because
-multiple KCFs run on each frame. \textit{YoungWoo : due to operation of multiple KCFs on each frame?}
+multiple KCFs run on each frame. 
 
 Another way of handling the scale change for the correlation filter
 based approach is to estimate a correct scale at a location where a
@@ -267,12 +267,12 @@ filter for learning a target's translation could include the
 background of the target to better discriminate it from its
 surrounding, and another correlation filter could focus on the target
 itself to estimate the right scale of the target. In particular, a
-transition filter with larger padding size, $R_{t}^{L}$ \textit{YoungWoo : , $R_{t}^{L}$, ?} 
-will enable {\it E}nKCF to recover from potential drifts after a scale filter is
-applied to the input images. On the other hand, another translation filter with
-smaller padding size, $R_{t}^{S}$, will help {\it E}nKCF to better
-localize the position of the target after a translation filter is
-applied.
+transition filter with larger padding size, $R_{t}^{L}$ will enable
+{\it E}nKCF to recover from potential drifts after a scale filter is
+applied to the input images. On the other hand, another translation
+filter with smaller padding size, $R_{t}^{S}$, will help {\it E}nKCF
+to better localize the position of the target after a translation
+filter is applied.
 
 Our approach is similar to that of \cite{ma2015long} which
 sequentially applied more than one KCF to every frame, but different
@@ -532,7 +532,7 @@ goal of this paper, we need data with challenging variations in scale
 and translation. To this end, we chose the UAV123
 data\footnote{\url{https://ivul.kaust.edu.sa/Pages/Dataset-UAV123.aspx}}\cite{mueller2016uav123}
 that contains 123 video sequences of moving objects captured from
-low-altitude UAVs. \textit{YoungWoo: It felt confusing to me} Because of the nature of the video acquisition --
+low-altitude UAVs. Because of the nature of the video acquisition --
 the targets and the camera are moving together, this data pose a great
 deal of challenges as the scale and position of the targets can be
 drastically changed in a few frames. To verify that our algorithm is
@@ -541,13 +541,13 @@ also for the one with nominal difficulties in single-object tracking,
 we also used the OTB100
 data\footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
 that contains the videos recorded from smart phones and typical
-cameras in perspective view. \textit{YoungWoo : We did not downsample it, they provide both
-UAV123 and UAV123$\_$1Ofps.} In addition, we temporarily down-sampled
-the UAV123 data to check how robust our algorithm is to drastic
-motions of camera and moving targets. Lastly, we evaluate the proposed
-algorithm with deep convolutional features, on the UAV123 dataset to
-investigate how much performance gain we can achieve in using deep
-features over the conventional features like fHoG and color-naming.
+cameras in perspective view. In addition, we use a temporarily
+down-sampled the UAV123 data to check how robust our algorithm is to
+drastic motions of camera and moving targets. Lastly, we evaluate the
+proposed algorithm with deep convolutional features on the UAV123
+dataset to investigate how much performance gain we can achieve in
+using deep features over the conventional features like fHoG and
+color-naming.
 
 \textbf{Finding Optimal Hyper-parameters} As each of three KCFs in
        {\it E}nKCF is designed to address specific challenges in
@@ -615,11 +615,11 @@ fHoG and color-naming features similar to our tracker. Figure
     algorithm outperformed it because, first of all, the DSST uses a
     1-D scale filter and searches the target's scale over 33
     candidates in a scale pool whereas our algorithm uses a 2-D scale
-    filter with 3 candidate scales. Learning a 2-D filter would result
-    in learning more spatial information. Second of all, the DSST use
+    filter with 3 candidate scales. Learning a 2-D filter resulted in
+    learning more spatial information. Second of all, the DSST use
     only fHoG whereas our algorithm uses both fHoG and color-naming
-    features. \textit{YoungWoo : The following sentence is confusing to me.} Learning more features, not for always, but would
-    provide better understanding on the ROI.
+    features. Learning more features, not always, but provided a
+    better understanding on the ROI.
     
 \begin{table*}[!h]
 \smaller
@@ -670,9 +670,9 @@ with no drastic camera motion. To evaluate the robustness of particle
 filter, we add noise from a uniform distribution ($[-20,20]$), to the
 translation estimations of the KCFs. For this experiment, the {\it
   E}nKCF with particle filter achieves $51.98\%$ precision ($20$px),
-outperforming the one \textit{YoungWoo: without particle filter EnKCF or the one without particle filter?} without particle filter {\it E}nKCF by
-$6.32\%$. This experiment validated that the integration of particle
-filter into the {\it E}nKCF can further improve the performance.
+outperforming the one without particle filter by $6.32\%$. This
+experiment validated that the integration of particle filter into the
+{\it E}nKCF can further improve the performance.
 
 \textbf{Performance on OTB100 Dataset} Figure \ref{fig:UAV123_DATASET}
 shows the results on the OTB100 dataset. The performance of {\it
@@ -705,22 +705,7 @@ observe how sensitive the performance of the state-of-the-art tracking
 algorithms is to the frame rate, and, with a slight modification, the
 proposed method effectively handled large displacement of objects in
 successive frames.
-\begin{comment}
-\textit{YoungWoo : I also believe that we should
-  emphasize how the state-of-the-art trackers perform in lower frame
-  rates. And I believe this is what this paper
-  \cite{mueller2017context} says. They rank the trackers by evaluating
-  them on videos matching their fps. I was thinking of running ECO and
-  CCOT in UAV123 in 5 fps videos and mention how they degrade with
-  respect to the decreasing fps.  I believe this is our contribution
-  and we should emphasize it.
-  
-  Burak: To be honest with you, it's a cheating -- we modified our
-  algorithm to make it work better, but didn't do anything or
-  modifications to other algorithms. Yes, all other algorithms didn't
-  perform well on a low frame rate, but it was a unfair comparison. So
-  I wouldn't think it's a contribution.  }
-\end{comment}
+
 \begin{figure}[!h]
 \centering
 \begin{tabular}{cc}
@@ -799,9 +784,6 @@ we explored the idea of utilizing deep features for the proposed
 algorithm and found that the deep features helped the proposed
 algorithm boost the performance by $10\%$.
 
-\textit{YoungWoo : I do not agree with this part. In terms of the future work, maybe,
- we can say we will more extensively test our algorithm on an embedded system and try
- to improve the accuracy by adaptively finding out when to apply the scale filter to reduce the drifts further. }
 Although the proposed algorithm showed a promising result tested with
 challenging data, we believe the corner case analysis has not been
 extensively done yet. As future work, we would like to thoroughly
