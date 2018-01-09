@@ -67,7 +67,7 @@ kernelized correlation filters (KCF), we call it {\it E}nKCF. A
 committee of KCFs is specifically designed to address the variations
 in scale and translation of moving objects. To guarantee a high-speed
 run-time performance, we deploy each of KCFs in turn, instead of
-applying multiple KCFs to each frame. To minimize any potential drifts
+applying multiple KCFs to each frame. To reduce any potential drifts
 between individual KCFs' transition, we developed a particle
 filter. Experimental results showed that the performance of ours is,
 on average, 70.10\% for precision at 20 pixels, 53.00\% for success
@@ -194,7 +194,7 @@ to effectively address the changes in scale and translation of a
 target, we extended the KCF and deployed each of three KCFs in
 turn. Because of such a deployment strategy, the run-time performance
 of the proposed algorithm maintains high without sacrificing the
-accuracy of tracking. To minimize any potential drifts while switching
+accuracy of tracking. To reduce any potential drifts while switching
 KCFs, we developed a particle filter. Additionally, to increase the
 flexibility of the proposed algorithm's usage, we explore deep
 convolutional features with varying levels of abstraction.
@@ -339,17 +339,18 @@ transform is the key to reduce the complexity of any tracking method
 based on correlation filter. The off-diagonal elements become zero
 whereas the diagonal elements represent the eigenvalues of the
 circulant matrix. The eigenvalues are equal to the DFT transformation
-of the base sample ($\boldsymbol{x}$) elements. The Kernelized Correlation
-Filter, in particular, applies a kernel to $\boldsymbol{x}$ to transform
-to a more discriminative domain. The circulant matrix is then formed
-by applying cyclic shifts on the kernelized $\boldsymbol{x}$. Such
-kernelization operation maintains O($nlog(n)$) complexity unlike other
-kernel algorithms leading to O($n^{2}$) or even higher complexities.
+of the base sample ($\boldsymbol{x}$) elements. The Kernelized
+Correlation Filter, in particular, applies a kernel to
+$\boldsymbol{x}$ to transform to a more discriminative domain. The
+circulant matrix is then formed by applying cyclic shifts on the
+kernelized $\boldsymbol{x}$. Such kernelization operation maintains
+$\mathcal{O}$($nlog(n)$) complexity unlike other kernel algorithms
+leading to $\mathcal{O}$($n^{2}$) or even higher complexities.
 
 The KCF solves essentially the problem of a regression in the form of
 the regularization (ridge regression):
 \begin{equation}
-E(h) = \frac{1}{2}||\boldsymbol{y}-\sum_{c=1}^{C}\boldsymbol{h_{c}}*\boldsymbol{x_{c}}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||\boldsymbol{h_{c}}||^{2}
+E_h = \min_{\boldsymbol{h}}\frac{1}{2}||\boldsymbol{y}-\sum_{c=1}^{C}\boldsymbol{h_{c}}*\boldsymbol{x_{c}}||^{2} + \frac{\lambda}{2}\sum_{c=1}^{C}||\boldsymbol{h_{c}}||^{2}
 \label{eq:Closedform_RidgeReg}
 \end{equation}
 where we seek for $\boldsymbol{h}$ that minimizes $E$ given the desired
@@ -538,7 +539,7 @@ that contains 123 video sequences of objects captured from
 low-altitude UAVs. Because of the nature of the video acquisition --
 the targets and the camera are moving together, this data pose a great
 deal of challenges as the scale and position of the targets change drastically
-in most of the sequences . To verify that our algorithm is
+in most of the sequences. To verify that our algorithm is
 useful not only for the image data with such extreme challenges but
 also for the one with nominal difficulties in single-object tracking,
 we also used the OTB100
