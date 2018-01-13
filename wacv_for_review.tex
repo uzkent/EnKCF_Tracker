@@ -422,7 +422,9 @@ tracking at $30$ fps on low-end embedded systems without GPUs.
 \subfloat[Small Area Translation Filter]{\hspace{.30\linewidth}}\label{fig:Rt_S}
 \quad\subfloat[Large Area Translation Filter]{\hspace{.37\linewidth}}\label{fig:Rt_L}
 \quad\quad\subfloat[Scale Filter]{\hspace{.12\linewidth}}\label{fig:Rs}
-\caption{Examples of three filters with hand-crafted features.}
+\caption{Examples of three filters with hand-crafted features. The desired responses by 
+the large and small area translation filters and scale filter are represented by $y_{R_{t}^{L}}$, $y_{R_{t}^{S}}$
+and $y_{R_{s}}$.}
 \label{fig:Filters}
 \end{figure}
 
@@ -523,7 +525,7 @@ as observation to update its state. The particle weight is computed
 as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{M}
 \boldsymbol{y_{R}}(x_{t}-i,y_{t}-j)$, where $w_{p}$ denotes the weight of
 the particle $p$ at time $t$, and $N$ and $M$ denote the number of
-rows and columns of the confidence map.
+rows and columns of the confidence map. 
         
 %----------------------------------------------------------------------
 \section{Experiments} \label{sc:Experiments}
@@ -544,6 +546,7 @@ useful not only for the image data with such extreme challenges but
 also for the one with nominal difficulties in single-object tracking,
 we also used the OTB100
 data\footnote{\url{http://cvlab.hanyang.ac.kr/tracker_benchmark/benchmark_v10.html}}
+\cite{WuLimYang13}
 that contains the videos recorded from smart phones and typical
 cameras in perspective view. In addition, we use the temporarily
 down-sampled UAV123 dataset to check how robust our algorithm is to
@@ -758,7 +761,8 @@ due to large target and camera motion in the UAV123 dataset.
 \end{tabular}
 \caption{Comparison of {\it E}nKCF's ({\it fHoG} + {\it color-naming}) 
 performance with Deep{\it E}nKCF on the UAV123
-dataset.}
+dataset. The runtime performance the Deep{\it E}nKCF (conv224) is 30.74 fps 
+whereas the conv222 setting yields to a 35.23 fps tracker on a CPU. }
 \label{fig:UAV123_DATASET_DeepFeatures}
 \end{figure}
 
