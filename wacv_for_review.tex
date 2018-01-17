@@ -366,10 +366,11 @@ $\boldsymbol{h}$, $\boldsymbol{\hat{w}}$:
 \boldsymbol{\hat{w}} = \boldsymbol{\hat{x}^{*}}*\boldsymbol{\hat{y}}(\boldsymbol{\hat{x}^{*}}*\boldsymbol{\hat{x}}+\lambda)^{-1}.
 \label{eq:DiagonalizedPrimalSolution}
 \end{equation}
-A non-linear version of $\boldsymbol{\hat{w}}$, $\boldsymbol{\hat{\alpha}}$ , is proposed to increase robustness
-to any geometric and photometric variations
-\cite{henriques2015high}. In particular, the diagonalized non-linear Fourier
-domain dual form solution is expressed as
+Where $*$ is an element-wise multiplication. A non-linear version of
+$\boldsymbol{\hat{w}}$ and $\boldsymbol{\hat{\alpha}}$ are proposed to
+increase robustness to any geometric and photometric variations
+\cite{henriques2015high}. In particular, the diagonalized non-linear
+Fourier domain dual form solution is expressed as
 \begin{equation}
 \boldsymbol{\hat{\alpha}} = \boldsymbol{\hat{y}}(\boldsymbol{\hat{k}^{xx^{'}}}+\lambda)^{-1}
 \label{eq:FourierDualDomainSolution}
@@ -460,8 +461,8 @@ performance.
 
 There has been a large volume of studies on utilizing a pre-trained
 CNN features in tracking-by-detection algorithms. For example,
-\cite{danelljan2015convolutional} used the activation of the first
-and second convolutional layer of the VGGNet \cite{simonyan2014very}.
+\cite{danelljan2015convolutional} used the activation of the first and
+second convolutional layer of the VGGNet \cite{simonyan2014very}.
 They report that the first convolutional layer features lead to
 slightly better precision and success rates than the second layer due
 to increased translational invariance in this
@@ -472,28 +473,30 @@ map. In the next stage, the KCF, concentrating on the second
 convolutional layer features, is run to update transition. The third
 KCF then works on the transition given by the previous KCF and learns
 the first convolutional layer features to update the transition. This
-coarse-to-fine translation estimation approach accommodates different levels of abstractions
-of the object. However, it runs multiple KCFs in a sequential fashion,
-increasing the run-time complexity. For this reason, we follow an
-approach similar to \cite{danelljan2015convolutional}, in order to
-embed deep features in {\it E}nKCF. Our {\it E}nKCF algorithm enables
-us to exploit different level of feature encodings with different
-KCFs. The translation filters, $R_{t}^{L}$ and $R_{t}^{S}$, consider
-at least twice bigger area than the scale filter, $R_{s}$. Given this,
-we can assign deeper feature encodings to $R_{s}$ as it learns less
-spatial information than $R_{t}^{L}$ and $R_{t}^{S}$. Thus we assign
-the activation of the fourth convolutional layer features
-($26\times26\times128$) to $R_{s}$ whereas $R_{t}^{L}$ and $R_{t}^{S}$
-are assigned the activation of the second layer features
-($109\times109\times64$). Figure \ref{fig:Filters_CNN} illustrates
-this feature assignment. Additionally, we assign the second
-convolutional layer features to $R_{s}$ as in $R_{t}^{L}$ and
-$R_{t}^{S}$ and compare this setting (\textit{conv222-VGG}) to
-\textit{conv224-VGG}. The conv222 setting stands for the assignment of
-the activation of $2^{th}$ convolutional layer features of VGGNet to
-$R_{t}^{L}$, $R_{t}^{S}$ and $R_{s}$. We use the VGGNet since it
-provides higher spatial resolution at the first several layers than
-AlexNet \cite{krizhevsky2012imagenet}.
+coarse-to-fine translation estimation accommodates different levels of
+abstractions of the object. However, it runs multiple KCFs in a
+sequential fashion, increasing the run-time complexity. For this
+reason, we follow an approach similar to
+\cite{danelljan2015convolutional}, in order to embed deep features in
+     {\it E}nKCF. Our {\it E}nKCF algorithm enables us to exploit
+     different level of feature encodings with different KCFs. The
+     translation filters, $R_{t}^{L}$ and $R_{t}^{S}$, consider at
+     least twice bigger area than the scale filter, $R_{s}$. Given
+     this, we can assign deeper feature encodings to $R_{s}$ as it
+     learns less spatial information than $R_{t}^{L}$ and
+     $R_{t}^{S}$. Thus we assign the activation of the fourth
+     convolutional layer features ($26\times26\times128$) to $R_{s}$
+     whereas $R_{t}^{L}$ and $R_{t}^{S}$ are assigned the activation
+     of the second layer features ($109\times109\times64$). Figure
+     \ref{fig:Filters_CNN} illustrates this feature
+     assignment. Additionally, we assign the second convolutional
+     layer features to $R_{s}$ as in $R_{t}^{L}$ and $R_{t}^{S}$ and
+     compare this setting (\textit{conv222-VGG}) to
+     \textit{conv224-VGG}. The conv222 setting stands for the
+     assignment of the activation of $2^{th}$ convolutional layer
+     features of VGGNet to $R_{t}^{L}$, $R_{t}^{S}$ and $R_{s}$. We
+     use the VGGNet since it provides higher spatial resolution at the
+     first several layers than AlexNet \cite{krizhevsky2012imagenet}.
 
 \begin{figure}[!h]
 \centering
@@ -515,17 +518,18 @@ any intermediate outputs from individual KCFs. In particular, we use a
 particle filter to estimate the target's image coordinate based on the
 {\it E}nKCF's outputs. The state in this paper, $\boldsymbol{X_{t}}$,
 represents the target's pixel coordinates and its velocity,
-$\boldsymbol{X_{t}} = \lbrace x, y, v_{x}, v_{y} \rbrace$, where $x$ and
-$y$ are the pixel coordinates of the target's centroid, $v_x$ and
+$\boldsymbol{X_{t}} = \lbrace x, y, v_{x}, v_{y} \rbrace$, where $x$
+and $y$ are the pixel coordinates of the target's centroid, $v_x$ and
 $v_y$ are the velocities estimated along the $x$-axis and
 $y$-axis. The particle filter predicts, using a constant velocity
 motion model, the target's next state by generating a predefined
 number of particles. Then it uses the confidence maps of {\it E}nKCF
 as observation to update its state. The particle weight is computed
 as, $w_{p_{t}}(x_{t},y_{t}) = \sum_{i=1}^{N}\sum_{j=1}^{M}
-\boldsymbol{y_{R}}(x_{t}-i,y_{t}-j)$, where $w_{p}$ denotes the weight of
-the particle $p$ at time $t$, and $N$ and $M$ denote the number of
-rows and columns of the confidence map. 
+\boldsymbol{y_{R}}(x_{t}-i,y_{t}-j)$, where $w_{p}$ is the weight of
+the particle $p$ at time $t$, $\boldsymbol{y_{R}}$ is the response map
+from one of the KCFs, and $N$ and $M$ denote the number of rows and
+columns of the confidence map.
         
 %----------------------------------------------------------------------
 \section{Experiments} \label{sc:Experiments}
@@ -750,7 +754,7 @@ low level features of the object than hand-crafted features in
 challenging cases such as low contrast ROIs. However, we believe that
 the contribution of the deep features is limited by two factors:
 increased translational invariance in deeper layers and losing targets
-due to large target and camera motion in the UAV123 dataset.
+due to large target and camera motion in the UAV123 dataset. 
 
 \begin{figure}[!h]
 \centering
@@ -759,10 +763,10 @@ due to large target and camera motion in the UAV123 dataset.
 \includegraphics[width=3.60cm]{./figures/pr_deep.eps}
 \includegraphics[width=3.70cm]{./figures/sr_deep.eps}\\
 \end{tabular}
-\caption{Comparison of {\it E}nKCF's ({\it fHoG} + {\it color-naming}) 
-performance with Deep{\it E}nKCF on the UAV123
-dataset. The runtime performance the Deep{\it E}nKCF (conv224) is 30.74 fps 
-whereas the conv222 setting yields to a 35.23 fps tracker on a CPU. }
+\caption{Comparison of {\it E}nKCF's ({\it fHoG} + {\it color-naming})
+  performance with Deep{\it E}nKCF on the UAV123 dataset. The frame
+  rate of the Deep{\it E}nKCF (conv224) was, on average, 30.74 fps and
+  the conv222 setting was 35.23 fps on a CPU.}
 \label{fig:UAV123_DATASET_DeepFeatures}
 \end{figure}
 
