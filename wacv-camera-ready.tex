@@ -45,8 +45,8 @@
 %}
 % Authors at different institutions
 \author{Burak Uzkent \\
-Institution1\\
-{\tt\small firstauthor@i1.org}
+Rochester Institute of Technology\\
+{\tt\small bxu2522@rit.edu}
 \and
 YoungWoo Seo \\
 Independent Robotics Research (IR2)\\
@@ -74,9 +74,11 @@ on average, 70.10\% for precision at 20 pixels, 53.00\% for success
 rate for the OTB100 data, and 54.50\% and 40.2\% for the UAV123
 data. Experimental results showed that our method is, on average,
 better than other high-speed trackers over 5\% on precision on 20
-pixels and 10-20\% on AUC. In addition, our implementation ran at 340
+pixels and 10-20\% on AUC. \textit{YoungWoo : Two preceeding sentences start with
+experimental results showed that. Should we change the begining of the second sentence?}
+In addition, our implementation ran at 340
 fps for the OTB100 and at 416 fps for the UAV123 dataset that is
-faster than DCF (292 fps) for the OTB100 and KCF (292 fps) for the
+faster than DCF (333 fps) for the OTB100 and KCF (296 fps) for the
 UAV123. To increase flexibility of the proposed {\it E}nKCF running on
 various platforms, we also explored different levels of deep
 convolutional features.
@@ -95,7 +97,8 @@ recording, an unmanned air vehicle (UAV) equipped with an object or
 feature following function would make it more useful for the
 application of monitoring/surveillance/surveying on private
 properties/wild-life/crop, video recording on various events, many
-others. To this end, in this paper, we propose a single-target
+others. \textit{YoungWoo : For me, it was hard to get the previous sentence.}
+To this end, in this paper, we propose a single-target
 tracking algorithm that does not require offline training and can run
 at high-speed. Specifically, we would like to have our algorithm 1)
 learn the appearance model of a target on the fly and 2) run on a
@@ -419,6 +422,7 @@ embedded system without GPUs).
 \quad\subfloat[Large area translation filter]{\hspace{.37\linewidth}}\label{fig:Rt_L}
 \quad\quad\subfloat[Scale filter]{\hspace{.12\linewidth}}\label{fig:Rs}
 \caption{Examples of three filters with hand-crafted features. The
+  \textit{YoungWoo : the responses are target (desired) response for the correlations filters}
   responses by the large and small area translation filters and scale
   filter are represented by $y_{R_{t}^{L}}$, $y_{R_{t}^{S}}$ and
   $y_{R_{s}}$.}
@@ -603,7 +607,7 @@ ECO \cite{DanelljanCVPR2017}, CCOT \cite{DanelljanECCV2016}, SCT
 \cite{Choi_2016_CVPR}, SAMF \cite{li2014scale}, DSST
 \cite{danelljan2014accurate}, Struck \cite{hare2012efficient}, MUSTER
 \cite{hong2015multi}, TLD \cite{kalal2012tracking}, and OAB
-\cite{zhang2012robust}. The ECO and CCOT trackers originally uses deep
+\cite{zhang2012robust}. The ECO and CCOT trackers \textit{YoungWoo : it should be "use" I think.}originally uses deep
 convolutional features, however, to perform fair comparison, we use
 fHoG and color-naming features similar to our tracker. Figure
 \ref{fig:UAV123_DATASET} shows the results on the UAV123 dataset. The
@@ -669,7 +673,8 @@ optimal, in terms of both tracking accuracy and run-time
 performance. For example, one could achieve $4.26\%$ higher in
 accuracy by running $R_{t}^{L}$ and $R_{t}^{S}$, and $R_{s}$ at every
 frame (produced 58.16\% for precision at 20 pixels), but this
-combination decreases run-time performance to 317 fps (=416fps - 99fps).
+combination decreases run-time performance to 317 fps (=416fps - 99fps). 
+\textit{YoungWoo : Should it not be 99fps.}
 
 \textbf{Evaluation on Particle Filter Contribution} For the UAV123
 dataset, we also evaluated the performance of the {\it E}nKCF with and
@@ -789,10 +794,10 @@ algorithms, and found that, on average, the performance of the
 proposed algorithm is better than other high-speed trackers over 5\%
 on precision at 20 pixels and 10-20\% on AUC. Our implementation ran
 at 340 fps for OTB100 and at 416 fps for UAV123 data that is faster
-than DCF (292 fps) for OTB100 and KCF (292 fps) for UAV123. Finally,
+than DCF (333 fps) for OTB100 and KCF (296 fps) for UAV123. Finally,
 we explored the idea of utilizing deep features for the proposed
 algorithm and found that the deep features helped the proposed
-algorithm boost the performance by $10\%$.
+algorithm boost the performance by $5\%$.
 
 Although the proposed algorithm showed a promising result for the
 challenging data, we believe the corner case analysis has not been
