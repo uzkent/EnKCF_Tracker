@@ -1,5 +1,5 @@
 ## Algorithm Description
-This code includes the Ensemble of Kernelized Correlation Filter Tracker (**EnKCF**) for the our WACV18 paper.
+This [code](https://github.com/buzkent86/EnKCF_Tracking_WACV18/tree/master/C%2B%2B_Implementation) includes the Ensemble of Kernelized Correlation Filter Tracker (**EnKCF**) for our WACV18 paper.
 The EnKCF runs multiple KCFs `[1]` to tackle different aspects of tracking such as : **scaling**, and **fast motion**.
 We also employ a `Particle Filter` to smoothen the interaction among different KCFs. Our tracker achieves
 higher success and precision rates than the baseline tracker at `416hz` on UAV123 dataset. We will share
@@ -45,6 +45,10 @@ in the system is not removed.
 * transition_noise_uniform_vx = [-10,10] // X Velocity
 * transition_noise_uniform_vy = [-10,10] // Y Velocity
 * beta_weight_function = 0.05 // exp(-dist * beta) - Weight Function Hyperparameter - For Importance Sampling based on spatial Eclidean Distance to Maximum of response map
+
+### Run the Tracker
+
+More information on running the tracker can be found [here](https://github.com/buzkent86/EnKCF_Tracking_WACV18/tree/master/C%2B%2B_Implementation).
 
 For your questions or comments, please contact Burak Uzkent at `uzkent.burak@gmail.com`.
 
