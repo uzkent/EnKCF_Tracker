@@ -21,15 +21,18 @@ You can find more details on the EnKCF tracker in our [arxiv version of the pape
 * learning_rate_large_roi_translation = 0.20
 * learning_rate_small_roi_translation = 0.20
 * scale_filter_training_psr_threshold = 4.0 // Threshold to Train Scale Filter
-* padding_scale_filter = 1.0          // Area to Consider for Scale Filter
-* padding_large_roi_translation = 3.0 // Area to Consider for Large Area Trans. Filter
-* padding_small_roi_translation = 2.5 // Area to COnsider for Small Area Trans. Filter
-* responsevariance_scale = 0.04	// Variance for Desired Gaussian Response for Scale KCF
+* padding_scale_filter = 0.0                // Area to Consider for Scale Filter
+* padding_large_roi_translation = 2.0       // Area to Consider for Large Area Trans. Filter
+* padding_small_roi_translation = 1.5       // Area to COnsider for Small Area Trans. Filter
+* responsevariance_scale = 0.04	            // Variance for Desired Gaussian Response for Scale KCF
 * responsevariance_large_roi_translation = 0.06 // Variance of the Gaussian Response for Large ROI Translation KCF
 * responsevariance_small_roi_translation = 0.125 // Variance of the Gaussian Response for Small ROI Translation KCF
 
 
 ### Particle Filter Hyperparameters
+
+It should be highlighted that we recommend that the particle filter should be removed in case the global camera motion
+in the system is not removed.
 
 * number_particles = 300		// Number of Particles in the Particle Filter
 * number_efficient_particles = 1000/3.0 // Number of Efficient Particles to Enable Resampling
