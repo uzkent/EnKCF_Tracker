@@ -8,6 +8,8 @@ the proposed EnKCF tracker. This tracker is inspired by the long-term correlatio
 however, our goal is to use multiple KCFs in an efficient way to keep the complexity at each frame similar to the 
 baseline KCF `(O(nlogn))` `[1]` so that it operates at real-time (`30fps`) on **computationaly limited embedded systems**.
 
+You can find more details on the EnKCF tracker in our [arxiv version of the paper](https://arxiv.org/pdf/1801.06729.pdf).
+
 ### EnKCF Hyperparameters
 
 * sigma_scale = 0.9   // Gaussian Kernel Bandwith in Scale KCF
