@@ -1,47 +1,46 @@
 ## Algorithm Description
-
-<p> This code includes the Ensemble of Kernelized Correlation Filter Tracker for the BMVC17 Submission.
+This code includes the Ensemble of Kernelized Correlation Filter Tracker (**EnKCF**) for the our WACV18 paper.
 The EnKCF runs multiple KCFs [1] to tackle different aspects of tracking such as : scaling, and fast motion.
 We also employ a Particle Filter to smoothen the interaction among different KCFs. Our tracker achieves
-higher success and precision rates than the baseline KCF tracker at 416hz on UAV123 dataset. We will share
+higher success and precision rates than the baseline KCF tracker at `416hz` on UAV123 dataset. We will share
 more details on our tracker soon. Below, you can find the hyperparameters and their optimal values for
 the proposed EnKCF tracker. This tracker is inspired by the long-term correlation (LCT) tracker proposed by [2], 
 however, our goal is to use multiple KCFs in an efficient way to keep the complexity at each frame similar to the 
-baseline KCF ( O(nlogn) ) [1]. </p>
+baseline KCF `(O(nlogn))` [1].
 
 ### EnKCF Hyperparameters
-<ul>
-<li> sigma_scale = 0.9   // Gaussian Kernel Bandwith in Scale KCF
-<li> sigma_large_roi_translation = 0.7 // Gaussian Kernel Bandwith in Large ROI Trans. KCF
-<li> sigma_small_roi_translation = 0.6 // Gaussian Kernel Bandwith in Small ROI Trans. KCF
-<li> lambda = 0.0001 // Regularization Weight - Same for all the KCFs
-<li> scale_filter_frequency = 5 // Scale Filter Applied every 5 frames
-<li> learning_rate_scale = 0.10 // Make it 0.25 for the UAV123_10fps dataset
-<li> learning_rate_large_roi_translation = 0.20
-<li> learning_rate_small_roi_translation = 0.20
-<li> scale_filter_training_psr_threshold = 4.0 // Threshold to Train Scale Filter
-<li> padding_scale_filter = 1.0          // Area to Consider for Scale Filter
-<li> padding_large_roi_translation = 3.0 // Area to Consider for Large Area Trans. Filter
-<li> padding_small_roi_translation = 2.5 // Area to COnsider for Small Area Trans. Filter
-<li> responsevariance_scale = 0.04	// Variance for Desired Gaussian Response for Scale KCF
-<li> responsevariance_large_roi_translation = 0.06 // Variance of the Gaussian Response for Large ROI Translation KCF
-<li> responsevariance_small_roi_translation = 0.125 // Variance of the Gaussian Response for Small ROI Translation KCF
-</ul>
+
+* sigma_scale = 0.9   // Gaussian Kernel Bandwith in Scale KCF
+* sigma_large_roi_translation = 0.7 // Gaussian Kernel Bandwith in Large ROI Trans. KCF
+* sigma_small_roi_translation = 0.6 // Gaussian Kernel Bandwith in Small ROI Trans. KCF
+* lambda = 0.0001 // Regularization Weight - Same for all the KCFs
+* scale_filter_frequency = 5 // Scale Filter Applied every 5 frames
+* learning_rate_scale = 0.10 // Make it 0.25 for the UAV123_10fps dataset
+* learning_rate_large_roi_translation = 0.20
+* learning_rate_small_roi_translation = 0.20
+* scale_filter_training_psr_threshold = 4.0 // Threshold to Train Scale Filter
+* padding_scale_filter = 1.0          // Area to Consider for Scale Filter
+* padding_large_roi_translation = 3.0 // Area to Consider for Large Area Trans. Filter
+* padding_small_roi_translation = 2.5 // Area to COnsider for Small Area Trans. Filter
+* responsevariance_scale = 0.04	// Variance for Desired Gaussian Response for Scale KCF
+* responsevariance_large_roi_translation = 0.06 // Variance of the Gaussian Response for Large ROI Translation KCF
+* responsevariance_small_roi_translation = 0.125 // Variance of the Gaussian Response for Small ROI Translation KCF
+
 
 ### Particle Filter Hyperparameters
-<ul>
-<li> number_particles = 300		// Number of Particles in the Particle Filter
-<li> number_efficient_particles = 1000/3.0 // Number of Efficient Particles to Enable Resampling
-<li> process_noise_uniform_x = [-10,10]	// Transition Noise X Coordinate
-<li> process_noise_uniform_y = [-10,10] // Transition Noise Y Coordinate
-<li> process_noise_uniform_vx = [-2,2]  // Transition Noise X Velocity
-<li> process_noise_uniform_vy = [-2,2]  // Transition Noise Y Velocity
-<li> transition_noise_uniform_x = [-25,25] // Distribution Interval X Coordinate
-<li> transition_noise_uniform_y = [-25,25] // Y Coordinate
-<li> transition_noise_uniform_vx = [-10,10] // X Velocity
-<li> transition_noise_uniform_vy = [-10,10] // Y Velocity
-<li> beta_weight_function = 0.05 // exp(-dist * beta) - Weight Function Hyperparameter - For Importance Sampling based on spatial Eclidean Distance to Maximum of response map
-</ul>
+
+* number_particles = 300		// Number of Particles in the Particle Filter
+* number_efficient_particles = 1000/3.0 // Number of Efficient Particles to Enable Resampling
+* process_noise_uniform_x = [-10,10]	// Transition Noise X Coordinate
+* process_noise_uniform_y = [-10,10] // Transition Noise Y Coordinate
+* process_noise_uniform_vx = [-2,2]  // Transition Noise X Velocity
+* process_noise_uniform_vy = [-2,2]  // Transition Noise Y Velocity
+* transition_noise_uniform_x = [-25,25] // Distribution Interval X Coordinate
+* transition_noise_uniform_y = [-25,25] // Y Coordinate
+* transition_noise_uniform_vx = [-10,10] // X Velocity
+* transition_noise_uniform_vy = [-10,10] // Y Velocity
+* beta_weight_function = 0.05 // exp(-dist * beta) - Weight Function Hyperparameter - For Importance Sampling based on spatial Eclidean Distance to Maximum of response map
+
 
 [1] - Henriques, João F., Rui Caseiro, Pedro Martins, and Jorge Batista. "High-speed tracking with kernelized correlation filters." IEEE Transactions on Pattern Analysis and Machine Intelligence 37, no. 3 (2015): 583-596.
 
