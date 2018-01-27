@@ -1,4 +1,4 @@
-### The shell scripts file shown here is to run the EnKCF tracker for OTB100, UAV123
+### The shell scripts file shown here is to run the EnKCF tracker on OTB100, UAV123
 ### ,UAV123_10fps, and UAV20L datasets.
 
 * OTB100 - OTB100.sh
