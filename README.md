@@ -1,12 +1,7 @@
 ## Algorithm Description
-This [code](https://github.com/buzkent86/EnKCF_Tracking_WACV18/tree/master/C%2B%2B_Implementation) includes the Ensemble of Kernelized Correlation Filter Tracker (**EnKCF**) for our WACV18 paper.
-The EnKCF runs multiple KCFs `[1]` to tackle different aspects of tracking such as : **scaling**, and **fast motion**.
-We also employ a `Particle Filter` to smoothen the interaction among different KCFs. Our tracker achieves
-higher success and precision rates than the baseline tracker at `416hz` on UAV123 dataset. We will share
-more details on our tracker soon. Below, you can find the hyperparameters and their optimal values for
-the proposed EnKCF tracker. This tracker is inspired by the long-term correlation (LCT) tracker proposed by `[2]`, 
-however, our goal is to use multiple KCFs in an efficient way to keep the complexity at each frame similar to the 
-baseline KCF `(O(nlogn))` `[1]` so that it operates at real-time (`30fps`) on **computationaly limited embedded systems**.
+This [code](https://github.com/buzkent86/EnKCF_Tracking_WACV18/tree/master/C%2B%2B_Implementation) includes the C++ implementation of the Ensemble of Kernelized Correlation Filter Tracker (**EnKCF**). The EnKCF runs multiple KCFs `[1]` to tackle different aspects of tracking such as : **scale**, and **fast motion**.
+It also employs a `Particle Filter` to smoothen the interaction among different KCFs. Our tracker achieves higher success and precision rates than the baseline tracker at `416hz` on UAV123 dataset. Below, you can find the hyper-parameters and their optimal values. The EnKCF is inspired by the long-term correlation (LCT) tracker `[2]`,
+however, our goal is to utilize multiple KCFs in an efficient way to keep the complexity at each frame similar to the baseline KCF `(O(nlogn))` `[1]`. This way, it maintains (`30fps`) operation rate on **computationally limited embedded systems**.
 
 You can find more details on the EnKCF tracker in our [arxiv version of the paper](https://arxiv.org/pdf/1801.06729.pdf).
 
@@ -31,8 +26,7 @@ You can find more details on the EnKCF tracker in our [arxiv version of the pape
 
 ### Particle Filter Hyperparameters
 
-It should be highlighted that we recommend that the particle filter should be removed in case the global camera motion
-in the system is not removed.
+It should be highlighted that we recommend that the particle filter to be removed in the existence of global camera motion.
 
 * number_particles = 300		// Number of Particles in the Particle Filter
 * number_efficient_particles = 1000/3.0 // Number of Efficient Particles to Enable Resampling
@@ -53,6 +47,13 @@ More information on running the tracker can be found [here](https://github.com/b
 For your questions or comments, please contact Burak Uzkent at `uzkent.burak@gmail.com`.
 
 `MATLAB code` for the EnKCF tracker can be found [here](https://github.com/buzkent86/EnKCF_Matlab). A README file for the MATLAB code will be added soon.
+
+You can cite the `EnKCF` tracker as
+
+```
+B. Uzkent and Y. Seo, "EnKCF: Ensemble of Kernelized Correlation Filters for High-Speed Object Tracking," 2018 IEEE Winter Conference on Applications of Computer Vision (WACV), Lake Tahoe, NV, 2018, pp. 1133-1141.
+doi: 10.1109/WACV.2018.00129
+```
 
 #### References
 [1] - Henriques, João F., Rui Caseiro, Pedro Martins, and Jorge Batista. "High-speed tracking with kernelized correlation filters." IEEE Transactions on Pattern Analysis and Machine Intelligence 37, no. 3 (2015): 583-596.
